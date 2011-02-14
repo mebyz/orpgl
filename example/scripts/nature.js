@@ -44,6 +44,7 @@ var birdEnd=100;
 var doc = new GLGE.Document(); 
 
 var Bird = function(x, y,mat) {
+	
 	this.x = x;
 	this.y = y;
 	this.el=null;
@@ -51,6 +52,8 @@ var Bird = function(x, y,mat) {
 	this.accelY=0;
 	this.xVelocity = 1;
 	this.yVelocity = -1;
+	var locx=this.x
+	var locy=this.y
 	
 	var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 			
@@ -59,8 +62,6 @@ var Bird = function(x, y,mat) {
 	obj.setZtransparent(false);
 	obj.id='Bird_'+(objCount++);
 	obj.pickable=true;
-	var locx=this.x
-	var locy=this.y
 	obj.setLocX(locx);
 	obj.setLocY(locy);
 	obj.setLocZ(-250);
@@ -72,11 +73,13 @@ var Bird = function(x, y,mat) {
 }
 
 var random = function(maxNum) {
+	
 	return Math.ceil(Math.random() * maxNum);
 }
 
 
 function ccluster() {
+	
 	this.clusterObj=null;
 	this.objContainer=null;
 	this.count=0;
@@ -87,13 +90,15 @@ function ccluster() {
 	this.idx=-1;
 	
 	function cload(obj,cont,mat,idx) {
-			this.idx=idx;
-			this.Elems=Nature[idx];
-			this.count=this.Elems.length;		
-		
+	
+		this.idx=idx;
+		this.Elems=Nature[idx];
+		this.count=this.Elems.length;		
 		this.clusterObj=obj;
 		this.objContainer=cont;
+		
 		for (var i=0;i<this.count;i++) {
+			
 			var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 			obj.setMesh(this.clusterObj.getMesh());
 			obj.setMaterial(mat);
@@ -117,7 +122,9 @@ function ccluster() {
 	}
 	
 	function cpos() {
+		
 		for (var i=0;i<this.count;i++) {
+			
 			cup=cube.getPosition();
 			cp =this.cElems[i].getPosition();
 			cube.setLocX(cp.x);
@@ -159,6 +166,7 @@ function interlopateHeight(keep,value,obj) {
 }	 
 
 doc.onLoad = function() {	
+	
 	var gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
 	
 	gameScene = new GLGE.Scene();
@@ -205,23 +213,20 @@ doc.onLoad = function() {
 	cube = doc.getElement( "plane" );
 	tree=doc.getElement( "plant_pmat8.001" );
 	bush=doc.getElement( "Bush 1" );
-	branches=doc.getElement( "Bush 2" );
-	//grass=doc.getElement( "plant_pmat8.000" );
-		
-		
+	branches=doc.getElement( "Bush 2" );	
 			
 	setTimeout('moveP();moveP2();',1000); 
 	
 	groundObject = doc.getElement( "groundObject" );
 	groundObject.setLocZ(-300);
 	
-		
 	var stop = false;
 	
 	maxVelocity = 1;
 
 	var birds = [];
 	var numBirds = 10;
+	
 	for(var i = 0; i < numBirds; i++) {
 		birds.push(new Bird(random(birdEnd), random(birdEnd),grass));
 	}
@@ -236,8 +241,8 @@ doc.onLoad = function() {
 		var distX = birds[i].x - cubepos.x;
 		var distY = birds[i].y - cubepos.y;
 		var distance =  Math.sqrt(distX * distX + distY * distY);
-		//$("#tim").append("boid"+i+" x="+birds[i].x+"<br/>y="+birds[i].y+"<br/>x2="+cubepos.x+"<br/>y2="+cubepos.y+"<br/>dist="+distance+"<br/><br/>")
-			if (distance>50) {
+		
+		if (distance>50) {
 			
 			if (( birds[i].x>cubepos.x))
 				distanceX = -1/distance*distance/500;
@@ -248,12 +253,8 @@ doc.onLoad = function() {
 			else
 				distanceY = 1/distance*distance/500;
 
-			
-			
-	
 			}
 	
-			
 			if (distanceY>0)birds[i].accelY+=1;
 			else birds[i].accelY-=1;
 			if (distanceX>0)birds[i].accelX+=1;
@@ -276,6 +277,7 @@ doc.onLoad = function() {
 
 	var T;
 	function addAvatar(){
+		
 		if(T) clearTimeout(T);
 		T=setTimeout(function(){
 		var newcol=new GLGE.Collada;
@@ -295,7 +297,6 @@ doc.onLoad = function() {
 	
 	function process(){
 	
-		
 		var camera = gameScene.camera;
 		var mousepos = mouse.getMousePosition();
 		mousepos.x = mousepos.x - document.body.offsetLeft;
@@ -307,7 +308,7 @@ doc.onLoad = function() {
 		
 		inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200)+2;
 		inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 200;
-		//if (inc <=0.01) inc=0.01;
+		
 		if (inc <=0.5) inc=0.5;
 		var trans=GLGE.mulMat4Vec4(camera.getRotMatrix(),[0,0,-1,1]);
 		var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
@@ -326,7 +327,7 @@ doc.onLoad = function() {
 		vy=mousepos.y
 		
 		var H2=gameScene.getHeight(null);
-	//	gameScene.getHeight(-200)
+		
 		if (H2!=false)
 			buildNature();
 			
@@ -371,9 +372,7 @@ doc.onLoad = function() {
 		rotating=false;
 	
 	cube.setLocY(cubepos.y+incY*0.05*(now-lasttime)*H/100);
-	cube.setLocX(cubepos.x+incX*0.05*(now-lasttime)*H/100);
-
-	// z axis is vertical		
+	cube.setLocX(cubepos.x+incX*0.05*(now-lasttime)*H/100);	
 	camera.setLocZ((cubepos.z+1.6-cuberot.x*1000+inc));
 	cubepos = cube.getPosition();
 	cuberot = cube.getRotation();
@@ -434,7 +433,6 @@ doc.onLoad = function() {
 			Grass.load(bush,objBag,flower_mat,1);	
 			Branches=new ccluster;
 			Branches.load(branches,objBag,bush_mat,2);	
-			//alert(Trees)
 			builded=true;	
 		}
 					
@@ -451,34 +449,25 @@ doc.onLoad = function() {
 		
 		cx=mousepos.x;
 		cy=mousepos.y;
-		//+magic hook
 		cx=renderWidth/2;
 		cy=renderHeight/2;
-		//+magic hook
 				
 		if 	((!evtRay)&&(evtPick)) {	
 			ob0=gameScene.pick3(cx, cy);
 			
 			
-			//$("#entry").attr("tim1",ob0['object']['id']+ ' shot at distance : '+ob0['distance']+'!');
 			if(ob0['coord']) {
-			/*var line=(new GLGE.Object).setDrawType(GLGE.DRAW_LINES);
-			line.setMesh((new GLGE.Mesh).setPositions([cubepos.x,cubepos.y,cubepos.z+1.5,ob0['coord'][0],ob0['coord'][1],ob0['coord'][2]]));
-			*/
-			pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
-			pos1=[ob0['coord'][0],ob0['coord'][1],ob0['coord'][2]];
-			/*line.setMaterial(black);
-			line.setZtransparent(true);
-			objBag.addObject(line);	
-			*/
-			p2.setLocX(pos0[0]);
-			p2.setLocY(pos0[1]);
-			p2.setLocZ(pos0[2]);	
-			p2.setRotX(cuberot.x+1.57)
-			p2.setRotY(cuberot.y)
-			p2.setRotZ(cuberot.z)
-			
-			send('COLLISION:'+pos1);
+				
+				pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
+				pos1=[ob0['coord'][0],ob0['coord'][1],ob0['coord'][2]];
+				p2.setLocX(pos0[0]);
+				p2.setLocY(pos0[1]);
+				p2.setLocZ(pos0[2]);	
+				p2.setRotX(cuberot.x+1.57)
+				p2.setRotY(cuberot.y)
+				p2.setRotZ(cuberot.z)
+				
+				send('COLLISION:'+pos1);
 			}
 		
 			nameObj=ob0['object']['id']+"_"
@@ -491,11 +480,9 @@ doc.onLoad = function() {
 			setTimeout("evtRay=false;",100);
 			
 		}	
-//		$("#tim1").html('')
-	for(var i = 0; i < numBirds; i++) {					
-//				$("#tim1").append('x0='+birds[i].x+'<br>'+'x0='+birds[i].y)
-			}
+		
 		if (evtRay) {	
+			
 			var posi=[]
 			posi[0]	=	pos0[0]-(pos0[0]-pos1[0])
 			posi[1]	=	pos0[1]-(pos0[1]-pos1[1])
@@ -503,21 +490,16 @@ doc.onLoad = function() {
 			p2.setLocX(posi[0]);
 			p2.setLocY(posi[1]);
 			p2.setLocZ(posi[2]);
-			//$("#entry").attr("value",$("#entry").attr("value")+'posx'+posi[0]+'posy'+posi[1]+'posz'+posi[2]);
-
+			
 			pos0[0]	=	posi[0]
 			pos0[1]	=	posi[1]
 			pos0[2]	=	posi[2]
-				
-			//$("#tim1").html(nameObj+"<br>")
 			
 			for(var i = 0; i < numBirds; i++) {					
 				
-				//$("#tim1").append('x0='+birds[i].x+'<br>'+'x0='+birds[i].y+'<br>'+'x1='+posi[0]+'<br>'+'y1='+posi[1]+'<br>'+ Pdistance)
-				
 				var PdistX =  birds[i].x-posi[0];
 				var PdistY =  birds[i].y-posi[1];
-				//var PdistZ = posi[2] + 300;
+				
 				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY)//+ PdistZ * PdistZ);
 
 				//"kill" the bird XD
@@ -526,24 +508,6 @@ doc.onLoad = function() {
 					birds[i].el.setLocZ(-1000);			
 				}
 			}
-
-			/*if (nameObj.substring(0,4)=='Bird') {
-				
-				
-//				p0=pickedObj.getPosition();
-			
-				var PdistX = p0.x - posi[0];
-				var PdistY = p0.y - posi[1];
-				var PdistZ = p0.z - posi[2];
-				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY+ PdistZ * PdistZ);
-
-				//"kill" the bird XD
-				$("#tim1").html(Pdistance)
-				if (Pdistance<50) {
-					alert(Pdistance);
-					pickedObj.setLocZ(-1000);			
-				}
-			}*/
 		}
 	}
 	
@@ -595,9 +559,7 @@ doc.onLoad = function() {
 							movePf2();
 							moveplayer=false;
 						}
-//						$("#entry").attr("value",'h1 '+st2[2]+' to h2 '+st[2]+' : <'+((st2[2]*1)-((st2[2]*1)-(st[2]*1))/10)+'>');
-						$("#entry").attr("value",'ndist='+ndistX+';'+ndistY);
-	
+						
 						myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]						
 
 					}
@@ -617,7 +579,6 @@ doc.onLoad = function() {
 		
 		now = parseInt(new Date().getTime());
 		fps = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
-		//$("#entry").attr("value",$("#entry").attr("value")+'fps='+fps);
 
 		process();
 
@@ -772,7 +733,7 @@ function movePf2() {
 }
 
 function moveJump() {
-//	return;
+	
 	if ((c2.actions)&&((!evtAnim)||(evtPAnimWalk))){  
 		evtPAnimWalk= false; 
 		for(n in c2.actions) { 
@@ -789,15 +750,12 @@ function moveJump() {
 function setCanvas() {
 	
 	if( typeof( window.innerWidth ) == 'number' ) {
-    //Non-IE
     renderWidth = window.innerWidth;
     renderHeight = window.innerHeight;
   } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-    //IE 6+ in 'standards compliant mode'
     renderWidth = document.documentElement.clientWidth;
     renderHeight = document.documentElement.clientHeight;
   } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-    //IE 4 compatible
     renderWidth = document.body.clientWidth;
     renderHeight = document.body.clientHeight;
   }
@@ -805,13 +763,8 @@ function setCanvas() {
 	$('#canvas').height(renderHeight);
 	$('#canvas').width(renderWidth);
 	
-	// we bind the click event to the evtPick variable
 	$("#canvas").mousedown( function(event) { evtPick = true; } );
 	$("#canvas").mouseup( function() { evtPick = false; } );
 }
-
-function build(oob,graph,material) {
-
-	}
 
 doc.load("example/meshes/nature.xml");
