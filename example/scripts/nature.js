@@ -1,4 +1,4 @@
-// emmanuel DOT botros AT neevagroup DOT com 
+// emmanuel DOT botros AT gmail DOT com 
 // 2011//2012
 var evtPick = false; 	// client pick request asked
 var evtRay = false; 	// client pick request sent
