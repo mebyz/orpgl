@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<glge>	
+<animation_vector id="spin" frames="200">
+		<animation_curve channel="RotY">
+			<linear_point x="1" y="0" />
+			<linear_point x="200" y="6.282" />
+		</animation_curve>
+	</animation_vector>
+	<collada id="duck" document="duck.dae" animation="#spin" rot_x="1.57" scale="0.05" />
+	<collada  id="plane" document="seymourplane_triangulate.dae" rot_x="1.57" rot_y="1.57" scale="1" />
+</glge>

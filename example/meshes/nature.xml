@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glge SYSTEM "glge.dtd">
+<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature3.blend' -->
+<glge>
+	<import url="meshes.xml" />
+	<import url="materials.xml" />
+	<import url="cols.xml" />
+	<scene id="Scene" ambient_color="rgb(0,0,0)" fog_type="FOG_NONE" background_color="rgb(209,222,249)">
+		<object id="Sphere" mesh="#SphereMesh"
+			rot_order="ROT_ZYX"
+			scale_x="1.000000" scale_y="1.000000" scale_z="1.000000"
+			material="#Material.003"
+			loc_x="6.944938" loc_y="-7.523624" loc_z="7.532308"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Cube" mesh="#Cube.001Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.027270" scale_y="0.027270" scale_z="0.027270"
+			material="#Material"
+			loc_x="-3.137819" loc_y="-6.997164" loc_z="-5.578625"
+			rot_x="1.561534" rot_y="-0.000000" rot_z="0.000000"
+		/>
+		<light id="Sun.000"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-30.195871" loc_y="26.706169" loc_z="-25.220690"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Plane" mesh="#Plane.002Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="203.305176" scale_y="203.305176" scale_z="420.059387"
+			material="#Material"
+			loc_x="13.700546" loc_y="-19.939754" loc_z="-313.925781"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Plane.001" mesh="#Plane.001Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="1343.772949" scale_y="1343.772949" scale_z="8094.309570"
+			material="#Material.002"
+			loc_x="-8.132945" loc_y="22.321857" loc_z="-3722.837402"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<light id="Sun.001"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-36.281570" loc_y="16.478388" loc_z="-26.529091"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Torus" mesh="#TorusMesh"
+			rot_order="ROT_ZYX"
+			scale_x="103.315445" scale_y="103.315445" scale_z="46.953388"
+			material="#Boden"
+			loc_x="0.000000" loc_y="0.000000" loc_z="-4.930620"
+			rot_x="0.000000" rot_y="-0.000000" rot_z="0.000000"
+		/>
+		<camera id="Camera"
+			xtype="C_PERSPECTIVE"
+			rot_order="ROT_XZY"
+			loc_x="5.822488" loc_y="-42.503159" loc_z="8.961102"
+			rot_x="1.364610" rot_y="-0.051446" rot_z="0.146897"
+		/>
+		<object id="plant_pmat8.001" mesh="#plant_pmat8.000Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.100000" scale_y="0.100000" scale_z="0.100000"
+			material="#Material.001"
+			loc_x="-3.413240" loc_y="101.188568" loc_z="-132.284958"
+			rot_x="0.000000" rot_y="-0.000000" rot_z="-0.893289"
+		/>
+		<object id="Bush 1" mesh="#Plane.003Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.326500" scale_y="0.326500" scale_z="0.326500"
+			material="#Flower Green"
+			loc_x="-6.745708" loc_y="-6.713222" loc_z="0.103248"
+			rot_x="-0.103128" rot_y="-0.142171" rot_z="-1.734176"
+		/>
+		<object id="Bush 2" mesh="#Plane.007Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.425890" scale_y="0.425890" scale_z="0.425890"
+			material="#Bush Green.001"
+			loc_x="-12.673321" loc_y="-8.169106" loc_z="2.325790"
+			rot_x="-0.103128" rot_y="-0.142171" rot_z="-2.439326"
+		/>
+		<group id="graph">
+			<object id="xaxis" draw_type="DRAW_LINES" line_width="2" mesh="#xline" material="#red"  />
+			<object id="yaxis" draw_type="DRAW_LINES" line_width="2" mesh="#yline" material="#green"  />
+			<object id="zaxis" draw_type="DRAW_LINES" line_width="2" mesh="#zline" material="#blue"  />
+		</group>
+		<collada document="head.dae" id="head" scale="0" rot_y="0"/>
+		<collada document="head.dae" id="player" scale="0.98" rot_y="0"/>
+		<collada document="rabbit.dae" id="plane" scale="0.05" />
+		<collada document="rabbit.dae" id="plane2" scale="0.05" />
+		<object id="groundObject" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
+	</scene>
+</glge>
