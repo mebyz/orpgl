@@ -52,23 +52,20 @@ var Bird = function(x, y,mat) {
 	this.xVelocity = 1;
 	this.yVelocity = -1;
 	
-			var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
+	var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 			
-			obj.setMesh(robot.getMesh());
-			obj.setMaterial(robot_mat);
-			obj.setZtransparent(false);
-			obj.id='Bird_'+(objCount++);
-			obj.pickable=true;
-var locx=this.x
-		var locy=this.y
-		obj.setLocX(locx);
-		obj.setLocY(locy);
-		obj.setLocZ(-250);
-		obj.setScale(1);
-			objBag.addObject(obj);
-	
-	
-	
+	obj.setMesh(robot.getMesh());
+	obj.setMaterial(robot_mat);
+	obj.setZtransparent(false);
+	obj.id='Bird_'+(objCount++);
+	obj.pickable=true;
+	var locx=this.x
+	var locy=this.y
+	obj.setLocX(locx);
+	obj.setLocY(locy);
+	obj.setLocZ(-250);
+	obj.setScale(1);
+	objBag.addObject(obj);
 	this.el=obj;
 	posSav = this.el.getPosition()
 			
