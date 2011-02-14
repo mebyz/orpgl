@@ -1,10 +1,16 @@
 ==================================================
 
 HTML5+WebGL+NodeJS Multiplayer Game Implementation
-
 E.BOTROS (2011)
 
+see LICENSE : legal informations about this work
+
+Ryan Dahl's node-chat base source licensing : see LICENSE-MIT 
+supereggbert (Paul Brunt) GLGE : see example/GLGE/README
+
+
 REQUIREMENTS
+
 server side : nodejs
 client side : HTML5/WebGL Compliant Browser (Nightly Chrome / FF 4 Beta)
 
