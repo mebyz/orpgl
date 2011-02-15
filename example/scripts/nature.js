@@ -1,47 +1,61 @@
 // emmanuel DOT botros AT gmail DOT com 
 // 2011//2012
-var evtPick = false; 	// client pick request asked
-var evtRay = false; 	// client pick request sent
-var gameScene = null;	// main Scene
-var incY=0;				// y offset used for walking
-var incX=0;				// y offset used for walking
-var evtJump = false; 		// player evtJump test
-var evtJumped = false; 		// player evtJump test
-var evtPreJump = false; 		// player evtJump test
-var evtAnim=false;			// player evtAnim test
-var evtPAnim=false;			// player evtAnim test
-var evtPAnimWalk=false;			// player evtAnim test
-var renderWidth = 800;	// canvas x size
-var renderHeight = 600;	// canvas x size
-var ob0=null;
-var dec=0;
-var landed=false;
-var up=false;
-var ob2,pickedObj,nameObj;
-var ret;
-var pos0,pos1;
-var testt=[];
-var H=null;
-var HMID=null;
-var builded = false; // additionnal world objs
-var builded2 = false; // additionnal world objs
-var tree=null;
-var bush=null;
-var robot=null;
-var branches=null;
-var objBag=null;
-var AnimFramesArray = [0,120,125,135];
-var objCount=0;
-var tick=false;
-var Forest=null;
-var Grass=null;
-var Branches=null;
-var KRotz=0;
-var black=null;
-var birdstart=-100;
-var birdEnd=100;
 
-var doc = new GLGE.Document(); 
+function Core() {
+	window.DB=[];
+	this.DB=window.DB;
+	this.DB.evtPick = false; 	
+	this.DB.evtRay = false; 		
+	this.DB.evtJump = false; 		
+	this.DB.evtJumped = false; 		
+	this.DB.evtPreJump = false; 		
+	this.DB.evtAnim=false;			
+	this.DB.evtPAnim=false;			
+	this.DB.evtPAnimWalk=false;		
+	this.DB.gameScene = null;		
+	this.DB.incY=0;					
+	this.DB.incX=0;					
+	this.DB.renderWidth = 800;		
+	this.DB.renderHeight = 600;		
+	this.DB.ob0=null;
+	this.DB.dec=0;
+	this.DB.pickedObj=null;
+	this.DB.nameObj=null;
+	this.DB.ret=null;
+	this.DB.pos0=null
+	this.DB.pos1=null;
+	this.DB.testt=[];
+	this.DB.H=null;
+	this.DB.builded = false; 
+	this.DB.builded2 = false;
+	this.DB.tree=null;
+	this.DB.bush=null;
+	this.DB.robot=null;
+	this.DB.grass=null;
+	this.DB.branches=null;
+	this.DB.objBag=null;
+	this.DB.AnimFramesArray = [0,120,125,135];
+	this.DB.objCount=0;
+	this.DB.tick=false;
+	this.DB.Forest=null;
+	this.DB.Grass=null;
+	this.DB.Branches=null;
+	this.DB.KRotz=0;
+	this.DB.black=null;
+	this.DB.birdEnd=100;
+	this.setDoc=setdoc;
+	this.doc=this.setDoc();
+
+	function setdoc() {
+		var doc = new GLGE.Document(); 
+		return doc;
+	}
+
+};
+
+var core = new Core(); 
+
+//var doc = new GLGE.Document(); 
 
 var Bird = function(x, y,mat) {
 	
@@ -57,16 +71,16 @@ var Bird = function(x, y,mat) {
 	
 	var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 			
-	obj.setMesh(robot.getMesh());
-	obj.setMaterial(robot_mat);
+	obj.setMesh(core.DB.robot.getMesh());
+	obj.setMaterial(core.DB.robot_mat);
 	obj.setZtransparent(false);
-	obj.id='Bird_'+(objCount++);
+	obj.id='Bird_'+(core.DB.objCount++);
 	obj.pickable=true;
 	obj.setLocX(locx);
 	obj.setLocY(locy);
 	obj.setLocZ(-250);
 	obj.setScale(1);
-	objBag.addObject(obj);
+	core.DB.objBag.addObject(obj);
 	this.el=obj;
 	posSav = this.el.getPosition()
 			
@@ -103,7 +117,7 @@ function ccluster() {
 			obj.setMesh(this.clusterObj.getMesh());
 			obj.setMaterial(mat);
 			obj.setZtransparent(false);
-			obj.id='Cube_'+(objCount++);
+			obj.id='Cube_'+(core.DB.objCount++);
 			obj.pickable=false;
 			this.objContainer.addObject(obj);	
 			var vx= this.Elems[i][0];
@@ -118,7 +132,7 @@ function ccluster() {
 			this.cElems.push(obj);
 		}
 		
-		builded=true;
+		core.DB.builded=true;
 	}
 	
 	function cpos() {
@@ -129,12 +143,12 @@ function ccluster() {
 			cp =this.cElems[i].getPosition();
 			cube.setLocX(cp.x);
 			cube.setLocY(cp.y);
-			H3=gameScene.getHeight(null);
+			H3=core.DB.gameScene.getHeight(null);
 			this.cElems[i].setLocZ(-H3+1);
 			cube.setLocX(cup.x);
 			cube.setLocY(cup.y);
 		}
-		builded2=true;
+		core.DB.builded2=true;
 		return;
 	}
 }
@@ -165,29 +179,29 @@ function interlopateHeight(keep,value,obj) {
 	return keep;
 }	 
 
-doc.onLoad = function() {	
+core.doc.onLoad = function() {	
 	
 	var gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
 	
-	gameScene = new GLGE.Scene();
-	gameScene = doc.getElement("Scene");
+	core.DB.gameScene = new GLGE.Scene();
+	core.DB.gameScene = core.doc.getElement("Scene");
 	
 	
 	setCanvas();
-	$('#mcur').show().css({"left":(renderWidth/2-20)+"px","top":(renderHeight/2-20)+"px"});
+	$('#mcur').show().css({"left":(core.DB.renderWidth/2-20)+"px","top":(core.DB.renderHeight/2-20)+"px"});
 	
-	gameScene.setFogType(GLGE.FOG_QUADRATIC);
-	gameRenderer.setScene(gameScene);
-	gameScene.fogNear=20;
-	gameScene.fogFar=2000;
-	var camera = gameScene.camera;
+	core.DB.gameScene.setFogType(GLGE.FOG_QUADRATIC);
+	gameRenderer.setScene(core.DB.gameScene);
+	core.DB.gameScene.fogNear=20;
+	core.DB.gameScene.fogFar=2000;
+	var camera = core.DB.gameScene.camera;
 
 	
   
-	camera.setAspect(renderWidth/renderHeight);
+	camera.setAspect(core.DB.renderWidth/core.DB.renderHeight);
 
-	gameRenderer.canvas.height = renderHeight;
-	gameRenderer.canvas.width = renderWidth;
+	gameRenderer.canvas.height = core.DB.renderHeight;
+	gameRenderer.canvas.width = core.DB.renderWidth;
 
 	var mouse = new GLGE.MouseInput(document.getElementById('canvas'));
 	var keys = new GLGE.KeyInput();
@@ -200,24 +214,24 @@ doc.onLoad = function() {
 	var vx=0;
 	var vy=0;
 	
-	objBag=doc.getElement( "graph" );
-	black=doc.getElement( "black" );
-	grass=doc.getElement( "Material" );
-	bush_mat=doc.getElement( "Bush Green.001" );
-	robot=doc.getElement( "Sphere" );
-	robot_mat=doc.getElement( "Material.003" );
-	flower_mat=doc.getElement( "Flower Green" );
-	head = doc.getElement( "head" );
-	player = doc.getElement( "plane2" );
-	var p2 = doc.getElement( "Cube" );
-	cube = doc.getElement( "plane" );
-	tree=doc.getElement( "plant_pmat8.001" );
-	bush=doc.getElement( "Bush 1" );
-	branches=doc.getElement( "Bush 2" );	
+	core.DB.objBag=core.doc.getElement( "graph" );
+	core.DB.black=core.doc.getElement( "black" );
+	core.DB.grass=core.doc.getElement( "Material" );
+	core.DB.bush_mat=core.doc.getElement( "Bush Green.001" );
+	core.DB.robot=core.doc.getElement( "Sphere" );
+	core.DB.robot_mat=core.doc.getElement( "Material.003" );
+	flower_mat=core.doc.getElement( "Flower Green" );
+	head = core.doc.getElement( "head" );
+	player = core.doc.getElement( "plane2" );
+	var p2 = core.doc.getElement( "Cube" );
+	cube = core.doc.getElement( "plane" );
+	core.DB.tree=core.doc.getElement( "plant_pmat8.001" );
+	core.DB.bush=core.doc.getElement( "Bush 1" );
+	core.DB.branches=core.doc.getElement( "Bush 2" );	
 			
 	setTimeout('moveP();moveP2();',1000); 
 	
-	groundObject = doc.getElement( "groundObject" );
+	groundObject = core.doc.getElement( "groundObject" );
 	groundObject.setLocZ(-300);
 	
 	var stop = false;
@@ -228,7 +242,7 @@ doc.onLoad = function() {
 	var numBirds = 10;
 	
 	for(var i = 0; i < numBirds; i++) {
-		birds.push(new Bird(random(birdEnd), random(birdEnd),grass));
+		birds.push(new Bird(random(core.DB.birdEnd), random(core.DB.birdEnd),core.DB.grass));
 	}
 
 	function movebirds() {
@@ -286,18 +300,18 @@ doc.onLoad = function() {
 		var locy=Math.random()*100-50
 		newcol.setLocX(locx);
 		newcol.setLocY(locy);
-		var ray=gameScene.ray([locx,locy,20],[0,0,1]);
+		var ray=core.DB.gameScene.ray([locx,locy,20],[0,0,1]);
 		newcol.setLocZ(-ray.distance+5);
 		newcol.setRotZ(Math.PI*2*Math.random());
 		newcol.setScale(30);
-		gameScene.addCollada(newcol);
+		core.DB.gameScene.addCollada(newcol);
 		},200);
 	}
 
 	
 	function process(){
 	
-		var camera = gameScene.camera;
+		var camera = core.DB.gameScene.camera;
 		var mousepos = mouse.getMousePosition();
 		mousepos.x = mousepos.x - document.body.offsetLeft;
 		mousepos.y = mousepos.y	- document.body.offsetTop;			
@@ -320,36 +334,36 @@ doc.onLoad = function() {
 			head.setRotX(inc/1000);
 		}
 		
-		cube.setRotZ(-inc2*2+1.57+dec);
-		head.setRotZ(-inc2*2+dec);
+		cube.setRotZ(-inc2*2+1.57+core.DB.dec);
+		head.setRotZ(-inc2*2+core.DB.dec);
 		
 		vx=mousepos.x
 		vy=mousepos.y
 		
-		var H2=gameScene.getHeight(null);
+		var H2=core.DB.gameScene.getHeight(null);
 		
 		if (H2!=false)
 			buildNature();
 			
-		if (H==null)H=0;
+		if (core.DB.H==null)core.DB.H=0;
 		
 		
-		if ((!evtJump))
+		if ((!core.DB.evtJump))
 			cube.setLocZ(-H2-.04);	
 			
 			
 
-		if (evtJumped)	
-					{cube.setLocZ(cubepos.z-.1);	setTimeout("evtJumped=false",500);}		
+		if (core.DB.evtJumped)	
+					{cube.setLocZ(cubepos.z-.1);	setTimeout("core.DB.evtJumped=false",500);}		
 			
-		if (evtJump)
+		if (core.DB.evtJump)
 			cube.setLocZ(cubepos.z+.1);	
-		H=H2
+		core.DB.H=H2
 		
 	var mat=cube.getRotMatrix();
 	var trans=GLGE.mulMat4Vec4(mat,[0,1,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
-	if (evtJump) {
+	if (core.DB.evtJump) {
 		trans[0]=trans[0]/mag/8;
 		trans[1]=trans[1]/mag/8;
 	}
@@ -358,21 +372,21 @@ doc.onLoad = function() {
 		trans[1]=trans[1]/mag/18;
 	}
 	
-	incY=0;
-	incX=0;
+	core.DB.incY=0;
+	core.DB.incX=0;
 	
-	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("evtJump=true",1);evtPreJump=true;moveJump();/*addAvatar();*/		birds.push(new Bird(random(birdEnd), random(birdEnd),grass));numBirds++;}
+	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("core.DB.evtJump=true",1);core.DB.evtPreJump=true;moveJump();/*addAvatar();*/		birds.push(new Bird(random(birdEnd), random(birdEnd),core.DB.grass));numBirds++;}
 
-	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {incY=incY+parseFloat(trans[1]);incX=incX+parseFloat(trans[0]);if((!evtPreJump)&&(!evtJump))movePf();}
-	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {incY=incY-parseFloat(trans[1]);incX=incX-parseFloat(trans[0]);if((!evtPreJump)&&(!evtJump))movePf();} 
-	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {incY=incY+parseFloat(trans[0]);incX=incX-parseFloat(trans[1]);if((!evtPreJump)&&(!evtJump))movePf();/*rotating=true;cube.setRotZ(cuberot.z-.01);head.setRotZ(headrot.z-.01);dec+=-.01;*/}
-	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {incY=incY-parseFloat(trans[0]);incX=incX+parseFloat(trans[1]);if((!evtPreJump)&&(!evtJump))movePf();/*rotating=true;cube.setRotZ(cuberot.z+.01);head.setRotZ(headrot.z+.01);dec+=.01;*/}
+	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[1]);core.DB.incX=core.DB.incX+parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
+	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[1]);core.DB.incX=core.DB.incX-parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();} 
+	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[0]);core.DB.incX=core.DB.incX-parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();/*rotating=true;cube.setRotZ(cuberot.z-.01);head.setRotZ(headrot.z-.01);dec+=-.01;*/}
+	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[0]);core.DB.incX=core.DB.incX+parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();/*rotating=true;cube.setRotZ(cuberot.z+.01);head.setRotZ(headrot.z+.01);dec+=.01;*/}
 
 	if ((!keys.isKeyPressed(GLGE.KI_RIGHT_ARROW))&&(!keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)))
 		rotating=false;
 	
-	cube.setLocY(cubepos.y+incY*0.05*(now-lasttime)*H/100);
-	cube.setLocX(cubepos.x+incX*0.05*(now-lasttime)*H/100);	
+	cube.setLocY(cubepos.y+core.DB.incY*0.05*(now-lasttime)*core.DB.H/100);
+	cube.setLocX(cubepos.x+core.DB.incX*0.05*(now-lasttime)*core.DB.H/100);	
 	camera.setLocZ((cubepos.z+1.6-cuberot.x*1000+inc));
 	cubepos = cube.getPosition();
 	cuberot = cube.getRotation();
@@ -386,7 +400,7 @@ doc.onLoad = function() {
 	head.setLocY(cubepos.y);
 	
 
-	KRotz=interlopateHeight(KRotz,(cubepos.z+2+inc/1000),camera);
+	core.DB.KRotz=interlopateHeight(core.DB.KRotz,(cubepos.z+2+inc/1000),camera);
 	
 	
 		
@@ -399,8 +413,8 @@ doc.onLoad = function() {
 		pyRot=(headrot.y);
 		pzRot=(headrot.z);		
 		send(msg);
-		tick=true;
-		setTimeout("tick=false",10000);
+		core.DB.tick=true;
+		setTimeout("core.DB.tick=false",10000);
 	}
 }
 	
@@ -426,21 +440,21 @@ doc.onLoad = function() {
 	
 	function buildNature() {
 
-		if (!builded){
-			//Forest=new ccluster;
-			//Forest.load(tree,objBag,grass,0);	
-			Grass=new ccluster;
-			Grass.load(bush,objBag,flower_mat,1);	
-			Branches=new ccluster;
-			Branches.load(branches,objBag,bush_mat,2);	
-			builded=true;	
+		if (!core.DB.builded){
+			//core.DB.Forest=new ccluster;
+			//core.DB.Forest.load(core.DB.tree,core.DB.objBag,core.DB.grass,0);	
+			core.DB.Grass=new ccluster;
+			core.DB.Grass.load(core.DB.bush,core.DB.objBag,flower_mat,1);	
+			core.DB.Branches=new ccluster;
+			core.DB.Branches.load(core.DB.branches,core.DB.objBag,core.DB.bush_mat,2);	
+			core.DB.builded=true;	
 		}
 					
-		if((builded)&&(!builded2)) { 
-			//Forest.position();
-			Grass.position();
-			Branches.position();
-			builded2=true;
+		if((core.DB.builded)&&(!core.DB.builded2)) { 
+			//core.DB.Forest.position();
+			core.DB.Grass.position();
+			core.DB.Branches.position();
+			core.DB.builded2=true;
 		}
 
 	}
@@ -449,51 +463,51 @@ doc.onLoad = function() {
 		
 		cx=mousepos.x;
 		cy=mousepos.y;
-		cx=renderWidth/2;
-		cy=renderHeight/2;
+		cx=core.DB.renderWidth/2;
+		cy=core.DB.renderHeight/2;
 				
-		if 	((!evtRay)&&(evtPick)) {	
-			ob0=gameScene.pick3(cx, cy);
+		if 	((!core.DB.evtRay)&&(core.DB.evtPick)) {	
+			core.DB.ob0=core.DB.gameScene.pick3(cx, cy);
 			
 			
-			if(ob0['coord']) {
+			if(core.DB.ob0['coord']) {
 				
-				pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
-				pos1=[ob0['coord'][0],ob0['coord'][1],ob0['coord'][2]];
-				p2.setLocX(pos0[0]);
-				p2.setLocY(pos0[1]);
-				p2.setLocZ(pos0[2]);	
+				core.DB.pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
+				core.DB.pos1=[core.DB.ob0['coord'][0],core.DB.ob0['coord'][1],core.DB.ob0['coord'][2]];
+				p2.setLocX(core.DB.pos0[0]);
+				p2.setLocY(core.DB.pos0[1]);
+				p2.setLocZ(core.DB.pos0[2]);	
 				p2.setRotX(cuberot.x+1.57)
 				p2.setRotY(cuberot.y)
 				p2.setRotZ(cuberot.z)
 				
-				send('COLLISION:'+pos1);
+				send('COLLISION:'+core.DB.pos1);
 			}
 		
-			nameObj=ob0['object']['id']+"_"
+			core.DB.nameObj=core.DB.ob0['object']['id']+"_"
 			
-			$("#tim1").html(nameObj.substring(0,4))
-			if (nameObj.substring(0,4)=='Bird')
-				pickedObj=ob0['object'];
+			$("#tim1").html(core.DB.nameObj.substring(0,4))
+			if (core.DB.nameObj.substring(0,4)=='Bird')
+				core.DB.pickedObj=core.DB.ob0['object'];
 		
-			evtRay=true;
-			setTimeout("evtRay=false;",100);
+			core.DB.evtRay=true;
+			setTimeout("core.DB.evtRay=false;",100);
 			
 		}	
 		
-		if (evtRay) {	
+		if (core.DB.evtRay) {	
 			
 			var posi=[]
-			posi[0]	=	pos0[0]-(pos0[0]-pos1[0])
-			posi[1]	=	pos0[1]-(pos0[1]-pos1[1])
-			posi[2]	=	pos0[2]-(pos0[2]-pos1[2])
+			posi[0]	=	core.DB.pos0[0]-(core.DB.pos0[0]-core.DB.pos1[0])
+			posi[1]	=	core.DB.pos0[1]-(core.DB.pos0[1]-core.DB.pos1[1])
+			posi[2]	=	core.DB.pos0[2]-(core.DB.pos0[2]-core.DB.pos1[2])
 			p2.setLocX(posi[0]);
 			p2.setLocY(posi[1]);
 			p2.setLocZ(posi[2]);
 			
-			pos0[0]	=	posi[0]
-			pos0[1]	=	posi[1]
-			pos0[2]	=	posi[2]
+			core.DB.pos0[0]	=	posi[0]
+			core.DB.pos0[1]	=	posi[1]
+			core.DB.pos0[2]	=	posi[2]
 			
 			for(var i = 0; i < numBirds; i++) {					
 				
@@ -624,10 +638,10 @@ GLGE.Scene.prototype.getHeight=function(h){
 		var H=0;
 		if (h!=null) H=h;
 		var origin=[cubePos.x,cubePos.y,H];
-		ret=this.ray(origin,[0,0,1]);		
+		core.DB.ret=this.ray(origin,[0,0,1]);		
 
-		if (ret['object']['id']=='Plane')
-			return ret['distance'];
+		if (core.DB.ret['object']['id']=='Plane')
+			return core.DB.ret['distance'];
 
 		return false;
 			
@@ -663,23 +677,23 @@ GLGE.Scene.prototype.pick3=function(x,y){
 }
 
 function moveP() {
-	if ((evtJump)||(evtPreJump)) 
+	if ((core.DB.evtJump)||(core.DB.evtPreJump)) 
 		return;
 		
-	if ((c2.actions)&&(!evtAnim)){ 
-		if (testt.length==0) {
+	if ((c2.actions)&&(!core.DB.evtAnim)){ 
+		if (core.DB.testt.length==0) {
 			for(n in c2.actions) 
-				testt.push(c2.actions[n]);
+				core.DB.testt.push(c2.actions[n]);
 		}	 
 		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(AnimFramesArray[0]+1);
-			c2.actions[n].setFrames(AnimFramesArray[1]); 
+			c2.actions[n].setStartFrame(core.DB.AnimFramesArray[0]+1);
+			c2.actions[n].setFrames(core.DB.AnimFramesArray[1]); 
 			c2.setAction(c2.actions[n],0,true);
 			break;
 		}
 		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(AnimFramesArray[0]+1);
-			c3.actions[n].setFrames(AnimFramesArray[1]); 
+			c3.actions[n].setStartFrame(core.DB.AnimFramesArray[0]+1);
+			c3.actions[n].setFrames(core.DB.AnimFramesArray[1]); 
 			c3.setAction(c3.actions[n],0,true);
 			break;
 		}
@@ -687,10 +701,10 @@ function moveP() {
 }	
 function moveP2() {
 		
-	if ((c3.actions)&&(!evtPAnim)){ 
+	if ((c3.actions)&&(!core.DB.evtPAnim)){ 
 		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(AnimFramesArray[0]+1);
-			c3.actions[n].setFrames(AnimFramesArray[1]); 
+			c3.actions[n].setStartFrame(core.DB.AnimFramesArray[0]+1);
+			c3.actions[n].setFrames(core.DB.AnimFramesArray[1]); 
 			c3.setAction(c3.actions[n],0,true);
 			break;
 		}
@@ -699,72 +713,72 @@ function moveP2() {
 
 function movePf() {
 	
-	if ((evtJump)||(evtPreJump)) 
+	if ((core.DB.evtJump)||(core.DB.evtPreJump)) 
 		return;
 		
-	if ((c2.actions)&&(!evtAnim)){  
-		evtPAnimWalk=true; 
+	if ((c2.actions)&&(!core.DB.evtAnim)){  
+		core.DB.evtPAnimWalk=true; 
 		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(AnimFramesArray[2]);
-			c2.actions[n].setFrames(AnimFramesArray[3]); 
-			evtAnim=true; 
+			c2.actions[n].setStartFrame(core.DB.AnimFramesArray[2]);
+			c2.actions[n].setFrames(core.DB.AnimFramesArray[3]); 
+			core.DB.evtAnim=true; 
 			c2.setAction(c2.actions[n],0,true);
 			play_multi_sound('multiaudio1');
 			break;			
 		} 
-		setTimeout('evtAnim=false;evtPAnimWalk=false;if(!evtJump)moveP();',800);
+		setTimeout('core.DB.evtAnim=false;core.DB.evtPAnimWalk=false;if(!core.DB.evtJump)moveP();',800);
 	}
 }
 function movePf2() {
 
 		
-	if ((c3.actions)&&(!evtPAnim)){  
+	if ((c3.actions)&&(!core.DB.evtPAnim)){  
 		
 		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(AnimFramesArray[2]);
+			c3.actions[n].setStartFrame(core.DB.AnimFramesArray[2]);
 			c3.actions[n].setFrames(150); 			
-			evtPAnim=true; 
+			core.DB.evtPAnim=true; 
 			c3.setAction(c3.actions[n],0,false);
 			break;
 		} 
 		
-		setTimeout('evtPAnim=false;moveP2();',1000);
+		setTimeout('core.DB.evtPAnim=false;moveP2();',1000);
 	}
 }
 
 function moveJump() {
 	
-	if ((c2.actions)&&((!evtAnim)||(evtPAnimWalk))){  
-		evtPAnimWalk= false; 
+	if ((c2.actions)&&((!core.DB.evtAnim)||(core.DB.evtPAnimWalk))){  
+		core.DB.evtPAnimWalk= false; 
 		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(AnimFramesArray[2]);
-			c2.actions[n].setFrames(AnimFramesArray[3]); 
-			evtAnim=true; 
+			c2.actions[n].setStartFrame(core.DB.AnimFramesArray[2]);
+			c2.actions[n].setFrames(core.DB.AnimFramesArray[3]); 
+			core.DB.evtAnim=true; 
 			c2.setAction(c2.actions[n],0,false);
 			break;
 		} 
-		setTimeout('evtAnim=false;evtJump=false;evtPreJump=false;evtJumped=true;moveP();',1000);
+		setTimeout('core.DB.evtAnim=false;core.DB.evtJump=false;core.DB.evtPreJump=false;core.DB.evtJumped=true;moveP();',1000);
 	}	
 }
 
 function setCanvas() {
 	
 	if( typeof( window.innerWidth ) == 'number' ) {
-    renderWidth = window.innerWidth;
-    renderHeight = window.innerHeight;
+    core.DB.renderWidth = window.innerWidth;
+    core.DB.renderHeight = window.innerHeight;
   } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-    renderWidth = document.documentElement.clientWidth;
-    renderHeight = document.documentElement.clientHeight;
+    core.DB.renderWidth = document.documentElement.clientWidth;
+    core.DB.renderHeight = document.documentElement.clientHeight;
   } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-    renderWidth = document.body.clientWidth;
-    renderHeight = document.body.clientHeight;
+    core.DB.renderWidth = document.body.clientWidth;
+    core.DB.renderHeight = document.body.clientHeight;
   }
   
-	$('#canvas').height(renderHeight);
-	$('#canvas').width(renderWidth);
+	$('#canvas').height(core.DB.renderHeight);
+	$('#canvas').width(core.DB.renderWidth);
 	
-	$("#canvas").mousedown( function(event) { evtPick = true; } );
-	$("#canvas").mouseup( function() { evtPick = false; } );
+	$("#canvas").mousedown( function(event) { core.DB.evtPick = true; } );
+	$("#canvas").mouseup( function() { core.DB.evtPick = false; } );
 }
 
-doc.load("example/meshes/nature.xml");
+core.doc.load("example/meshes/nature.xml");

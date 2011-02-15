@@ -290,6 +290,9 @@ fu.get("/send", function (req, res) {
 fu.get("/GST", function (req, res) {
   var id = qs.parse(url.parse(req.url).query).id;
   var session = sessions[id];
+  if (!session) 
+    return;
+  session.poke();
   if (session.nick) {
 	console.log(session.nick +" asks time : "+GTime);
 	res.simpleJSON(200, { GST: GTime });
