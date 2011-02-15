@@ -42,7 +42,7 @@ function Core() {
 	this.DB.Branches=null;
 	this.DB.KRotz=0;
 	this.DB.black=null;
-	this.DB.birdEnd=100;
+	this.DB.moveableEnd=100;
 	this.setDoc=setdoc;
 	this.doc=this.setDoc();
 
@@ -55,9 +55,7 @@ function Core() {
 
 var core = new Core(); 
 
-//var doc = new GLGE.Document(); 
-
-var Bird = function(x, y,mat) {
+var Moveable = function(x, y,mat) {
 	
 	this.x = x;
 	this.y = y;
@@ -74,7 +72,7 @@ var Bird = function(x, y,mat) {
 	obj.setMesh(core.DB.robot.getMesh());
 	obj.setMaterial(core.DB.robot_mat);
 	obj.setZtransparent(false);
-	obj.id='Bird_'+(core.DB.objCount++);
+	obj.id='Moveable_'+(core.DB.objCount++);
 	obj.pickable=true;
 	obj.setLocX(locx);
 	obj.setLocY(locy);
@@ -238,50 +236,50 @@ core.doc.onLoad = function() {
 	
 	maxVelocity = 1;
 
-	var birds = [];
-	var numBirds = 10;
+	var moveables = [];
+	var numMoveables = 10;
 	
-	for(var i = 0; i < numBirds; i++) {
-		birds.push(new Bird(random(core.DB.birdEnd), random(core.DB.birdEnd),core.DB.grass));
+	for(var i = 0; i < numMoveables; i++) {
+		moveables.push(new Moveable(random(core.DB.moveableEnd), random(core.DB.moveableEnd),core.DB.grass));
 	}
 
-	function movebirds() {
+	function movemoveables() {
 			cubepos=cube.getPosition()
-		for(var i = 0; i < numBirds; i++) {					
+		for(var i = 0; i < numMoveables; i++) {					
 		var distanceX = 0;
 		var distanceY = 0; 
 		var nPosX = 0;
 		var nPosY = 0; 
-		var distX = birds[i].x - cubepos.x;
-		var distY = birds[i].y - cubepos.y;
+		var distX = moveables[i].x - cubepos.x;
+		var distY = moveables[i].y - cubepos.y;
 		var distance =  Math.sqrt(distX * distX + distY * distY);
 		
 		if (distance>50) {
 			
-			if (( birds[i].x>cubepos.x))
+			if (( moveables[i].x>cubepos.x))
 				distanceX = -1/distance*distance/500;
 			else
 				distanceX = 1/distance*distance/500;
-			if (( birds[i].y>cubepos.y))
+			if (( moveables[i].y>cubepos.y))
 				distanceY = -1/distance*distance/500;
 			else
 				distanceY = 1/distance*distance/500;
 
 			}
 	
-			if (distanceY>0)birds[i].accelY+=1;
-			else birds[i].accelY-=1;
-			if (distanceX>0)birds[i].accelX+=1;
-			else birds[i].accelX-=1;
+			if (distanceY>0)moveables[i].accelY+=1;
+			else moveables[i].accelY-=1;
+			if (distanceX>0)moveables[i].accelX+=1;
+			else moveables[i].accelX-=1;
 			
-			nPosX=birds[i].x+distanceX+birds[i].accelX/1000
-			nPosY=birds[i].y+distanceY+birds[i].accelY/1000
+			nPosX=moveables[i].x+distanceX+moveables[i].accelX/1000
+			nPosY=moveables[i].y+distanceY+moveables[i].accelY/1000
 			
 	
-			birds[i].el.setLocX(nPosX);
-			birds[i].el.setLocY(nPosY);
-			birds[i].x=nPosX
-			birds[i].y=nPosY
+			moveables[i].el.setLocX(nPosX);
+			moveables[i].el.setLocY(nPosY);
+			moveables[i].x=nPosX
+			moveables[i].y=nPosY
 		}
 		
 		
@@ -375,7 +373,7 @@ core.doc.onLoad = function() {
 	core.DB.incY=0;
 	core.DB.incX=0;
 	
-	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("core.DB.evtJump=true",1);core.DB.evtPreJump=true;moveJump();/*addAvatar();*/		birds.push(new Bird(random(birdEnd), random(birdEnd),core.DB.grass));numBirds++;}
+	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("core.DB.evtJump=true",1);core.DB.evtPreJump=true;moveJump();/*addAvatar();*/		moveables.push(new Moveable(random(moveableEnd), random(moveableEnd),core.DB.grass));numMoveables++;}
 
 	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[1]);core.DB.incX=core.DB.incX+parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
 	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[1]);core.DB.incX=core.DB.incX-parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();} 
@@ -487,7 +485,7 @@ core.doc.onLoad = function() {
 			core.DB.nameObj=core.DB.ob0['object']['id']+"_"
 			
 			$("#tim1").html(core.DB.nameObj.substring(0,4))
-			if (core.DB.nameObj.substring(0,4)=='Bird')
+			if (core.DB.nameObj.substring(0,4)=='Moveable')
 				core.DB.pickedObj=core.DB.ob0['object'];
 		
 			core.DB.evtRay=true;
@@ -509,17 +507,17 @@ core.doc.onLoad = function() {
 			core.DB.pos0[1]	=	posi[1]
 			core.DB.pos0[2]	=	posi[2]
 			
-			for(var i = 0; i < numBirds; i++) {					
+			for(var i = 0; i < numMoveables; i++) {					
 				
-				var PdistX =  birds[i].x-posi[0];
-				var PdistY =  birds[i].y-posi[1];
+				var PdistX =  moveables[i].x-posi[0];
+				var PdistY =  moveables[i].y-posi[1];
 				
 				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY)//+ PdistZ * PdistZ);
 
-				//"kill" the bird XD
+				//"kill" the moveable XD
 				
 				if (Pdistance<5) {
-					birds[i].el.setLocZ(-1000);			
+					moveables[i].el.setLocZ(-1000);			
 				}
 			}
 		}
@@ -599,7 +597,7 @@ core.doc.onLoad = function() {
 		multi();
 		
 		$("#tim").html("");
-		movebirds();
+		movemoveables();
 		
 		gameRenderer.render();
 		lasttime = now;
