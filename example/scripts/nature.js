@@ -29,9 +29,8 @@ function Renderer() {
 }
 
 function Core() {
-	window.DB			= [];
-	this.DB				= window.DB;
-	this.DB.evtPick		= false; 	
+	this.DB = {};
+    this.DB.evtPick		= false; 	
 	this.DB.evtRay		= false; 		
 	this.DB.evtJump		= false; 		
 	this.DB.evtJumped	= false; 		
@@ -74,7 +73,9 @@ function Core() {
 	
 	this.setDoc=setdoc;	
 	this.doc=this.setDoc();
-
+	
+	window.DB=this.DB;
+	
 	function setdoc() {
 		var doc = new GLGE.Document(); 
 		return doc;
