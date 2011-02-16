@@ -1,6 +1,8 @@
 // emmanuel DOT botros AT gmail DOT com 
 // 2011//2012
 
+
+// PosRot Class represents a Position/Rotation couple of triplets
 function PosRot(x,y,z,rx,ry,rz) {
 	this.x=x
 	this.y=y
@@ -13,11 +15,16 @@ function PosRot(x,y,z,rx,ry,rz) {
 // Renderer Class handles communication with the 3d engine
 function Renderer() {
 
-	this.setPosX=_setposX;
-	this.setPosY=_setposY;
-	this.setPosZ=_setposZ;
+	this.gameRenderer = null;
+	this.gameScene 	= null;		
+
+	this.setPosX=_setposx;
+	this.setPosY=_setposy;
+	this.setPosZ=_setposz;
 	this.initObj=_initobj;	
-	
+	this.initGameRenderer=_initgr;	
+	this.initScene=_initsc;	
+	this.bindScene=_bindsc;	
 	this.setDoc=_setdoc;	
 
 	this.doc=this.setDoc();
@@ -30,19 +37,19 @@ function Renderer() {
 		return doc;
 	}
 	
-	function _setposX(o,x) {
+	function _setposx(o,x) {
 		if (typeof(o.setLocX)=='undefined')
 			return;	
 		o.setLocX(x);
 	}
 	
-	function _setposY(o,x) {
+	function _setposy(o,y) {
 		if (typeof(o.setLocY)=='undefined')
 			return;	
 		o.setLocY(y);
 	}
 	
-	function _setposZ(o,z) {
+	function _setposz(o,z) {
 		if (typeof(o.setLocZ)=='undefined')
 			return;	
 		o.setLocX(z);
@@ -88,6 +95,17 @@ function Renderer() {
 			tvar.push(obj);		
 	}
 
+	function _initgr(el) {
+		this.gameRenderer = new GLGE.Renderer(document.getElementById(el));
+	}
+	
+	function _initsc() {
+		this.gameScene = new GLGE.Scene();
+	}
+	
+	function _bindsc(name) {
+		this.gameScene = this.doc.getElement(name)
+	}	
 	// END : GLGE INTERFACE //
 	//////////////////////////
 }
@@ -103,7 +121,6 @@ function Core() {
 	this.DB.evtAnim		= false;			
 	this.DB.evtPAnim	= false;			
 	this.DB.evtPAnimWalk= false;		
-	this.DB.gameScene 	= null;		
 	this.DB.incY		= 0;					
 	this.DB.incX		= 0;					
 	this.DB.renderWidth = 800;		
@@ -158,7 +175,6 @@ function Cluster() {
 	this.objContainer=null;
 	this.count=0;
 	this.load= cload;
-	this.position= cpos;
 	this.Elems=null;
 	this.cElems=[];
 	this.idx=-1;
@@ -179,27 +195,9 @@ function Cluster() {
 		
 		core.DB.evtClusterCrea=true;
 	}
-	
-	function cpos() {
-		
-		for (var i=0;i<this.count;i++) {
-			
-			cup=cube.getPosition();
-			cp =this.cElems[i].getPosition();
-			cube.setLocX(cp.x);
-			cube.setLocY(cp.y);
-			H3=core.DB.gameScene.getHeight(null);
-			this.cElems[i].setLocZ(-H3+1);
-			cube.setLocX(cup.x);
-			cube.setLocY(cup.y);
-		}
-		core.DB.evtClusterPos=true;
-		return;
-	}
 }
 
 var random = function(maxNum) {
-	
 	return Math.ceil(Math.random() * maxNum);
 }
 
@@ -238,27 +236,26 @@ function interlopateHeight(keep,value,obj) {
 
 renderer.doc.onLoad = function() {	
 	
-	var gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
-	
-	core.DB.gameScene = new GLGE.Scene();
-	core.DB.gameScene = renderer.doc.getElement("Scene");
-	
+	renderer.initGameRenderer('canvas');
+	renderer.initScene();
+	renderer.bindScene("Scene");
 	
 	setCanvas();
+	
+	renderer.gameRenderer.setScene(renderer.gameScene);
+	
 	$('#mcur').show().css({"left":(core.DB.renderWidth/2-20)+"px","top":(core.DB.renderHeight/2-20)+"px"});
 	
-	core.DB.gameScene.setFogType(GLGE.FOG_QUADRATIC);
-	gameRenderer.setScene(core.DB.gameScene);
-	core.DB.gameScene.fogNear=20;
-	core.DB.gameScene.fogFar=2000;
-	var camera = core.DB.gameScene.camera;
-
+	renderer.gameScene.setFogType(GLGE.FOG_QUADRATIC);
+	renderer.gameScene.fogNear=20;
+	renderer.gameScene.fogFar=2000;
 	
-  
-	camera.setAspect(core.DB.renderWidth/core.DB.renderHeight);
+	var camera = renderer.gameScene.camera;
 
-	gameRenderer.canvas.height = core.DB.renderHeight;
-	gameRenderer.canvas.width = core.DB.renderWidth;
+	camera.setAspect(core.DB.renderWidth/core.DB.renderHeight);
+	
+	renderer.gameRenderer.canvas.height = core.DB.renderHeight;
+	renderer.gameRenderer.canvas.width = core.DB.renderWidth;
 
 	var mouse = new GLGE.MouseInput(document.getElementById('canvas'));
 	var keys = new GLGE.KeyInput();
@@ -358,18 +355,18 @@ renderer.doc.onLoad = function() {
 		var locy=Math.random()*100-50
 		newcol.setLocX(locx);
 		newcol.setLocY(locy);
-		var ray=core.DB.gameScene.ray([locx,locy,20],[0,0,1]);
+		var ray=renderer.gameScene.ray([locx,locy,20],[0,0,1]);
 		newcol.setLocZ(-ray.distance+5);
 		newcol.setRotZ(Math.PI*2*Math.random());
 		newcol.setScale(30);
-		core.DB.gameScene.addCollada(newcol);
+		renderer.gameScene.addCollada(newcol);
 		},200);
 	}
 
 	
 	function process(){
 	
-		var camera = core.DB.gameScene.camera;
+		var camera = renderer.gameScene.camera;
 		var mousepos = mouse.getMousePosition();
 		mousepos.x = mousepos.x - document.body.offsetLeft;
 		mousepos.y = mousepos.y	- document.body.offsetTop;			
@@ -398,7 +395,7 @@ renderer.doc.onLoad = function() {
 		vx=mousepos.x
 		vy=mousepos.y
 		
-		var H2=core.DB.gameScene.getHeight(null);
+		var H2=renderer.gameScene.getHeight(null);
 		
 		if (H2!=false)
 			buildNature();
@@ -507,15 +504,33 @@ renderer.doc.onLoad = function() {
 			core.DB.Branches.load(core.DB.branches,core.DB.objBag,core.DB.bush_mat,2);	
 			core.DB.evtClusterCrea=true;	
 		}
-					
+		
 		if((core.DB.evtClusterCrea)&&(!core.DB.evtClusterPos)) { 
-			//core.DB.Forest.position();
-			core.DB.Grass.position();
-			core.DB.Branches.position();
-			core.DB.evtClusterPos=true;
+		
+			for (var i=0;i<core.DB.Grass.count;i++) {
+				cup=cube.getPosition();
+				cp =core.DB.Grass.cElems[i].getPosition();
+				renderer.setPosX(cube,cp.x);
+				renderer.setPosY(cube,cp.y);
+				H3=renderer.gameScene.getHeight(null);
+				renderer.setPosZ(core.DB.Grass.cElems[i],-H3+1);
+				renderer.setPosX(cube,cup.x);
+				renderer.setPosY(cube,cup.y);
+			}
+			for (var i=0;i<core.DB.Branches.count;i++) {
+				cup=cube.getPosition();
+				cp =core.DB.Branches.cElems[i].getPosition();
+				renderer.setPosX(cube,cp.x);
+				renderer.setPosY(cube,cp.y);
+				H3=renderer.gameScene.getHeight(null);
+				renderer.setPosZ(core.DB.Branches.cElems[i],-H3+1);
+				renderer.setPosX(cube,cup.x);
+				renderer.setPosY(cube,cup.y);
+			}
 		}
-
 	}
+
+	
 
 	function processRay(mousepos) {
 		
@@ -525,7 +540,7 @@ renderer.doc.onLoad = function() {
 		cy=core.DB.renderHeight/2;
 				
 		if 	((!core.DB.evtRay)&&(core.DB.evtPick)) {	
-			core.DB.ob0=core.DB.gameScene.pick3(cx, cy);
+			core.DB.ob0=renderer.gameScene.pick3(cx, cy);
 			
 			
 			if(core.DB.ob0['coord']) {
@@ -659,7 +674,7 @@ renderer.doc.onLoad = function() {
 		$("#tim").html("");
 		movemoveables();
 		
-		gameRenderer.render();
+		renderer.gameRenderer.render();
 		lasttime = now;
 	}
 	
