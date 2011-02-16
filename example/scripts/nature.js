@@ -1,6 +1,33 @@
 // emmanuel DOT botros AT gmail DOT com 
 // 2011//2012
 
+
+function Renderer() {
+
+	this.setPosX=_setposX;
+	this.setPosY=_setposY;
+	this.setPosZ=_setposZ;
+
+	function _setposX(o,x) {
+		if (typeof(o.setLocX)=='undefined')
+			return;	
+		o.setLocX(x);
+	}
+	
+	function _setposY(o,x) {
+		if (typeof(o.setLocY)=='undefined')
+			return;	
+		o.setLocY(y);
+	}
+	
+	function _setposZ(o,z) {
+		if (typeof(o.setLocZ)=='undefined')
+			return;	
+		o.setLocX(z);
+	}
+
+}
+
 function Core() {
 	window.DB			= [];
 	this.DB				= window.DB;
@@ -26,8 +53,8 @@ function Core() {
 	this.DB.pos1		= null;
 	this.DB.testt		= [];
 	this.DB.H			= null;
-	this.DB.builded 	= false; 
-	this.DB.builded2	= false;
+	this.DB.evtClusterCrea 	= false; 
+	this.DB.evtClusterPos	= false;
 	this.DB.tree		= null;
 	this.DB.bush		= null;
 	this.DB.robot		= null;
@@ -55,7 +82,8 @@ function Core() {
 
 };
 
-var core = new Core(); 
+var core 		= new Core(); 
+var renderer 	= new Renderer(); 
 
 var Moveable = function(x, y,mat) {
 	
@@ -132,7 +160,7 @@ function ccluster() {
 			this.cElems.push(obj);
 		}
 		
-		core.DB.builded=true;
+		core.DB.evtClusterCrea=true;
 	}
 	
 	function cpos() {
@@ -148,7 +176,7 @@ function ccluster() {
 			cube.setLocX(cup.x);
 			cube.setLocY(cup.y);
 		}
-		core.DB.builded2=true;
+		core.DB.evtClusterPos=true;
 		return;
 	}
 }
@@ -440,21 +468,21 @@ core.doc.onLoad = function() {
 	
 	function buildNature() {
 
-		if (!core.DB.builded){
+		if (!core.DB.evtClusterCrea){
 			//core.DB.Forest=new ccluster;
 			//core.DB.Forest.load(core.DB.tree,core.DB.objBag,core.DB.grass,0);	
 			core.DB.Grass=new ccluster;
 			core.DB.Grass.load(core.DB.bush,core.DB.objBag,flower_mat,1);	
 			core.DB.Branches=new ccluster;
 			core.DB.Branches.load(core.DB.branches,core.DB.objBag,core.DB.bush_mat,2);	
-			core.DB.builded=true;	
+			core.DB.evtClusterCrea=true;	
 		}
 					
-		if((core.DB.builded)&&(!core.DB.builded2)) { 
+		if((core.DB.evtClusterCrea)&&(!core.DB.evtClusterPos)) { 
 			//core.DB.Forest.position();
 			core.DB.Grass.position();
 			core.DB.Branches.position();
-			core.DB.builded2=true;
+			core.DB.evtClusterPos=true;
 		}
 
 	}
