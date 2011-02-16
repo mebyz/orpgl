@@ -1,13 +1,35 @@
 // emmanuel DOT botros AT gmail DOT com 
 // 2011//2012
 
+function PosRot(x,y,z,rx,ry,rz) {
+	this.x=x
+	this.y=y
+	this.z=z
+	this.rx=rx
+	this.ry=ry
+	this.rz=rz
+}
 
+// Renderer Class handles communication with the 3d engine
 function Renderer() {
 
 	this.setPosX=_setposX;
 	this.setPosY=_setposY;
 	this.setPosZ=_setposZ;
+	this.initObj=_initobj;	
+	
+	this.setDoc=_setdoc;	
 
+	this.doc=this.setDoc();
+	
+	////////////////////////////	
+	// START : GLGE INTERFACE //
+
+	function _setdoc() {
+		var doc = new GLGE.Document(); 
+		return doc;
+	}
+	
 	function _setposX(o,x) {
 		if (typeof(o.setLocX)=='undefined')
 			return;	
@@ -25,9 +47,52 @@ function Renderer() {
 			return;	
 		o.setLocX(z);
 	}
+	
+	function _initobj(mesh,name,posrot,mat,p,bag,ct,type,tvar) {
+		
+		var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
+				
+		obj.setMesh(mesh);
+		obj.setMaterial(mat);
+		obj.setZtransparent(false);
+		obj.id=name+ct;
+		obj.pickable=p;
+				
+		var x=posrot.x;
+		var y=posrot.y;
+		var z=posrot.z;
+		var rx=posrot.rx;
+		var ry=posrot.ry;
+		var rz=posrot.rz;
+		
+		if (x!=null)
+			obj.setLocX(x);
+		if (y!=null)
+			obj.setLocY(y);
+		if (z!=null)
+			obj.setLocZ(z);		
+		if (rx!=null)
+			obj.setLocX(rx);
+		if (ry!=null)
+			obj.setLocY(ry);
+		if (rz!=null)
+			obj.setLocZ(rz);
 
+		bag.addObject(obj);
+		posSav = obj.getPosition()
+		
+		if (type==0)
+			tvar.el=obj;
+				
+		if (type==1)
+			tvar.push(obj);		
+	}
+
+	// END : GLGE INTERFACE //
+	//////////////////////////
 }
 
+// Core Class handles game variables and communication with other modules
 function Core() {
 	this.DB = {};
     this.DB.evtPick		= false; 	
@@ -71,57 +136,23 @@ function Core() {
 
 	this.DB.AnimFramesArray = [0,120,125,135];
 	
-	this.setDoc=setdoc;	
-	this.doc=this.setDoc();
-	
 	window.DB=this.DB;
 	
-	function setdoc() {
-		var doc = new GLGE.Document(); 
-		return doc;
-	}
-
 };
 
-var core 		= new Core(); 
-var renderer 	= new Renderer(); 
-
-var Moveable = function(x, y,mat) {
-	
+// Moveable Class Represent a positionable object in the 3d space 
+function Moveable(x, y,mat) {
 	this.x = x;
 	this.y = y;
 	this.el=null;
 	this.accelX=0;
 	this.accelY=0;
 	this.xVelocity = 1;
-	this.yVelocity = -1;
-	var locx=this.x
-	var locy=this.y
-	
-	var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
-			
-	obj.setMesh(core.DB.robot.getMesh());
-	obj.setMaterial(core.DB.robot_mat);
-	obj.setZtransparent(false);
-	obj.id='Moveable_'+(core.DB.objCount++);
-	obj.pickable=true;
-	obj.setLocX(locx);
-	obj.setLocY(locy);
-	obj.setLocZ(-250);
-	obj.setScale(1);
-	core.DB.objBag.addObject(obj);
-	this.el=obj;
-	posSav = this.el.getPosition()
-			
+	this.yVelocity = -1;	
 }
 
-var random = function(maxNum) {
-	
-	return Math.ceil(Math.random() * maxNum);
-}
-
-
-function ccluster() {
+// Cluster Class contains a cluster of clone objects 
+function Cluster() {
 	
 	this.clusterObj=null;
 	this.objContainer=null;
@@ -141,24 +172,9 @@ function ccluster() {
 		this.objContainer=cont;
 		
 		for (var i=0;i<this.count;i++) {
+	
+		renderer.initObj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,core.DB.objCount++,1,this.cElems);
 			
-			var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
-			obj.setMesh(this.clusterObj.getMesh());
-			obj.setMaterial(mat);
-			obj.setZtransparent(false);
-			obj.id='Cube_'+(core.DB.objCount++);
-			obj.pickable=false;
-			this.objContainer.addObject(obj);	
-			var vx= this.Elems[i][0];
-			var vy= this.Elems[i][1];
-			var ry= this.Elems[i][2];
-			var rz= this.Elems[i][3];
-
-			obj.setLocX(vx);
-			obj.setLocY(vy);
-			obj.setRotY(ry);
-			obj.setRotZ(rz);
-			this.cElems.push(obj);
 		}
 		
 		core.DB.evtClusterCrea=true;
@@ -181,6 +197,18 @@ function ccluster() {
 		return;
 	}
 }
+
+var random = function(maxNum) {
+	
+	return Math.ceil(Math.random() * maxNum);
+}
+
+
+var core 		= new Core(); 
+var renderer 	= new Renderer(); 
+
+////////////////////////////////////////////////////////////////////////
+
 
 function interlopateHeight(keep,value,obj) {
 
@@ -208,12 +236,12 @@ function interlopateHeight(keep,value,obj) {
 	return keep;
 }	 
 
-core.doc.onLoad = function() {	
+renderer.doc.onLoad = function() {	
 	
 	var gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
 	
 	core.DB.gameScene = new GLGE.Scene();
-	core.DB.gameScene = core.doc.getElement("Scene");
+	core.DB.gameScene = renderer.doc.getElement("Scene");
 	
 	
 	setCanvas();
@@ -243,24 +271,24 @@ core.doc.onLoad = function() {
 	var vx=0;
 	var vy=0;
 	
-	core.DB.objBag=core.doc.getElement( "graph" );
-	core.DB.black=core.doc.getElement( "black" );
-	core.DB.grass=core.doc.getElement( "Material" );
-	core.DB.bush_mat=core.doc.getElement( "Bush Green.001" );
-	core.DB.robot=core.doc.getElement( "Sphere" );
-	core.DB.robot_mat=core.doc.getElement( "Material.003" );
-	flower_mat=core.doc.getElement( "Flower Green" );
-	head = core.doc.getElement( "head" );
-	player = core.doc.getElement( "plane2" );
-	var p2 = core.doc.getElement( "Cube" );
-	cube = core.doc.getElement( "plane" );
-	core.DB.tree=core.doc.getElement( "plant_pmat8.001" );
-	core.DB.bush=core.doc.getElement( "Bush 1" );
-	core.DB.branches=core.doc.getElement( "Bush 2" );	
+	core.DB.objBag=renderer.doc.getElement( "graph" );
+	core.DB.black=renderer.doc.getElement( "black" );
+	core.DB.grass=renderer.doc.getElement( "Material" );
+	core.DB.bush_mat=renderer.doc.getElement( "Bush Green.001" );
+	core.DB.robot=renderer.doc.getElement( "Sphere" );
+	core.DB.robot_mat=renderer.doc.getElement( "Material.003" );
+	flower_mat=renderer.doc.getElement( "Flower Green" );
+	head = renderer.doc.getElement( "head" );
+	player = renderer.doc.getElement( "plane2" );
+	var p2 = renderer.doc.getElement( "Cube" );
+	cube = renderer.doc.getElement( "plane" );
+	core.DB.tree=renderer.doc.getElement( "plant_pmat8.001" );
+	core.DB.bush=renderer.doc.getElement( "Bush 1" );
+	core.DB.branches=renderer.doc.getElement( "Bush 2" );	
 			
 	setTimeout('moveP();moveP2();',1000); 
 	
-	groundObject = core.doc.getElement( "groundObject" );
+	groundObject = renderer.doc.getElement( "groundObject" );
 	groundObject.setLocZ(-300);
 	
 	var stop = false;
@@ -272,10 +300,11 @@ core.doc.onLoad = function() {
 	
 	for(var i = 0; i < numMoveables; i++) {
 		moveables.push(new Moveable(random(core.DB.moveableEnd), random(core.DB.moveableEnd),core.DB.grass));
+		renderer.initObj( core.DB.robot.getMesh(),"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),core.DB.robot_mat,true,core.DB.objBag,core.DB.objCount++,0,moveables[i]);
 	}
-
+	
 	function movemoveables() {
-			cubepos=cube.getPosition()
+		cubepos=cube.getPosition()
 		for(var i = 0; i < numMoveables; i++) {					
 		var distanceX = 0;
 		var distanceY = 0; 
@@ -470,11 +499,11 @@ core.doc.onLoad = function() {
 	function buildNature() {
 
 		if (!core.DB.evtClusterCrea){
-			//core.DB.Forest=new ccluster;
+			//core.DB.Forest=new Cluster;
 			//core.DB.Forest.load(core.DB.tree,core.DB.objBag,core.DB.grass,0);	
-			core.DB.Grass=new ccluster;
+			core.DB.Grass=new Cluster;
 			core.DB.Grass.load(core.DB.bush,core.DB.objBag,flower_mat,1);	
-			core.DB.Branches=new ccluster;
+			core.DB.Branches=new Cluster;
 			core.DB.Branches.load(core.DB.branches,core.DB.objBag,core.DB.bush_mat,2);	
 			core.DB.evtClusterCrea=true;	
 		}
@@ -810,4 +839,4 @@ function setCanvas() {
 	$("#canvas").mouseup( function() { core.DB.evtPick = false; } );
 }
 
-core.doc.load("example/meshes/nature.xml");
+renderer.doc.load("example/meshes/nature.xml");
