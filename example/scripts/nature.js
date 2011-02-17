@@ -62,15 +62,15 @@ function Renderer() {
 		o.setLocX(z);
 	}
 	
-	function _initobj(mesh,name,posrot,mat,p,bag,ct,type,tvar) {
+	function _initobj(mesh,name,posrot,mat,pick,bag,counter,type,tvar) {
 		
 		var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 				
 		obj.setMesh(mesh);
 		obj.setMaterial(mat);
 		obj.setZtransparent(false);
-		obj.id=name+ct;
-		obj.pickable=p;
+		obj.id=name+counter;
+		obj.pickable=pick;
 				
 		var x=posrot.x;
 		var y=posrot.y;
@@ -119,14 +119,14 @@ function Renderer() {
 		$('#canvas').height(this.renderHeight);
 		$('#canvas').width(this.renderWidth);
 		
-		$("#canvas").mousedown( function(event) { renderer.evtPick = true; } );
-		$("#canvas").mouseup( function(event) { renderer.evtPick = false; } );
+		$("#canvas").mousedown( function(event) { this.evtPick = true; } );
+		$("#canvas").mouseup( function(event) { this.evtPick = false; } );
 	}
 	
 	function _initsc(name) {
 		this.gameScene = new GLGE.Scene();
 		this.gameScene = this.doc.getElement(name)
-		this.gameRenderer.setScene(renderer.gameScene);
+		this.gameRenderer.setScene(this.gameScene);
 		this.gameRenderer.canvas.width = this.renderWidth;
 		this.gameRenderer.canvas.height = this.renderHeight;
 	}
@@ -279,6 +279,7 @@ renderer.doc.onLoad = function() {
 	
 	var mouse = new GLGE.MouseInput(document.getElementById('canvas'));
 	var keys = new GLGE.KeyInput();
+	
 	var mouseovercanvas;
 	var hoverobj;
 	
