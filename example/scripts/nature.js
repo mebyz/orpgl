@@ -17,15 +17,22 @@ function Renderer() {
 
 	this.gameRenderer = null;
 	this.gameScene 	= null;		
-
+				
+	this.renderWidth = null;		
+	this.renderHeight= null;
+	
+    this.evtPick= false; 	
+	this.evtRay= false; 	
+	
 	this.setPosX=_setposx;
 	this.setPosY=_setposy;
 	this.setPosZ=_setposz;
 	this.initObj=_initobj;	
 	this.initGameRenderer=_initgr;	
 	this.initScene=_initsc;	
-	this.bindScene=_bindsc;	
+	this.initCamera=_initcam;	
 	this.setDoc=_setdoc;	
+	this.initFog=_initfog;	
 
 	this.doc=this.setDoc();
 	
@@ -97,24 +104,53 @@ function Renderer() {
 
 	function _initgr(el) {
 		this.gameRenderer = new GLGE.Renderer(document.getElementById(el));
+		
+		if( typeof( window.innerWidth ) == 'number' ) {
+			this.renderWidth = window.innerWidth;
+			this.renderHeight = window.innerHeight;
+		} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+			this.renderWidth = document.documentElement.clientWidth;
+			this.renderHeight = document.documentElement.clientHeight;
+		} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+			this.renderWidth = document.body.clientWidth;
+			this.renderHeight = document.body.clientHeight;
+		}
+	  
+		$('#canvas').height(this.renderHeight);
+		$('#canvas').width(this.renderWidth);
+		
+		$("#canvas").mousedown( function(event) { renderer.evtPick = true; } );
+		$("#canvas").mouseup( function(event) { renderer.evtPick = false; } );
 	}
 	
-	function _initsc() {
+	function _initsc(name) {
 		this.gameScene = new GLGE.Scene();
+		this.gameScene = this.doc.getElement(name)
+		this.gameRenderer.setScene(renderer.gameScene);
+		this.gameRenderer.canvas.width = this.renderWidth;
+		this.gameRenderer.canvas.height = this.renderHeight;
 	}
 	
-	function _bindsc(name) {
-		this.gameScene = this.doc.getElement(name)
+	function _initcam() {
+		var camera = this.gameScene.camera;
+		camera.setAspect(this.renderWidth/this.renderHeight);
+		return camera;
+	}
+	
+
+	function _initfog(near, far) {		
+		this.gameScene.setFogType(GLGE.FOG_QUADRATIC);
+		this.gameScene.fogNear=near;
+		this.gameScene.fogFar=far;
 	}	
+		
 	// END : GLGE INTERFACE //
 	//////////////////////////
 }
 
 // Core Class handles game variables and communication with other modules
 function Core() {
-	this.DB = {};
-    this.DB.evtPick		= false; 	
-	this.DB.evtRay		= false; 		
+	this.DB = {};		
 	this.DB.evtJump		= false; 		
 	this.DB.evtJumped	= false; 		
 	this.DB.evtPreJump	= false; 		
@@ -122,9 +158,7 @@ function Core() {
 	this.DB.evtPAnim	= false;			
 	this.DB.evtPAnimWalk= false;		
 	this.DB.incY		= 0;					
-	this.DB.incX		= 0;					
-	this.DB.renderWidth = 800;		
-	this.DB.renderHeight= 600;		
+	this.DB.incX		= 0;		
 	this.DB.ob0			= null;
 	this.DB.dec			= 0;
 	this.DB.pickedObj	= null;
@@ -237,26 +271,12 @@ function interlopateHeight(keep,value,obj) {
 renderer.doc.onLoad = function() {	
 	
 	renderer.initGameRenderer('canvas');
-	renderer.initScene();
-	renderer.bindScene("Scene");
+	renderer.initScene("Scene");
+	var camera = renderer.initCamera();
+	renderer.initFog(20,2000);
 	
-	setCanvas();
+	$('#mcur').show().css({"left":(renderer.renderWidth/2-20)+"px","top":(renderer.renderHeight/2-20)+"px"});
 	
-	renderer.gameRenderer.setScene(renderer.gameScene);
-	
-	$('#mcur').show().css({"left":(core.DB.renderWidth/2-20)+"px","top":(core.DB.renderHeight/2-20)+"px"});
-	
-	renderer.gameScene.setFogType(GLGE.FOG_QUADRATIC);
-	renderer.gameScene.fogNear=20;
-	renderer.gameScene.fogFar=2000;
-	
-	var camera = renderer.gameScene.camera;
-
-	camera.setAspect(core.DB.renderWidth/core.DB.renderHeight);
-	
-	renderer.gameRenderer.canvas.height = core.DB.renderHeight;
-	renderer.gameRenderer.canvas.width = core.DB.renderWidth;
-
 	var mouse = new GLGE.MouseInput(document.getElementById('canvas'));
 	var keys = new GLGE.KeyInput();
 	var mouseovercanvas;
@@ -293,7 +313,7 @@ renderer.doc.onLoad = function() {
 	maxVelocity = 1;
 
 	var moveables = [];
-	var numMoveables = 10;
+	var numMoveables = 0;
 	
 	for(var i = 0; i < numMoveables; i++) {
 		moveables.push(new Moveable(random(core.DB.moveableEnd), random(core.DB.moveableEnd),core.DB.grass));
@@ -397,8 +417,8 @@ renderer.doc.onLoad = function() {
 		
 		var H2=renderer.gameScene.getHeight(null);
 		
-		if (H2!=false)
-			buildNature();
+		//if (H2!=false)
+		//	buildNature();
 			
 		if (core.DB.H==null)core.DB.H=0;
 		
@@ -536,10 +556,10 @@ renderer.doc.onLoad = function() {
 		
 		cx=mousepos.x;
 		cy=mousepos.y;
-		cx=core.DB.renderWidth/2;
-		cy=core.DB.renderHeight/2;
+		cx=renderer.renderWidth/2;
+		cy=renderer.renderHeight/2;
 				
-		if 	((!core.DB.evtRay)&&(core.DB.evtPick)) {	
+		if 	((!renderer.evtRay)&&(renderer.evtPick)) {	
 			core.DB.ob0=renderer.gameScene.pick3(cx, cy);
 			
 			
@@ -563,12 +583,12 @@ renderer.doc.onLoad = function() {
 			if (core.DB.nameObj.substring(0,4)=='Moveable')
 				core.DB.pickedObj=core.DB.ob0['object'];
 		
-			core.DB.evtRay=true;
-			setTimeout("core.DB.evtRay=false;",100);
+			renderer.evtRay=true;
+			setTimeout("renderer.evtRay=false;",100);
 			
 		}	
 		
-		if (core.DB.evtRay) {	
+		if (renderer.evtRay) {	
 			
 			var posi=[]
 			posi[0]	=	core.DB.pos0[0]-(core.DB.pos0[0]-core.DB.pos1[0])
@@ -834,24 +854,5 @@ function moveJump() {
 	}	
 }
 
-function setCanvas() {
-	
-	if( typeof( window.innerWidth ) == 'number' ) {
-    core.DB.renderWidth = window.innerWidth;
-    core.DB.renderHeight = window.innerHeight;
-  } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-    core.DB.renderWidth = document.documentElement.clientWidth;
-    core.DB.renderHeight = document.documentElement.clientHeight;
-  } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-    core.DB.renderWidth = document.body.clientWidth;
-    core.DB.renderHeight = document.body.clientHeight;
-  }
-  
-	$('#canvas').height(core.DB.renderHeight);
-	$('#canvas').width(core.DB.renderWidth);
-	
-	$("#canvas").mousedown( function(event) { core.DB.evtPick = true; } );
-	$("#canvas").mouseup( function() { core.DB.evtPick = false; } );
-}
 
 renderer.doc.load("example/meshes/nature.xml");
