@@ -17,6 +17,7 @@ function Renderer() {
 
 	this.gameRenderer = null;
 	this.gameScene 	= null;		
+	this.canvasEl	= null;
 				
 	this.renderWidth = null;		
 	this.renderHeight= null;
@@ -27,12 +28,14 @@ function Renderer() {
 	this.setPosX=_setposx;
 	this.setPosY=_setposy;
 	this.setPosZ=_setposz;
-	this.initObj=_initobj;	
-	this.initGameRenderer=_initgr;	
-	this.initScene=_initsc;	
-	this.initCamera=_initcam;	
+	this.setObj=_setobj;	
+	this.setGameRenderer=_setgr;	
+	this.setScene=_setsc;	
+	this.setCamera=_setcam;	
 	this.setDoc=_setdoc;	
-	this.initFog=_initfog;	
+	this.setFog=_setfog;	
+	this.getMouseHandler=_getmouse
+	this.getKeysHandler=_getkeys
 
 	this.doc=this.setDoc();
 	
@@ -62,7 +65,7 @@ function Renderer() {
 		o.setLocX(z);
 	}
 	
-	function _initobj(mesh,name,posrot,mat,pick,bag,counter,type,tvar) {
+	function _setobj(mesh,name,posrot,mat,pick,bag,counter,type,tvar) {
 		
 		var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 				
@@ -102,8 +105,9 @@ function Renderer() {
 			tvar.push(obj);		
 	}
 
-	function _initgr(el) {
-		this.gameRenderer = new GLGE.Renderer(document.getElementById(el));
+	function _setgr(el) {
+		this.canvasEl=el
+		this.gameRenderer = new GLGE.Renderer(document.getElementById(this.canvasEl));
 		
 		if( typeof( window.innerWidth ) == 'number' ) {
 			this.renderWidth = window.innerWidth;
@@ -114,16 +118,10 @@ function Renderer() {
 		} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
 			this.renderWidth = document.body.clientWidth;
 			this.renderHeight = document.body.clientHeight;
-		}
-	  
-		$('#canvas').height(this.renderHeight);
-		$('#canvas').width(this.renderWidth);
-		
-		$("#canvas").mousedown( function(event) { this.evtPick = true; } );
-		$("#canvas").mouseup( function(event) { this.evtPick = false; } );
+		}	  
 	}
 	
-	function _initsc(name) {
+	function _setsc(name) {
 		this.gameScene = new GLGE.Scene();
 		this.gameScene = this.doc.getElement(name)
 		this.gameRenderer.setScene(this.gameScene);
@@ -131,19 +129,28 @@ function Renderer() {
 		this.gameRenderer.canvas.height = this.renderHeight;
 	}
 	
-	function _initcam() {
+	function _setcam() {
 		var camera = this.gameScene.camera;
 		camera.setAspect(this.renderWidth/this.renderHeight);
 		return camera;
 	}
 	
 
-	function _initfog(near, far) {		
+	function _setfog(near, far) {		
 		this.gameScene.setFogType(GLGE.FOG_QUADRATIC);
 		this.gameScene.fogNear=near;
 		this.gameScene.fogFar=far;
 	}	
 		
+	function _getmouse() {		
+		return new GLGE.MouseInput(document.getElementById(this.canvasEl));	
+	}	
+
+	function _getkeys() {		
+		return new GLGE.KeyInput();
+	}	
+		
+	
 	// END : GLGE INTERFACE //
 	//////////////////////////
 }
@@ -223,7 +230,7 @@ function Cluster() {
 		
 		for (var i=0;i<this.count;i++) {
 	
-		renderer.initObj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,core.DB.objCount++,1,this.cElems);
+		renderer.setObj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,core.DB.objCount++,1,this.cElems);
 			
 		}
 		
@@ -268,24 +275,27 @@ function interlopateHeight(keep,value,obj) {
 	return keep;
 }	 
 
+
+function setDomEvents(iRenderer) {
+	$('#canvas').mousedown( function(e) { iRenderer.evtPick = true; } );
+	$('#canvas').mouseup( function(e) { iRenderer.evtPick = false; } );
+	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
+}
+
 renderer.doc.onLoad = function() {	
 	
-	renderer.initGameRenderer('canvas');
-	renderer.initScene("Scene");
-	var camera = renderer.initCamera();
-	renderer.initFog(20,2000);
+	renderer.setGameRenderer('canvas');
+	renderer.setScene("Scene");
+	renderer.setFog(20,2000);	
 	
-	$('#mcur').show().css({"left":(renderer.renderWidth/2-20)+"px","top":(renderer.renderHeight/2-20)+"px"});
+	var camera = renderer.setCamera();
+	var mouse = renderer.getMouseHandler();
+	var keys = renderer.getKeysHandler();
 	
-	var mouse = new GLGE.MouseInput(document.getElementById('canvas'));
-	var keys = new GLGE.KeyInput();
-	
-	var mouseovercanvas;
-	var hoverobj;
+	setDomEvents(renderer);
 	
 	var pxPos,pyPos,pzPos=0;
 	var pxRot,pyRot,pzRot=0;
-	var rotating=false;
 	var vx=0;
 	var vy=0;
 	
@@ -318,7 +328,7 @@ renderer.doc.onLoad = function() {
 	
 	for(var i = 0; i < numMoveables; i++) {
 		moveables.push(new Moveable(random(core.DB.moveableEnd), random(core.DB.moveableEnd),core.DB.grass));
-		renderer.initObj( core.DB.robot.getMesh(),"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),core.DB.robot_mat,true,core.DB.objBag,core.DB.objCount++,0,moveables[i]);
+		renderer.setObj( core.DB.robot.getMesh(),"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),core.DB.robot_mat,true,core.DB.objBag,core.DB.objCount++,0,moveables[i]);
 	}
 	
 	function movemoveables() {
@@ -455,11 +465,9 @@ renderer.doc.onLoad = function() {
 
 	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[1]);core.DB.incX=core.DB.incX+parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
 	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[1]);core.DB.incX=core.DB.incX-parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();} 
-	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[0]);core.DB.incX=core.DB.incX-parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();/*rotating=true;cube.setRotZ(cuberot.z-.01);head.setRotZ(headrot.z-.01);dec+=-.01;*/}
-	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[0]);core.DB.incX=core.DB.incX+parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();/*rotating=true;cube.setRotZ(cuberot.z+.01);head.setRotZ(headrot.z+.01);dec+=.01;*/}
+	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[0]);core.DB.incX=core.DB.incX-parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
+	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[0]);core.DB.incX=core.DB.incX+parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
 
-	if ((!keys.isKeyPressed(GLGE.KI_RIGHT_ARROW))&&(!keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)))
-		rotating=false;
 	
 	cube.setLocY(cubepos.y+core.DB.incY*0.05*(now-lasttime)*core.DB.H/100);
 	cube.setLocX(cubepos.x+core.DB.incX*0.05*(now-lasttime)*core.DB.H/100);	
@@ -559,8 +567,12 @@ renderer.doc.onLoad = function() {
 		cy=mousepos.y;
 		cx=renderer.renderWidth/2;
 		cy=renderer.renderHeight/2;
-				
+		
+		
+		$("#tim1").html(renderer.evtRay+" "+renderer.evtPick)
+		
 		if 	((!renderer.evtRay)&&(renderer.evtPick)) {	
+			
 			core.DB.ob0=renderer.gameScene.pick3(cx, cy);
 			
 			
@@ -702,12 +714,6 @@ renderer.doc.onLoad = function() {
 	
 	setInterval(render, 1);
 	var inc = 0.2;
-	document.getElementById("canvas").onmouseover = function(e) {
-		mouseovercanvas = true;
-	};
-	document.getElementById("canvas").onmouseout = function(e) {
-		mouseovercanvas = false;
-	};
 	
 	
 };
