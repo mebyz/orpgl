@@ -36,6 +36,7 @@ function Renderer() {
 	this.setFog=_setfog;	
 	this.getMouseHandler=_getmouse
 	this.getKeysHandler=_getkeys
+	this.getMesh=_getmesh
 
 	this.doc=this.setDoc();
 	
@@ -135,6 +136,9 @@ function Renderer() {
 		return camera;
 	}
 	
+	function _getmesh(name) {
+		return this.doc.getElement(name);
+	}
 
 	function _setfog(near, far) {		
 		this.gameScene.setFogType(GLGE.FOG_QUADRATIC);
@@ -249,39 +253,6 @@ var renderer 	= new Renderer();
 ////////////////////////////////////////////////////////////////////////
 
 
-function interlopateHeight(keep,value,obj) {
-
-	var keeped=keep;
-	
-	if (keep==0)
-		keep=value;		
-
-	var dd=keep;
-		
-	if (value>keep+0.001) 
-		dd=keep+0.001;
-	if (value<keep-0.001) 
-		dd=keep-0.001;
-
-	obj.Lookat([cubepos.x,cubepos.y,dd]);
-	
-	keep=value;
-	
-	if (value>keeped+0.001) 
-		keep=value+0.001;
-	if (value<keeped-0.001) 
-		keep=value-0.001;
-	
-	return keep;
-}	 
-
-
-function setDomEvents(iRenderer) {
-	$('#canvas').mousedown( function(e) { iRenderer.evtPick = true; } );
-	$('#canvas').mouseup( function(e) { iRenderer.evtPick = false; } );
-	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
-}
-
 renderer.doc.onLoad = function() {	
 	
 	renderer.setGameRenderer('canvas');
@@ -293,38 +264,52 @@ renderer.doc.onLoad = function() {
 	var keys = renderer.getKeysHandler();
 	
 	setDomEvents(renderer);
+	var pPos = new PosRot(0,0,0,0,0,0);
 	
-	var pxPos,pyPos,pzPos=0;
-	var pxRot,pyRot,pzRot=0;
 	var vx=0;
 	var vy=0;
+	var stop = false;
+	var maxVelocity = 1;
+	var moveables = [];
+	var numMoveables = 0;
 	
-	core.DB.objBag=renderer.doc.getElement( "graph" );
-	core.DB.black=renderer.doc.getElement( "black" );
-	core.DB.grass=renderer.doc.getElement( "Material" );
-	core.DB.bush_mat=renderer.doc.getElement( "Bush Green.001" );
-	core.DB.robot=renderer.doc.getElement( "Sphere" );
-	core.DB.robot_mat=renderer.doc.getElement( "Material.003" );
-	flower_mat=renderer.doc.getElement( "Flower Green" );
-	head = renderer.doc.getElement( "head" );
-	player = renderer.doc.getElement( "plane2" );
-	var p2 = renderer.doc.getElement( "Cube" );
-	cube = renderer.doc.getElement( "plane" );
-	core.DB.tree=renderer.doc.getElement( "plant_pmat8.001" );
-	core.DB.bush=renderer.doc.getElement( "Bush 1" );
-	core.DB.branches=renderer.doc.getElement( "Bush 2" );	
+	// this is an object container
+	core.DB.objBag=renderer.getMesh('graph');
+
+	//some materials
+	core.DB.black=renderer.getMesh('black');
+	core.DB.grass=renderer.getMesh('Material');
+	core.DB.bush_mat=renderer.getMesh('Bush Green.001');
+
+	//ennemies
+	core.DB.robot=renderer.getMesh('Sphere');
+	core.DB.robot_mat=renderer.getMesh('Material.003');
+
+	flower_mat=renderer.getMesh('Flower Green');
+
+	// the player
+	head = renderer.getMesh('head');
+
+	// the opponent
+	player = renderer.getMesh('plane2');
+	
+	//the bullet
+	var p2 = renderer.getMesh('Cube');
+
+	//
+	cube = renderer.getMesh('plane');
+	
+	// nature
+	core.DB.tree=renderer.getMesh('plant_pmat8.001');
+	core.DB.bush=renderer.getMesh('Bush 1');
+	core.DB.branches=renderer.getMesh('Bush 2');	
 			
 	setTimeout('moveP();moveP2();',1000); 
 	
-	groundObject = renderer.doc.getElement( "groundObject" );
+	// sea plane
+	groundObject = renderer.getMesh('groundObject');
 	groundObject.setLocZ(-300);
 	
-	var stop = false;
-	
-	maxVelocity = 1;
-
-	var moveables = [];
-	var numMoveables = 0;
 	
 	for(var i = 0; i < numMoveables; i++) {
 		moveables.push(new Moveable(random(core.DB.moveableEnd), random(core.DB.moveableEnd),core.DB.grass));
@@ -488,14 +473,14 @@ renderer.doc.onLoad = function() {
 	
 	
 		
-	if((((pxPos-(headpos.x)>1)||(pxPos-(headpos.x)<-1))||((pzPos-(headpos.z)>1)||(pzPos-(headpos.z)<-1))||((pxRot-(headrot.x)>1)||(pxRot-(headrot.x)<-1))||((pzRot-(headrot.z)>1)||(pzRot-(headrot.z)<-1))||((pyRot-(headrot.y)>1)||(pyRot-(headrot.y)<-1)))/*||(!tick)*/) {
+	if((((pPos.x-(headpos.x)>1)||(pPos.x-(headpos.x)<-1))||((pPos.z-(headpos.z)>1)||(pPos.z-(headpos.z)<-1))||((pPos.rx-(headrot.x)>1)||(pPos.rx-(headrot.x)<-1))||((pPos.rz-(headrot.z)>1)||(pPos.rz-(headrot.z)<-1))||((pPos.ry-(headrot.y)>1)||(pPos.ry-(headrot.y)<-1)))) {
 		var msg = (headpos.x)+ ";"+ (headpos.y)+";"+(headpos.z)+'|'+(headrot.x)+ ";"+ (headrot.y)+";"+(headrot.z);
-		pxPos=(headpos.x);
-		pyPos=(headpos.y);
-		pzPos=(headpos.z);
-		pxRot=(headrot.x);
-		pyRot=(headrot.y);
-		pzRot=(headrot.z);		
+		pPos.x=(headpos.x);
+		pPos.y=(headpos.y);
+		pPos.z=(headpos.z);
+		pPos.rx=(headrot.x);
+		pPos.ry=(headrot.y);
+		pPos.rz=(headrot.z);		
 		send(msg);
 		core.DB.tick=true;
 		setTimeout("core.DB.tick=false",10000);
@@ -718,6 +703,39 @@ renderer.doc.onLoad = function() {
 	
 };
 
+
+function interlopateHeight(keep,value,obj) {
+
+	var keeped=keep;
+	
+	if (keep==0)
+		keep=value;		
+
+	var dd=keep;
+		
+	if (value>keep+0.001) 
+		dd=keep+0.001;
+	if (value<keep-0.001) 
+		dd=keep-0.001;
+
+	obj.Lookat([cubepos.x,cubepos.y,dd]);
+	
+	keep=value;
+	
+	if (value>keeped+0.001) 
+		keep=value+0.001;
+	if (value<keeped-0.001) 
+		keep=value-0.001;
+	
+	return keep;
+}	 
+
+
+function setDomEvents(iRenderer) {
+	$('#canvas').mousedown( function(e) { iRenderer.evtPick = true; } );
+	$('#canvas').mouseup( function(e) { iRenderer.evtPick = false; } );
+	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
+}
 
 GLGE.Scene.prototype.pick2=function(height){
 	if(!cube)
