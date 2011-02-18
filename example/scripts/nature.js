@@ -159,46 +159,56 @@ function Renderer() {
 	//////////////////////////
 }
 
-// Core Class handles game variables and communication with other modules
-function Core() {
-	this.DB = {};		
-	this.DB.evtJump		= false; 		
-	this.DB.evtJumped	= false; 		
-	this.DB.evtPreJump	= false; 		
-	this.DB.evtAnim		= false;			
-	this.DB.evtPAnim	= false;			
-	this.DB.evtPAnimWalk= false;		
-	this.DB.incY		= 0;					
-	this.DB.incX		= 0;		
-	this.DB.ob0			= null;
-	this.DB.dec			= 0;
-	this.DB.pickedObj	= null;
-	this.DB.nameObj		= null;
-	this.DB.ret			= null;
-	this.DB.pos0		= null
-	this.DB.pos1		= null;
-	this.DB.testt		= [];
-	this.DB.H			= null;
-	this.DB.evtClusterCrea 	= false; 
-	this.DB.evtClusterPos	= false;
-	this.DB.tree		= null;
-	this.DB.bush		= null;
-	this.DB.robot		= null;
-	this.DB.grass		= null;
-	this.DB.branches	= null;
-	this.DB.objBag		= null;
-	this.DB.objCount	= 0;
-	this.DB.tick		= false;
-	this.DB.Forest		= null;
-	this.DB.Grass		= null;
-	this.DB.Branches	= null;
-	this.DB.KRotz		= 0;
-	this.DB.black		= null;
-	this.DB.moveableEnd	= 100;
-
-	this.DB.AnimFramesArray = [0,120,125,135];
+// DB Class handles objects instances and in-game variables
+function DB() {
 	
-	window.DB=this.DB;
+	this.evtJump		= false; 		
+	this.evtJumped	= false; 		
+	this.evtPreJump	= false; 		
+	this.evtAnim		= false;			
+	this.evtPAnim	= false;			
+	this.evtPAnimWalk= false;		
+	this.incY		= 0;					
+	this.incX		= 0;		
+	this.ob0			= null;
+	this.dec			= 0;
+	this.pickedObj	= null;
+	this.nameObj		= null;
+	this.ret			= null;
+	this.pos0		= null
+	this.pos1		= null;
+	this.testt		= [];
+	this.H			= null;
+	this.evtClusterCrea 	= false; 
+	this.evtClusterPos	= false;
+	
+	this.tree		= null;
+	this.bush		= null;
+	this.bush_mat	= null;
+	this.robot		= null;
+	this.grass		= null;
+	this.branches	= null;
+	this.objBag		= null;
+	this.flower_mat		= null;
+	this.head		= null;
+	this.player		= null;
+	this.p2		= null;
+	this.cube		= null;
+	this.Forest		= null;
+	this.Grass		= null;
+	this.Branches	= null;
+	this.robot_mat	= null;
+	this.black	= null;
+
+	this.objCount	= 0;
+	this.tick		= false;
+	this.KRotz		= 0;
+	this.black		= null;
+	this.moveableEnd	= 100;
+	
+	this.AnimFramesArray = [0,120,125,135];
+	
+	window.DB=this;
 	
 };
 
@@ -234,11 +244,11 @@ function Cluster() {
 		
 		for (var i=0;i<this.count;i++) {
 	
-		renderer.setObj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,core.DB.objCount++,1,this.cElems);
+		renderer.setObj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,db.objCount++,1,this.cElems);
 			
 		}
 		
-		core.DB.evtClusterCrea=true;
+		db.evtClusterCrea=true;
 	}
 }
 
@@ -247,7 +257,7 @@ var random = function(maxNum) {
 }
 
 
-var core 		= new Core(); 
+var db 		= new DB(); 
 var renderer 	= new Renderer(); 
 
 ////////////////////////////////////////////////////////////////////////
@@ -264,60 +274,52 @@ renderer.doc.onLoad = function() {
 	var keys = renderer.getKeysHandler();
 	
 	setDomEvents(renderer);
+	
 	var pPos = new PosRot(0,0,0,0,0,0);
 	
-	var vx=0;
-	var vy=0;
-	var stop = false;
-	var maxVelocity = 1;
-	var moveables = [];
-	var numMoveables = 0;
-	
 	// this is an object container
-	core.DB.objBag=renderer.getMesh('graph');
+	db.objBag=renderer.getMesh('graph');
+	
+	
 
 	//some materials
-	core.DB.black=renderer.getMesh('black');
-	core.DB.grass=renderer.getMesh('Material');
-	core.DB.bush_mat=renderer.getMesh('Bush Green.001');
+	db.black=renderer.getMesh('black');
+	db.grass=renderer.getMesh('Material');
+	db.bush_mat=renderer.getMesh('Bush Green.001');
+	db.robot_mat=renderer.getMesh('Material.003');
+	db.flower_mat=renderer.getMesh('Flower Green');
 
 	//ennemies
-	core.DB.robot=renderer.getMesh('Sphere');
-	core.DB.robot_mat=renderer.getMesh('Material.003');
-
-	flower_mat=renderer.getMesh('Flower Green');
-
+	db.robot=renderer.getMesh('Sphere');	
 	// the player
-	head = renderer.getMesh('head');
-
+	db.head = renderer.getMesh('head');
 	// the opponent
-	player = renderer.getMesh('plane2');
-	
+	db.player = renderer.getMesh('plane2');
 	//the bullet
-	var p2 = renderer.getMesh('Cube');
-
+	db.p2 = renderer.getMesh('Cube');
 	//
-	cube = renderer.getMesh('plane');
-	
+	db.cube = renderer.getMesh('plane');	
 	// nature
-	core.DB.tree=renderer.getMesh('plant_pmat8.001');
-	core.DB.bush=renderer.getMesh('Bush 1');
-	core.DB.branches=renderer.getMesh('Bush 2');	
-			
-	setTimeout('moveP();moveP2();',1000); 
-	
+	db.tree=renderer.getMesh('plant_pmat8.001');
+	db.bush=renderer.getMesh('Bush 1');
+	db.branches=renderer.getMesh('Bush 2');	
 	// sea plane
 	groundObject = renderer.getMesh('groundObject');
 	groundObject.setLocZ(-300);
 	
+	setTimeout('moveP();moveP2();',1000); 
 	
+	//init ennemies
+	var maxVelocity = 1;
+	var moveables = [];
+	var numMoveables = 0;
 	for(var i = 0; i < numMoveables; i++) {
-		moveables.push(new Moveable(random(core.DB.moveableEnd), random(core.DB.moveableEnd),core.DB.grass));
-		renderer.setObj( core.DB.robot.getMesh(),"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),core.DB.robot_mat,true,core.DB.objBag,core.DB.objCount++,0,moveables[i]);
+		moveables.push(new Moveable(random(db.moveableEnd), random(db.moveableEnd),db.grass));
+		renderer.setObj( db.robot.getMesh(),"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),db.robot_mat,true,db.objBag,db.objCount++,0,moveables[i]);
 	}
 	
 	function movemoveables() {
-		cubepos=cube.getPosition()
+		cubepos=db.cube.getPosition()
 		for(var i = 0; i < numMoveables; i++) {					
 		var distanceX = 0;
 		var distanceY = 0; 
@@ -357,29 +359,7 @@ renderer.doc.onLoad = function() {
 		
 		
 	};			
-	
 
-
-	var T;
-	function addAvatar(){
-		
-		if(T) clearTimeout(T);
-		T=setTimeout(function(){
-		var newcol=new GLGE.Collada;
-		newcol.setDocument("example/meshes/sheep.dae",window.location.href);
-		var locx=Math.random()*100-50
-		var locy=Math.random()*100-50
-		newcol.setLocX(locx);
-		newcol.setLocY(locy);
-		var ray=renderer.gameScene.ray([locx,locy,20],[0,0,1]);
-		newcol.setLocZ(-ray.distance+5);
-		newcol.setRotZ(Math.PI*2*Math.random());
-		newcol.setScale(30);
-		renderer.gameScene.addCollada(newcol);
-		},200);
-	}
-
-	
 	function process(){
 	
 		var camera = renderer.gameScene.camera;
@@ -401,40 +381,38 @@ renderer.doc.onLoad = function() {
 		trans[1]=trans[1]/mag;
 		
 		if (inc<1) {
-			cube.setRotX(inc/1000);
-			head.setRotX(inc/1000);
+			db.cube.setRotX(inc/1000);
+			db.head.setRotX(inc/1000);
 		}
 		
-		cube.setRotZ(-inc2*2+1.57+core.DB.dec);
-		head.setRotZ(-inc2*2+core.DB.dec);
+		db.cube.setRotZ(-inc2*2+1.57+db.dec);
+		db.head.setRotZ(-inc2*2+db.dec);
 		
-		vx=mousepos.x
-		vy=mousepos.y
-		
+	
 		var H2=renderer.gameScene.getHeight(null);
 		
 		//if (H2!=false)
 		//	buildNature();
 			
-		if (core.DB.H==null)core.DB.H=0;
+		if (db.H==null)db.H=0;
 		
 		
-		if ((!core.DB.evtJump))
-			cube.setLocZ(-H2-.04);	
+		if ((!db.evtJump))
+			db.cube.setLocZ(-H2-.04);	
 			
 			
 
-		if (core.DB.evtJumped)	
-					{cube.setLocZ(cubepos.z-.1);	setTimeout("core.DB.evtJumped=false",500);}		
+		if (db.evtJumped)	
+					{db.cube.setLocZ(cubepos.z-.1);	setTimeout("db.evtJumped=false",500);}		
 			
-		if (core.DB.evtJump)
-			cube.setLocZ(cubepos.z+.1);	
-		core.DB.H=H2
+		if (db.evtJump)
+			db.cube.setLocZ(cubepos.z+.1);	
+		db.H=H2
 		
-	var mat=cube.getRotMatrix();
+	var mat=db.cube.getRotMatrix();
 	var trans=GLGE.mulMat4Vec4(mat,[0,1,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
-	if (core.DB.evtJump) {
+	if (db.evtJump) {
 		trans[0]=trans[0]/mag/8;
 		trans[1]=trans[1]/mag/8;
 	}
@@ -443,33 +421,33 @@ renderer.doc.onLoad = function() {
 		trans[1]=trans[1]/mag/18;
 	}
 	
-	core.DB.incY=0;
-	core.DB.incX=0;
+	db.incY=0;
+	db.incX=0;
 	
-	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("core.DB.evtJump=true",1);core.DB.evtPreJump=true;moveJump();/*addAvatar();*/		moveables.push(new Moveable(random(moveableEnd), random(moveableEnd),core.DB.grass));numMoveables++;}
+	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("db.evtJump=true",1);db.evtPreJump=true;moveJump();	moveables.push(new Moveable(random(moveableEnd), random(moveableEnd),db.grass));numMoveables++;}
 
-	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[1]);core.DB.incX=core.DB.incX+parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
-	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[1]);core.DB.incX=core.DB.incX-parseFloat(trans[0]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();} 
-	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {core.DB.incY=core.DB.incY+parseFloat(trans[0]);core.DB.incX=core.DB.incX-parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
-	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {core.DB.incY=core.DB.incY-parseFloat(trans[0]);core.DB.incX=core.DB.incX+parseFloat(trans[1]);if((!core.DB.evtPreJump)&&(!core.DB.evtJump))movePf();}
+	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {db.incY=db.incY+parseFloat(trans[1]);db.incX=db.incX+parseFloat(trans[0]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
+	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {db.incY=db.incY-parseFloat(trans[1]);db.incX=db.incX-parseFloat(trans[0]);if((!db.evtPreJump)&&(!db.evtJump))movePf();} 
+	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {db.incY=db.incY+parseFloat(trans[0]);db.incX=db.incX-parseFloat(trans[1]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
+	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {db.incY=db.incY-parseFloat(trans[0]);db.incX=db.incX+parseFloat(trans[1]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
 
 	
-	cube.setLocY(cubepos.y+core.DB.incY*0.05*(now-lasttime)*core.DB.H/100);
-	cube.setLocX(cubepos.x+core.DB.incX*0.05*(now-lasttime)*core.DB.H/100);	
+	db.cube.setLocY(cubepos.y+db.incY*0.05*(now-lasttime)*db.H/100);
+	db.cube.setLocX(cubepos.x+db.incX*0.05*(now-lasttime)*db.H/100);	
 	camera.setLocZ((cubepos.z+1.6-cuberot.x*1000+inc));
-	cubepos = cube.getPosition();
-	cuberot = cube.getRotation();
-	headpos = head.getPosition();
-	headrot = head.getRotation();
+	cubepos = db.cube.getPosition();
+	cuberot = db.cube.getRotation();
+	headpos = db.head.getPosition();
+	headrot = db.head.getRotation();
 	camera.setLocX(cubepos.x-2*inc*Math.cos((headrot.z) * 57 *Math.PI / 180));
 	camera.setLocY(cubepos.y-2*inc*Math.sin((headrot.z) * 57* Math.PI / 180));
 	
-	head.setLocZ(cubepos.z-1.08);
-	head.setLocX(cubepos.x);
-	head.setLocY(cubepos.y);
+	db.head.setLocZ(cubepos.z-1.08);
+	db.head.setLocX(cubepos.x);
+	db.head.setLocY(cubepos.y);
 	
 
-	core.DB.KRotz=interlopateHeight(core.DB.KRotz,(cubepos.z+2+inc/1000),camera);
+	db.KRotz=interlopateHeight(db.KRotz,(cubepos.z+2+inc/1000),camera);
 	
 	
 		
@@ -482,8 +460,8 @@ renderer.doc.onLoad = function() {
 		pPos.ry=(headrot.y);
 		pPos.rz=(headrot.z);		
 		send(msg);
-		core.DB.tick=true;
-		setTimeout("core.DB.tick=false",10000);
+		db.tick=true;
+		setTimeout("db.tick=false",10000);
 	}
 }
 	
@@ -500,46 +478,46 @@ renderer.doc.onLoad = function() {
 		
 		camerarot = camera.getRotation();
 		camerapos = camera.getPosition();
-		cubepos = cube.getPosition();
-		cuberot = cube.getRotation();
+		cubepos = db.cube.getPosition();
+		cuberot = db.cube.getRotation();
 		groundObjectpos = groundObject.getPosition();
-		headrot = head.getRotation();
+		headrot = db.head.getRotation();
 		
 	}
 	
 	function buildNature() {
 
-		if (!core.DB.evtClusterCrea){
-			//core.DB.Forest=new Cluster;
-			//core.DB.Forest.load(core.DB.tree,core.DB.objBag,core.DB.grass,0);	
-			core.DB.Grass=new Cluster;
-			core.DB.Grass.load(core.DB.bush,core.DB.objBag,flower_mat,1);	
-			core.DB.Branches=new Cluster;
-			core.DB.Branches.load(core.DB.branches,core.DB.objBag,core.DB.bush_mat,2);	
-			core.DB.evtClusterCrea=true;	
+		if (!db.evtClusterCrea){
+			//db.Forest=new Cluster;
+			//db.Forest.load(db.tree,db.objBag,db.grass,0);	
+			db.Grass=new Cluster;
+			db.Grass.load(db.bush,db.objBag,db.flower_mat,1);	
+			db.Branches=new Cluster;
+			db.Branches.load(db.branches,db.objBag,db.bush_mat,2);	
+			db.evtClusterCrea=true;	
 		}
 		
-		if((core.DB.evtClusterCrea)&&(!core.DB.evtClusterPos)) { 
+		if((db.evtClusterCrea)&&(!db.evtClusterPos)) { 
 		
-			for (var i=0;i<core.DB.Grass.count;i++) {
-				cup=cube.getPosition();
-				cp =core.DB.Grass.cElems[i].getPosition();
-				renderer.setPosX(cube,cp.x);
-				renderer.setPosY(cube,cp.y);
+			for (var i=0;i<db.Grass.count;i++) {
+				cup=db.cube.getPosition();
+				cp =db.Grass.cElems[i].getPosition();
+				renderer.setPosX(db.cube,cp.x);
+				renderer.setPosY(db.cube,cp.y);
 				H3=renderer.gameScene.getHeight(null);
-				renderer.setPosZ(core.DB.Grass.cElems[i],-H3+1);
-				renderer.setPosX(cube,cup.x);
-				renderer.setPosY(cube,cup.y);
+				renderer.setPosZ(db.Grass.cElems[i],-H3+1);
+				renderer.setPosX(db.cube,cup.x);
+				renderer.setPosY(db.cube,cup.y);
 			}
-			for (var i=0;i<core.DB.Branches.count;i++) {
-				cup=cube.getPosition();
-				cp =core.DB.Branches.cElems[i].getPosition();
-				renderer.setPosX(cube,cp.x);
-				renderer.setPosY(cube,cp.y);
+			for (var i=0;i<db.Branches.count;i++) {
+				cup=db.cube.getPosition();
+				cp =db.Branches.cElems[i].getPosition();
+				renderer.setPosX(db.cube,cp.x);
+				renderer.setPosY(db.cube,cp.y);
 				H3=renderer.gameScene.getHeight(null);
-				renderer.setPosZ(core.DB.Branches.cElems[i],-H3+1);
-				renderer.setPosX(cube,cup.x);
-				renderer.setPosY(cube,cup.y);
+				renderer.setPosZ(db.Branches.cElems[i],-H3+1);
+				renderer.setPosX(db.cube,cup.x);
+				renderer.setPosY(db.cube,cup.y);
 			}
 		}
 	}
@@ -558,28 +536,28 @@ renderer.doc.onLoad = function() {
 		
 		if 	((!renderer.evtRay)&&(renderer.evtPick)) {	
 			
-			core.DB.ob0=renderer.gameScene.pick3(cx, cy);
+			db.ob0=renderer.gameScene.pick3(cx, cy);
 			
 			
-			if(core.DB.ob0['coord']) {
+			if(db.ob0['coord']) {
 				
-				core.DB.pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
-				core.DB.pos1=[core.DB.ob0['coord'][0],core.DB.ob0['coord'][1],core.DB.ob0['coord'][2]];
-				p2.setLocX(core.DB.pos0[0]);
-				p2.setLocY(core.DB.pos0[1]);
-				p2.setLocZ(core.DB.pos0[2]);	
-				p2.setRotX(cuberot.x+1.57)
-				p2.setRotY(cuberot.y)
-				p2.setRotZ(cuberot.z)
+				db.pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
+				db.pos1=[db.ob0['coord'][0],db.ob0['coord'][1],db.ob0['coord'][2]];
+				db.p2.setLocX(db.pos0[0]);
+				db.p2.setLocY(db.pos0[1]);
+				db.p2.setLocZ(db.pos0[2]);	
+				db.p2.setRotX(cuberot.x+1.57)
+				db.p2.setRotY(cuberot.y)
+				db.p2.setRotZ(cuberot.z)
 				
-				send('COLLISION:'+core.DB.pos1);
+				send('COLLISION:'+db.pos1);
 			}
 		
-			core.DB.nameObj=core.DB.ob0['object']['id']+"_"
+			db.nameObj=db.ob0['object']['id']+"_"
 			
-			$("#tim1").html(core.DB.nameObj.substring(0,4))
-			if (core.DB.nameObj.substring(0,4)=='Moveable')
-				core.DB.pickedObj=core.DB.ob0['object'];
+			$("#tim1").html(db.nameObj.substring(0,4))
+			if (db.nameObj.substring(0,4)=='Moveable')
+				db.pickedObj=db.ob0['object'];
 		
 			renderer.evtRay=true;
 			setTimeout("renderer.evtRay=false;",100);
@@ -589,16 +567,16 @@ renderer.doc.onLoad = function() {
 		if (renderer.evtRay) {	
 			
 			var posi=[]
-			posi[0]	=	core.DB.pos0[0]-(core.DB.pos0[0]-core.DB.pos1[0])
-			posi[1]	=	core.DB.pos0[1]-(core.DB.pos0[1]-core.DB.pos1[1])
-			posi[2]	=	core.DB.pos0[2]-(core.DB.pos0[2]-core.DB.pos1[2])
-			p2.setLocX(posi[0]);
-			p2.setLocY(posi[1]);
-			p2.setLocZ(posi[2]);
+			posi[0]	=	db.pos0[0]-(db.pos0[0]-db.pos1[0])
+			posi[1]	=	db.pos0[1]-(db.pos0[1]-db.pos1[1])
+			posi[2]	=	db.pos0[2]-(db.pos0[2]-db.pos1[2])
+			db.p2.setLocX(posi[0]);
+			db.p2.setLocY(posi[1]);
+			db.p2.setLocZ(posi[2]);
 			
-			core.DB.pos0[0]	=	posi[0]
-			core.DB.pos0[1]	=	posi[1]
-			core.DB.pos0[2]	=	posi[2]
+			db.pos0[0]	=	posi[0]
+			db.pos0[1]	=	posi[1]
+			db.pos0[2]	=	posi[2]
 			
 			for(var i = 0; i < numMoveables; i++) {					
 				
@@ -656,10 +634,10 @@ renderer.doc.onLoad = function() {
 						var nlocZ=((st2[2]*1) - ndistZ);
 						
 					
-						player.setLocX(nlocX);
-						player.setLocY(nlocY);
-						player.setLocZ(nlocZ+1);	
-						player.setRotZ((strot[2])-4.8)
+						db.player.setLocX(nlocX);
+						db.player.setLocY(nlocY);
+						db.player.setLocZ(nlocZ+1);	
+						db.player.setRotZ((strot[2])-4.8)
 						if (moveplayer)	{		
 							movePf2();
 							moveplayer=false;
@@ -699,8 +677,6 @@ renderer.doc.onLoad = function() {
 	
 	setInterval(render, 1);
 	var inc = 0.2;
-	
-	
 };
 
 
@@ -738,10 +714,10 @@ function setDomEvents(iRenderer) {
 }
 
 GLGE.Scene.prototype.pick2=function(height){
-	if(!cube)
+	if(!db.cube)
 		return false;
 	if(this.camera.matrix && this.camera.pMatrix){	
-		var cubePos=cube.getPosition();
+		var cubePos=db.cube.getPosition();
 		var origin=[cubePos.x,cubePos.y,cubePos.z+height];
 		return this.ray(origin,[0,0,1]);
 	}else{
@@ -749,17 +725,17 @@ GLGE.Scene.prototype.pick2=function(height){
 	}
 }
 GLGE.Scene.prototype.getHeight=function(h){
-	if(!cube)
+	if(!db.cube)
 		return false;
 	if(this.camera.matrix && this.camera.pMatrix){	
-		var cubePos=cube.getPosition();
+		var cubePos=db.cube.getPosition();
 		var H=0;
 		if (h!=null) H=h;
 		var origin=[cubePos.x,cubePos.y,H];
-		core.DB.ret=this.ray(origin,[0,0,1]);		
+		db.ret=this.ray(origin,[0,0,1]);		
 
-		if (core.DB.ret['object']['id']=='Plane')
-			return core.DB.ret['distance'];
+		if (db.ret['object']['id']=='Plane')
+			return db.ret['distance'];
 
 		return false;
 			
@@ -795,23 +771,23 @@ GLGE.Scene.prototype.pick3=function(x,y){
 }
 
 function moveP() {
-	if ((core.DB.evtJump)||(core.DB.evtPreJump)) 
+	if ((db.evtJump)||(db.evtPreJump)) 
 		return;
 		
-	if ((c2.actions)&&(!core.DB.evtAnim)){ 
-		if (core.DB.testt.length==0) {
+	if ((c2.actions)&&(!db.evtAnim)){ 
+		if (db.testt.length==0) {
 			for(n in c2.actions) 
-				core.DB.testt.push(c2.actions[n]);
+				db.testt.push(c2.actions[n]);
 		}	 
 		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(core.DB.AnimFramesArray[0]+1);
-			c2.actions[n].setFrames(core.DB.AnimFramesArray[1]); 
+			c2.actions[n].setStartFrame(db.AnimFramesArray[0]+1);
+			c2.actions[n].setFrames(db.AnimFramesArray[1]); 
 			c2.setAction(c2.actions[n],0,true);
 			break;
 		}
 		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(core.DB.AnimFramesArray[0]+1);
-			c3.actions[n].setFrames(core.DB.AnimFramesArray[1]); 
+			c3.actions[n].setStartFrame(db.AnimFramesArray[0]+1);
+			c3.actions[n].setFrames(db.AnimFramesArray[1]); 
 			c3.setAction(c3.actions[n],0,true);
 			break;
 		}
@@ -819,10 +795,10 @@ function moveP() {
 }	
 function moveP2() {
 		
-	if ((c3.actions)&&(!core.DB.evtPAnim)){ 
+	if ((c3.actions)&&(!db.evtPAnim)){ 
 		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(core.DB.AnimFramesArray[0]+1);
-			c3.actions[n].setFrames(core.DB.AnimFramesArray[1]); 
+			c3.actions[n].setStartFrame(db.AnimFramesArray[0]+1);
+			c3.actions[n].setFrames(db.AnimFramesArray[1]); 
 			c3.setAction(c3.actions[n],0,true);
 			break;
 		}
@@ -831,51 +807,51 @@ function moveP2() {
 
 function movePf() {
 	
-	if ((core.DB.evtJump)||(core.DB.evtPreJump)) 
+	if ((db.evtJump)||(db.evtPreJump)) 
 		return;
 		
-	if ((c2.actions)&&(!core.DB.evtAnim)){  
-		core.DB.evtPAnimWalk=true; 
+	if ((c2.actions)&&(!db.evtAnim)){  
+		db.evtPAnimWalk=true; 
 		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(core.DB.AnimFramesArray[2]);
-			c2.actions[n].setFrames(core.DB.AnimFramesArray[3]); 
-			core.DB.evtAnim=true; 
+			c2.actions[n].setStartFrame(db.AnimFramesArray[2]);
+			c2.actions[n].setFrames(db.AnimFramesArray[3]); 
+			db.evtAnim=true; 
 			c2.setAction(c2.actions[n],0,true);
 			play_multi_sound('multiaudio1');
 			break;			
 		} 
-		setTimeout('core.DB.evtAnim=false;core.DB.evtPAnimWalk=false;if(!core.DB.evtJump)moveP();',800);
+		setTimeout('db.evtAnim=false;db.evtPAnimWalk=false;if(!db.evtJump)moveP();',800);
 	}
 }
 function movePf2() {
 
 		
-	if ((c3.actions)&&(!core.DB.evtPAnim)){  
+	if ((c3.actions)&&(!db.evtPAnim)){  
 		
 		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(core.DB.AnimFramesArray[2]);
+			c3.actions[n].setStartFrame(db.AnimFramesArray[2]);
 			c3.actions[n].setFrames(150); 			
-			core.DB.evtPAnim=true; 
+			db.evtPAnim=true; 
 			c3.setAction(c3.actions[n],0,false);
 			break;
 		} 
 		
-		setTimeout('core.DB.evtPAnim=false;moveP2();',1000);
+		setTimeout('db.evtPAnim=false;moveP2();',1000);
 	}
 }
 
 function moveJump() {
 	
-	if ((c2.actions)&&((!core.DB.evtAnim)||(core.DB.evtPAnimWalk))){  
-		core.DB.evtPAnimWalk= false; 
+	if ((c2.actions)&&((!db.evtAnim)||(db.evtPAnimWalk))){  
+		db.evtPAnimWalk= false; 
 		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(core.DB.AnimFramesArray[2]);
-			c2.actions[n].setFrames(core.DB.AnimFramesArray[3]); 
-			core.DB.evtAnim=true; 
+			c2.actions[n].setStartFrame(db.AnimFramesArray[2]);
+			c2.actions[n].setFrames(db.AnimFramesArray[3]); 
+			db.evtAnim=true; 
 			c2.setAction(c2.actions[n],0,false);
 			break;
 		} 
-		setTimeout('core.DB.evtAnim=false;core.DB.evtJump=false;core.DB.evtPreJump=false;core.DB.evtJumped=true;moveP();',1000);
+		setTimeout('db.evtAnim=false;db.evtJump=false;db.evtPreJump=false;db.evtJumped=true;moveP();',1000);
 	}	
 }
 
