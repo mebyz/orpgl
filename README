@@ -1,18 +1,18 @@
-==================================================
+-  HTML5+WebGL+NodeJS Multiplayer Game Implementation  -
+-  e.botros@gmail.com,2011 -
 
-HTML5+WebGL+NodeJS Multiplayer Game Implementation
-E.BOTROS (2011)
+please read LICENSE file
++ Ryan Dahl's node-chat base source licensing : see LICENSE-MIT 
++ supereggbert (Paul Brunt) GLGE : see example/GLGE/README
 
-see LICENSE : legal informations about this work
+REQUIREMENTS:
+server side > nodejs
+client side > HTML5 WebGL  Compatible Browser (see nightly builds of Google Chrome / Mozilla Firefox 4 Beta)
 
-Ryan Dahl's node-chat base source licensing : see LICENSE-MIT 
-supereggbert (Paul Brunt) GLGE : see example/GLGE/README
-
-
-REQUIREMENTS
-
-server side : nodejs
-client side : HTML5/WebGL Compliant Browser (Nightly Chrome / FF 4 Beta)
-
-
+LAUNCH: this will install the server in a orpgl folder in your home directory:
+1. > cd ~
+2. > git clone git@github.com:mebyz/orpgl.git
+3. > cd orpgl/
+4. > node server.js
+5. call http://localhost:8080/ in a - compatible :) - browser
 
