@@ -34,10 +34,18 @@ function Renderer() {
 	this.setCamera=_setcam;	
 	this.setDoc=_setdoc;	
 	this.setFog=_setfog;	
-	this.getMouseHandler=_getmouse
-	this.getKeysHandler=_getkeys
-	this.getMesh=_getmesh
-
+	this.getMouseHandler=_getmouse;
+	this.getKeysHandler=_getkeys;
+	this.getMesh=_getmesh;
+	this.render=_render;
+	this.getCamera=_getcam;
+	this.getMousePosition=_getmousepos;
+	this.getPosition=_getpos;
+	this.getRotation=_getrot;
+	this.lasttime=null;
+	this.now=null;
+	this.mouse=null;
+	
 	this.doc=this.setDoc();
 	
 	////////////////////////////	
@@ -146,13 +154,38 @@ function Renderer() {
 		this.gameScene.fogFar=far;
 	}	
 		
-	function _getmouse() {		
-		return new GLGE.MouseInput(document.getElementById(this.canvasEl));	
+	function _getmouse() {
+		this.mouse =	new GLGE.MouseInput(document.getElementById(this.canvasEl));
+		return this.mouse;	
+	}	
+
+	function _getmousepos() {	
+		return this.mouse.getMousePosition();
+	}
+
+	function _getpos(obj) {	
+		return obj.getPosition();
+	}
+
+	function _getrot(obj) {	
+		return obj.getRotation();
+	}
+	
+	function _getcam() {		
+		return this.gameScene.camera;	
 	}	
 
 	function _getkeys() {		
 		return new GLGE.KeyInput();
 	}	
+		
+		
+
+	function _render() {
+		this.now = parseInt(new Date().getTime());
+		this.gameRenderer.render();
+		this.lasttime = this.now;		
+	}
 		
 	
 	// END : GLGE INTERFACE //
@@ -280,8 +313,6 @@ renderer.doc.onLoad = function() {
 	// this is an object container
 	db.objBag=renderer.getMesh('graph');
 	
-	
-
 	//some materials
 	db.black=renderer.getMesh('black');
 	db.grass=renderer.getMesh('Material');
@@ -358,16 +389,23 @@ renderer.doc.onLoad = function() {
 		}
 		
 		
-	};			
+	}		
 
 	function process(){
 	
-		var camera = renderer.gameScene.camera;
-		var mousepos = mouse.getMousePosition();
+		var camera = renderer.getCamera();
+		var mousepos = renderer.getMousePosition();
+
 		mousepos.x = mousepos.x - document.body.offsetLeft;
 		mousepos.y = mousepos.y	- document.body.offsetTop;			
 
-		getPosRotObjects();
+		var camerapos = renderer.getPosition(camera);
+		var camerarot = renderer.getRotation(camera);
+		cubepos = renderer.getPosition(db.cube);
+		cuberot = renderer.getRotation(db.cube);
+		groundObjectpos = renderer.getPosition(groundObject);
+		
+		headrot =  renderer.getRotation(db.head);
 		
 		processRay(mousepos);
 		
@@ -432,8 +470,8 @@ renderer.doc.onLoad = function() {
 	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {db.incY=db.incY-parseFloat(trans[0]);db.incX=db.incX+parseFloat(trans[1]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
 
 	
-	db.cube.setLocY(cubepos.y+db.incY*0.05*(now-lasttime)*db.H/100);
-	db.cube.setLocX(cubepos.x+db.incX*0.05*(now-lasttime)*db.H/100);	
+	db.cube.setLocY(cubepos.y+db.incY*0.5*db.H/100);
+	db.cube.setLocX(cubepos.x+db.incX*0.5*db.H/100);	
 	camera.setLocZ((cubepos.z+1.6-cuberot.x*1000+inc));
 	cubepos = db.cube.getPosition();
 	cuberot = db.cube.getRotation();
@@ -465,7 +503,6 @@ renderer.doc.onLoad = function() {
 	}
 }
 	
-	
 	canvas.onmousewheel = function( e ){
 		delta=e.wheelDelta/40;
 		if(delta!=0){
@@ -473,18 +510,7 @@ renderer.doc.onLoad = function() {
 		}
 	}
 	
-	
-	function getPosRotObjects() {
-		
-		camerarot = camera.getRotation();
-		camerapos = camera.getPosition();
-		cubepos = db.cube.getPosition();
-		cuberot = db.cube.getRotation();
-		groundObjectpos = groundObject.getPosition();
-		headrot = db.head.getRotation();
-		
-	}
-	
+
 	function buildNature() {
 
 		if (!db.evtClusterCrea){
@@ -522,8 +548,6 @@ renderer.doc.onLoad = function() {
 		}
 	}
 
-	
-
 	function processRay(mousepos) {
 		
 		cx=mousepos.x;
@@ -532,7 +556,7 @@ renderer.doc.onLoad = function() {
 		cy=renderer.renderHeight/2;
 		
 		
-		$("#tim1").html(renderer.evtRay+" "+renderer.evtPick)
+//		$("#tim1").html(renderer.evtRay+" "+renderer.evtPick)
 		
 		if 	((!renderer.evtRay)&&(renderer.evtPick)) {	
 			
@@ -555,7 +579,7 @@ renderer.doc.onLoad = function() {
 		
 			db.nameObj=db.ob0['object']['id']+"_"
 			
-			$("#tim1").html(db.nameObj.substring(0,4))
+//			$("#tim1").html(db.nameObj.substring(0,4))
 			if (db.nameObj.substring(0,4)=='Moveable')
 				db.pickedObj=db.ob0['object'];
 		
@@ -598,7 +622,7 @@ renderer.doc.onLoad = function() {
 		
 		for (var i=0;i<ns.length;i++) {
 
-			$("#tim").append(ns[i]+" "+ myJSONUserPosArray[ns[i]]+"<br/>")
+//			$("#tim").append(ns[i]+" "+ myJSONUserPosArray[ns[i]]+"<br/>")
 		   if (CONFIG.nick!=ns[i]) {
 				if (myJSONUserPosArray[ns[i]])	{
 					if (myJSONUserPosArray2[ns[i]])
@@ -651,32 +675,16 @@ renderer.doc.onLoad = function() {
 		}
 	}
 
-	var lasttime = 0;
-	var frameratebuffer = 60;
-	start = parseInt(new Date().getTime());
-	var now;
 
-	function render() {
-		
-		$("#tim").html("")
-		
-		now = parseInt(new Date().getTime());
-		fps = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
-
+	function loop() {
 		process();
-
 		multi();
-		
-		$("#tim").html("");
 		movemoveables();
-		
-		renderer.gameRenderer.render();
-		lasttime = now;
+		renderer.render();		
 	}
 	
-	
-	setInterval(render, 1);
-	var inc = 0.2;
+	setInterval(loop,1);
+	var inc=.2;
 };
 
 
