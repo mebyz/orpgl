@@ -343,7 +343,7 @@ renderer.doc.onLoad = function() {
 	//init ennemies
 	var maxVelocity = 1;
 	var moveables = [];
-	var numMoveables = 0;
+	var numMoveables = 10;
 	for(var i = 0; i < numMoveables; i++) {
 		moveables.push(new Moveable(random(db.moveableEnd), random(db.moveableEnd),db.grass));
 		renderer.setObj( db.robot.getMesh(),"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),db.robot_mat,true,db.objBag,db.objCount++,0,moveables[i]);
@@ -462,7 +462,7 @@ renderer.doc.onLoad = function() {
 	db.incY=0;
 	db.incX=0;
 	
-	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("db.evtJump=true",1);db.evtPreJump=true;moveJump();	moveables.push(new Moveable(random(moveableEnd), random(moveableEnd),db.grass));numMoveables++;}
+	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("db.evtJump=true",1);db.evtPreJump=true;moveJump();	moveables.push(new Moveable(random(db.moveableEnd), random(db.moveableEnd),db.grass));numMoveables++;}
 
 	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {db.incY=db.incY+parseFloat(trans[1]);db.incX=db.incX+parseFloat(trans[0]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
 	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {db.incY=db.incY-parseFloat(trans[1]);db.incX=db.incX-parseFloat(trans[0]);if((!db.evtPreJump)&&(!db.evtJump))movePf();} 
