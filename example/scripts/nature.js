@@ -14,6 +14,7 @@ function PosRot(x,y,z,rx,ry,rz) {
 
 // Renderer Class handles communication with the 3d engine
 function Renderer() {
+	
 
 	this.gameRenderer = null;
 	this.gameScene 	= null;		
@@ -25,9 +26,12 @@ function Renderer() {
     this.evtPick= false; 	
 	this.evtRay= false; 	
 	
-	this.setPosX=_setposx;
+	/*this.setPosX=_setposx;
 	this.setPosY=_setposy;
-	this.setPosZ=_setposz;
+	this.setPosZ=_setposz;	
+	this.setRotX=_setrotx;
+	this.setRotY=_setroty;
+	this.setRotZ=_setrotz;*/
 	this.setObj=_setobj;	
 	this.setGameRenderer=_setgr;	
 	this.setScene=_setsc;	
@@ -42,6 +46,7 @@ function Renderer() {
 	this.getMousePosition=_getmousepos;
 	this.getPosition=_getpos;
 	this.getRotation=_getrot;
+	this.addObject=_addobj;
 	this.lasttime=null;
 	this.now=null;
 	this.mouse=null;
@@ -56,22 +61,32 @@ function Renderer() {
 		return doc;
 	}
 	
-	function _setposx(o,x) {
-		if (typeof(o.setLocX)=='undefined')
-			return;	
+	this._setposx= function (o,x) {
 		o.setLocX(x);
 	}
 	
-	function _setposy(o,y) {
-		if (typeof(o.setLocY)=='undefined')
-			return;	
+	this._setposy= function (o,y) {	
 		o.setLocY(y);
 	}
 	
-	function _setposz(o,z) {
-		if (typeof(o.setLocZ)=='undefined')
-			return;	
-		o.setLocX(z);
+	this._setposz= function (o,z) {
+		o.setLocZ(z);
+	}
+	
+	this._setrotx= function (o,x) {
+		o.setRotX(x);
+	}
+	
+	this._setroty= function (o,y) {
+		o.setRotY(y);
+	}
+	
+	this._setrotz= function (o,z) {
+		o.setRotZ(z);
+	}
+	
+	function _addobj(o,o2) {
+		o.addObject(o2);
 	}
 	
 	function _setobj(mesh,name,posrot,mat,pick,bag,counter,type,tvar) {
@@ -92,20 +107,20 @@ function Renderer() {
 		var rz=posrot.rz;
 		
 		if (x!=null)
-			obj.setLocX(x);
+			this._setposx(obj,x);
 		if (y!=null)
-			obj.setLocY(y);
+			this._setposy(obj,y);
 		if (z!=null)
-			obj.setLocZ(z);		
+			this._setposz(obj,z);		
 		if (rx!=null)
-			obj.setLocX(rx);
+			this._setrotx(obj,rx);
 		if (ry!=null)
-			obj.setLocY(ry);
+			this._setroty(obj,ry);
 		if (rz!=null)
-			obj.setLocZ(rz);
+			this._setrotz(obj,rz);
 
-		bag.addObject(obj);
-		posSav = obj.getPosition()
+		this.addObject(bag,obj);
+		posSav = this.getPosition(obj)
 		
 		if (type==0)
 			tvar.el=obj;
@@ -233,6 +248,7 @@ function DB() {
 	this.robot_mat	= null;
 	this.black	= null;
 
+	this.cubepos	= null;
 	this.objCount	= 0;
 	this.tick		= false;
 	this.KRotz		= 0;
@@ -330,13 +346,14 @@ renderer.doc.onLoad = function() {
 	db.p2 = renderer.getMesh('Cube');
 	//
 	db.cube = renderer.getMesh('plane');	
+	
 	// nature
 	db.tree=renderer.getMesh('plant_pmat8.001');
 	db.bush=renderer.getMesh('Bush 1');
 	db.branches=renderer.getMesh('Bush 2');	
 	// sea plane
 	groundObject = renderer.getMesh('groundObject');
-	groundObject.setLocZ(-300);
+	renderer._setposz(groundObject,150);
 	
 	setTimeout('moveP();moveP2();',1000); 
 	
@@ -350,23 +367,23 @@ renderer.doc.onLoad = function() {
 	}
 	
 	function movemoveables() {
-		cubepos=db.cube.getPosition()
+		db.cubepos=db.cube.getPosition()
 		for(var i = 0; i < numMoveables; i++) {					
 		var distanceX = 0;
 		var distanceY = 0; 
 		var nPosX = 0;
 		var nPosY = 0; 
-		var distX = moveables[i].x - cubepos.x;
-		var distY = moveables[i].y - cubepos.y;
+		var distX = moveables[i].x - db.cubepos.x;
+		var distY = moveables[i].y - db.cubepos.y;
 		var distance =  Math.sqrt(distX * distX + distY * distY);
 		
 		if (distance>50) {
 			
-			if (( moveables[i].x>cubepos.x))
+			if (( moveables[i].x>db.cubepos.x))
 				distanceX = -1/distance*distance/500;
 			else
 				distanceX = 1/distance*distance/500;
-			if (( moveables[i].y>cubepos.y))
+			if (( moveables[i].y>db.cubepos.y))
 				distanceY = -1/distance*distance/500;
 			else
 				distanceY = 1/distance*distance/500;
@@ -382,8 +399,8 @@ renderer.doc.onLoad = function() {
 			nPosY=moveables[i].y+distanceY+moveables[i].accelY/1000
 			
 	
-			moveables[i].el.setLocX(nPosX);
-			moveables[i].el.setLocY(nPosY);
+			renderer._setposx(moveables[i].el,nPosX);
+			renderer._setposy(moveables[i].el,nPosY);
 			moveables[i].x=nPosX
 			moveables[i].y=nPosY
 		}
@@ -401,7 +418,7 @@ renderer.doc.onLoad = function() {
 
 		var camerapos = renderer.getPosition(camera);
 		var camerarot = renderer.getRotation(camera);
-		cubepos = renderer.getPosition(db.cube);
+		db.cubepos = renderer.getPosition(db.cube);
 		cuberot = renderer.getRotation(db.cube);
 		groundObjectpos = renderer.getPosition(groundObject);
 		
@@ -419,32 +436,43 @@ renderer.doc.onLoad = function() {
 		trans[1]=trans[1]/mag;
 		
 		if (inc<1) {
-			db.cube.setRotX(inc/1000);
-			db.head.setRotX(inc/1000);
+			renderer._setrotx(db.cube,(inc/1000));
+			renderer._setrotx(db.head,(inc/1000));
 		}
 		
-		db.cube.setRotZ(-inc2*2+1.57+db.dec);
-		db.head.setRotZ(-inc2*2+db.dec);
+		renderer._setrotz(db.cube,(-inc2*2+1.57+db.dec));
+		renderer._setrotz(db.head,(-inc2*2+db.dec));
 		
 	
 		var H2=renderer.gameScene.getHeight(null);
-		
+
 		//if (H2!=false)
 		//	buildNature();
 			
 		if (db.H==null)db.H=0;
 		
 		
+		
 		if ((!db.evtJump))
-			db.cube.setLocZ(-H2-.04);	
+			renderer._setposz(db.cube,(-H2));	
 			
+		for(prop in db)
+		{
+				$("#tim1").append(prop+" "+ db[prop]+"<br>")
+				
+		}
+		
+	
 			
 
-		if (db.evtJumped)	
-					{db.cube.setLocZ(cubepos.z-.1);	setTimeout("db.evtJumped=false",500);}		
+		if (db.evtJumped) {
+			renderer._setposz(db.cube,(db.cubepos.z-.1));	
+			setTimeout("db.evtJumped=false",500);
+		}		
 			
 		if (db.evtJump)
-			db.cube.setLocZ(cubepos.z+.1);	
+			renderer._setposz(db.cube,(db.cubepos.z+.1));	
+		
 		db.H=H2
 		
 	var mat=db.cube.getRotMatrix();
@@ -470,22 +498,22 @@ renderer.doc.onLoad = function() {
 	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {db.incY=db.incY-parseFloat(trans[0]);db.incX=db.incX+parseFloat(trans[1]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
 
 	
-	db.cube.setLocY(cubepos.y+db.incY*0.5*db.H/100);
-	db.cube.setLocX(cubepos.x+db.incX*0.5*db.H/100);	
-	camera.setLocZ((cubepos.z+1.6-cuberot.x*1000+inc));
-	cubepos = db.cube.getPosition();
-	cuberot = db.cube.getRotation();
-	headpos = db.head.getPosition();
-	headrot = db.head.getRotation();
-	camera.setLocX(cubepos.x-2*inc*Math.cos((headrot.z) * 57 *Math.PI / 180));
-	camera.setLocY(cubepos.y-2*inc*Math.sin((headrot.z) * 57* Math.PI / 180));
+	renderer._setposy(db.cube,(db.cubepos.y+db.incY*0.5*db.H/100));
+	renderer._setposx(db.cube,(db.cubepos.x+db.incX*0.5*db.H/100));	
+	renderer._setposz(camera,(db.cubepos.z+1.6-cuberot.x*1000+inc));
+	db.cubepos = renderer.getPosition(db.cube);
+	cuberot = renderer.getRotation(db.cube);
+	headpos = renderer.getPosition(db.head);
+	headrot = renderer.getRotation(db.head);
+	renderer._setposx(camera,(db.cubepos.x-2*inc*Math.cos((headrot.z) * 57 *Math.PI / 180)));
+	renderer._setposy(camera,(db.cubepos.y-2*inc*Math.sin((headrot.z) * 57* Math.PI / 180)));
 	
-	db.head.setLocZ(cubepos.z-1.08);
-	db.head.setLocX(cubepos.x);
-	db.head.setLocY(cubepos.y);
+	renderer._setposz(db.head,(db.cubepos.z-1.08));
+	renderer._setposx(db.head,(db.cubepos.x));
+	renderer._setposy(db.head,(db.cubepos.y));
 	
 
-	db.KRotz=interlopateHeight(db.KRotz,(cubepos.z+2+inc/1000),camera);
+	db.KRotz=interlopateHeight(db.KRotz,(db.cubepos.z+2+inc/1000),camera);
 	
 	
 		
@@ -528,22 +556,22 @@ renderer.doc.onLoad = function() {
 			for (var i=0;i<db.Grass.count;i++) {
 				cup=db.cube.getPosition();
 				cp =db.Grass.cElems[i].getPosition();
-				renderer.setPosX(db.cube,cp.x);
-				renderer.setPosY(db.cube,cp.y);
+				renderer._setposx(db.cube,cp.x);
+				renderer._setposy(db.cube,cp.y);
 				H3=renderer.gameScene.getHeight(null);
-				renderer.setPosZ(db.Grass.cElems[i],-H3+1);
-				renderer.setPosX(db.cube,cup.x);
-				renderer.setPosY(db.cube,cup.y);
+				renderer._setposz(db.Grass.cElems[i],-H3+1);
+				renderer._setposx(db.cube,cup.x);
+				renderer._setposy(db.cube,cup.y);
 			}
 			for (var i=0;i<db.Branches.count;i++) {
 				cup=db.cube.getPosition();
 				cp =db.Branches.cElems[i].getPosition();
-				renderer.setPosX(db.cube,cp.x);
-				renderer.setPosY(db.cube,cp.y);
+				renderer._setposx(db.cube,cp.x);
+				renderer._setposy(db.cube,cp.y);
 				H3=renderer.gameScene.getHeight(null);
-				renderer.setPosZ(db.Branches.cElems[i],-H3+1);
-				renderer.setPosX(db.cube,cup.x);
-				renderer.setPosY(db.cube,cup.y);
+				renderer._setposz(db.Branches.cElems[i],-H3+1);
+				renderer._setposx(db.cube,cup.x);
+				renderer._setposy(db.cube,cup.y);
 			}
 		}
 	}
@@ -565,14 +593,15 @@ renderer.doc.onLoad = function() {
 			
 			if(db.ob0['coord']) {
 				
-				db.pos0=[cubepos.x,cubepos.y,cubepos.z+1.5]
+				db.pos0=[db.cubepos.x,db.cubepos.y,db.cubepos.z+1.5]
 				db.pos1=[db.ob0['coord'][0],db.ob0['coord'][1],db.ob0['coord'][2]];
-				db.p2.setLocX(db.pos0[0]);
-				db.p2.setLocY(db.pos0[1]);
-				db.p2.setLocZ(db.pos0[2]);	
-				db.p2.setRotX(cuberot.x+1.57)
-				db.p2.setRotY(cuberot.y)
-				db.p2.setRotZ(cuberot.z)
+
+				renderer._setposx(db.p2,(db.pos0[0]));
+				renderer._setposy(db.p2,(db.pos0[1]));
+				renderer._setposz(db.p2,(db.pos0[2]));	
+				renderer._setrotx(db.p2,(cuberot.x+1.57));
+				renderer._setroty(db.p2,(cuberot.y));
+				renderer._setrotz(db.p2,(cuberot.z));
 				
 				send('COLLISION:'+db.pos1);
 			}
@@ -589,30 +618,27 @@ renderer.doc.onLoad = function() {
 		}	
 		
 		if (renderer.evtRay) {	
-			
-			var posi=[]
-			posi[0]	=	db.pos0[0]-(db.pos0[0]-db.pos1[0])
-			posi[1]	=	db.pos0[1]-(db.pos0[1]-db.pos1[1])
-			posi[2]	=	db.pos0[2]-(db.pos0[2]-db.pos1[2])
-			db.p2.setLocX(posi[0]);
-			db.p2.setLocY(posi[1]);
-			db.p2.setLocZ(posi[2]);
+			var posi=[];
+			posi[0]	=	db.pos0[0]-(db.pos0[0]-db.pos1[0]);
+			posi[1]	=	db.pos0[1]-(db.pos0[1]-db.pos1[1]);
+			posi[2]	=	db.pos0[2]-(db.pos0[2]-db.pos1[2]);
+
+			renderer._setposx(db.p2,(posi[0]));
+			renderer._setposy(db.p2,(posi[1]));
+			renderer._setposz(db.p2,(posi[2]));
 			
 			db.pos0[0]	=	posi[0]
 			db.pos0[1]	=	posi[1]
 			db.pos0[2]	=	posi[2]
 			
-			for(var i = 0; i < numMoveables; i++) {					
-				
+			for(var i = 0; i < numMoveables; i++) {									
 				var PdistX =  moveables[i].x-posi[0];
-				var PdistY =  moveables[i].y-posi[1];
-				
+				var PdistY =  moveables[i].y-posi[1];				
 				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY)//+ PdistZ * PdistZ);
 
 				//"kill" the moveable XD
-				
 				if (Pdistance<5) {
-					moveables[i].el.setLocZ(-1000);			
+					renderer._setposz(moveables[i].el,(-1000));			
 				}
 			}
 		}
@@ -658,10 +684,10 @@ renderer.doc.onLoad = function() {
 						var nlocZ=((st2[2]*1) - ndistZ);
 						
 					
-						db.player.setLocX(nlocX);
-						db.player.setLocY(nlocY);
-						db.player.setLocZ(nlocZ+1);	
-						db.player.setRotZ((strot[2])-4.8)
+						renderer._setposx(db.player,(nlocX));
+						renderer._setposy(db.player,(nlocY));
+						renderer._setposz(db.player,(nlocZ+1));	
+						renderer._setrotz(db.player,((strot[2])-4.8));
 						if (moveplayer)	{		
 							movePf2();
 							moveplayer=false;
@@ -702,7 +728,7 @@ function interlopateHeight(keep,value,obj) {
 	if (value<keep-0.001) 
 		dd=keep-0.001;
 
-	obj.Lookat([cubepos.x,cubepos.y,dd]);
+	obj.Lookat([db.cubepos.x,db.cubepos.y,dd]);
 	
 	keep=value;
 	
@@ -736,19 +762,23 @@ GLGE.Scene.prototype.getHeight=function(h){
 	if(!db.cube)
 		return false;
 	if(this.camera.matrix && this.camera.pMatrix){	
-		var cubePos=db.cube.getPosition();
+		db.cubepos=renderer.getPosition(db.cube);
 		var H=0;
 		if (h!=null) H=h;
-		var origin=[cubePos.x,cubePos.y,H];
-		db.ret=this.ray(origin,[0,0,1]);		
+		var origin=[db.cubepos.x,db.cubepos.y,H];
+		var ret=this.ray(origin,[0,0,1]);		
 
-		if (db.ret['object']['id']=='Plane')
-			return db.ret['distance'];
+$("#tim1").html("d "+ ret['distance']+' '+ ret['id'])
+		
+		if (ret['object']['id']=='Plane')
+			return ret['distance'];
+
 
 		return false;
 			
 	}
 	else {
+	
 		return false;
 	}
 }
