@@ -24,6 +24,12 @@ function Renderer() {
 		}
 	}
 	
+	this._setdom = function () {
+		$('#canvas').mousedown( function(e) { this.evtPick = true; } );
+		$('#canvas').mouseup( function(e) { this.evtPick = false; } );
+		$('#mcur').show().css({"left":(this.renderWidth/2-20)+"px","top":(this.renderHeight/2-20)+"px"});
+	}
+	
 	this._setposx = function (o,x) {
 		o.setLocX(x);
 	}
@@ -285,15 +291,13 @@ renderer.doc.onLoad = function() {
 	renderer._setgr('canvas');
 	renderer._setsc("Scene");
 	renderer._setfog(20,2000);	
-	
+	renderer._setdom();
 	var camera = renderer._setcam();
 	var mouse = renderer._getmouse();
 	var keys = renderer._getkeys();
 	
-	setDomEvents(renderer);
-	
 	var pPos = new PosRot(0,0,0,0,0,0);
-	
+
 	var initObjs = {'ObjBag' : 'graph',
 					'materialBlack' : 'black',
 					'materialGrass' : 'Material',
@@ -312,10 +316,8 @@ renderer.doc.onLoad = function() {
 	
 	renderer._initobjects(db,initObjs);
 
-	
 	renderer._setposz(db.groundObject,150);
 
-	
 	setTimeout('moveP();moveP2();',1000); 
 	//init ennemies
 	var maxVelocity = 1;
@@ -473,7 +475,7 @@ renderer.doc.onLoad = function() {
 	renderer._setposy(db.head,(db.cubepos.y));
 	
 
-	db.KRotz=interlopateHeight(db.KRotz,(db.cubepos.z+2+inc/1000),camera);
+	db.KRotz=interlopateHeight(db.KRotz,(db.cubepos.z+2+inc/1000),camera,0.001);
 	
 	
 		
@@ -820,8 +822,8 @@ var random = function(maxNum) {
 	return Math.ceil(Math.random() * maxNum);
 }
 
-var interlopateHeight = function(keep,value,obj) {
-
+var interlopateHeight = function(keep,value,obj,shift) {
+	
 	var keeped=keep;
 	
 	if (keep==0)
@@ -829,27 +831,22 @@ var interlopateHeight = function(keep,value,obj) {
 
 	var dd=keep;
 		
-	if (value>keep+0.001) 
-		dd=keep+0.001;
-	if (value<keep-0.001) 
-		dd=keep-0.001;
+	if (value>keep+shift) 
+		dd=keep+shift;
+	if (value<keep-shift) 
+		dd=keep-shift;
 
 	obj.Lookat([db.cubepos.x,db.cubepos.y,dd]);
 	
 	keep=value;
 	
-	if (value>keeped+0.001) 
-		keep=value+0.001;
-	if (value<keeped-0.001) 
-		keep=value-0.001;
-	
+	if (value>keeped+shift) 
+		keep=value+shift;
+	if (value<keeped-shift) 
+		keep=value-shift;
+		
 	return keep;
 }	 
 
-var setDomEvents = function(iRenderer) {
-	$('#canvas').mousedown( function(e) { iRenderer.evtPick = true; } );
-	$('#canvas').mouseup( function(e) { iRenderer.evtPick = false; } );
-	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
-}
 
 renderer.doc.load("example/meshes/nature.xml");
