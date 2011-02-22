@@ -1,19 +1,24 @@
-// emmanuel DOT botros AT gmail DOT com 
-// 2011//2012
+// emmanuel DOT botros AT gmail DOT com (2011)
 
 // Renderer Class handles communication with the 3d engine
 function Renderer() {
+	
 	this.gameRenderer = null;
 	this.gameScene 	= null;		
 	this.canvasEl	= null;				
 	this.renderWidth = null;		
 	this.renderHeight= null;
-    this.evtPick= false; 	
-	this.evtRay= false; 	
 	this.lasttime=null;
 	this.now=null;
 	this.mouse=null;
-
+	this.camera =null;
+	this.mouse =null;
+	this.keys =null;
+	this.pPos = new PosRot(0,0,0,0,0,0);
+	this.numMoveables=0;
+	this.maxVelocity =0;
+	this.moveables =null;
+	
 	// START : GLGE INTERFACE //
 	
 	this.doc=new GLGE.Document();
@@ -21,6 +26,170 @@ function Renderer() {
 	this._initobjects = function (database,collection) {
 		for (var prop in collection) {
 			database[prop]=this._getmesh(collection[prop]);	
+		}
+	}
+
+	this._getray = function (database,mousepos) {
+		var cx=this.renderWidth/2;
+		var cy=this.renderHeight/2;
+		
+		if 	((!database.evtRay)&&(database.evtPick)) {		
+			database.ob0=this.gameScene.pick3(cx, cy);
+			if(database.ob0['coord']) {			
+				database.pos0=[database.cubepos.x,database.cubepos.y,database.cubepos.z+1.5]
+				database.pos1=[database.ob0['coord'][0],database.ob0['coord'][1],database.ob0['coord'][2]];
+
+				this._setposx(database.p2,(database.pos0[0]));
+				this._setposy(database.p2,(database.pos0[1]));
+				this._setposz(database.p2,(database.pos0[2]));	
+				this._setrotx(database.p2,(cuberot.x+1.57));
+				this._setroty(database.p2,(cuberot.y));
+				this._setrotz(database.p2,(cuberot.z));
+				send('COLLISION:'+database.pos1);
+			}
+			
+			database.nameObj=database.ob0['object']['id']+"_"
+	
+			if (database.nameObj.substring(0,4)=='Moveable')
+				database.pickedObj=database.ob0['object'];
+			database.evtRay=true;
+			setTimeout("window.DB.evtRay=false;",100); // NO GOOD
+		}	
+		
+		if (database.evtRay) {	
+			var posi=[];
+			posi[0]	=	database.pos0[0]-(database.pos0[0]-database.pos1[0]);
+			posi[1]	=	database.pos0[1]-(database.pos0[1]-database.pos1[1]);
+			posi[2]	=	database.pos0[2]-(database.pos0[2]-database.pos1[2]);
+
+			this._setposx(database.p2,(posi[0]));
+			this._setposy(database.p2,(posi[1]));
+			this._setposz(database.p2,(posi[2]));
+			
+			database.pos0[0]	=	posi[0]
+			database.pos0[1]	=	posi[1]
+			database.pos0[2]	=	posi[2]
+			
+			for(var i = 0; i < this.numMoveables; i++) {									
+				var PdistX =  this.moveables[i].x-posi[0];
+				var PdistY =  this.moveables[i].y-posi[1];				
+				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY)//+ PdistZ * PdistZ);
+
+				//"kill" the moveable XD
+				if (Pdistance<5) {
+					this._setposz(this.moveables[i].el,(-1000));			
+				}
+			}
+		}
+	}
+	
+	this._process = function (database){
+	
+		var camera = this._getcam();
+		var mousepos = this._getmousepos();
+
+		mousepos.x = mousepos.x - document.body.offsetLeft;
+		mousepos.y = mousepos.y	- document.body.offsetTop;			
+
+		var camerapos = this._getpos(camera);
+		var camerarot = this._getrot(camera);
+		database.cubepos = this._getpos(database.cube);
+		cuberot = this._getrot(database.cube);
+		groundObjectpos = this._getpos(database.groundObject);
+		
+		headrot =  this._getrot(database.head);
+		
+		this._getray(database,mousepos);
+		
+		inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200)+2;
+		inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 200;
+		
+		if (inc <=0.5) inc=0.5;
+		var trans=GLGE.mulMat4Vec4(camera.getRotMatrix(),[0,0,-1,1]);
+		var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
+		trans[0]=trans[0]/mag;
+		trans[1]=trans[1]/mag;
+		
+		if (inc<1) {
+			this._setrotx(database.cube,(inc/1000));
+			this._setrotx(database.head,(inc/1000));
+		}
+		
+		this._setrotz(database.cube,(-inc2*2+1.57+database.dec));
+		this._setrotz(database.head,(-inc2*2+database.dec));
+		
+	
+		var H2=this.gameScene.getHeight(null);
+
+		//if (H2!=false)
+		//	buildNature();
+			
+		if (database.H==null)database.H=0;
+		
+		if ((!database.evtJump))
+			this._setposz(database.cube,(-H2));	
+			
+		for(prop in db)	
+				$("#tim1").append(prop+" "+ db[prop]+"<br>")	
+
+		if (database.evtJumped) {
+			this._setposz(database.cube,(database.cubepos.z-.1));	
+			setTimeout("window.DB.evtJumped=false",500);
+		}		
+			
+		if (database.evtJump)
+			this._setposz(database.cube,(database.cubepos.z+.1));	
+		
+		database.H=H2
+		
+		var mat=database.cube.getRotMatrix();
+		var trans=GLGE.mulMat4Vec4(mat,[0,1,-1,1]);
+		var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
+		if (database.evtJump) {
+			trans[0]=trans[0]/mag/8;
+			trans[1]=trans[1]/mag/8;
+		}
+		else {
+			trans[0]=trans[0]/mag/18;
+			trans[1]=trans[1]/mag/18;
+		}
+		
+		database.incY=0;
+		database.incX=0;
+		
+		if(this.keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("window.DB.evtJump=true",1);database.evtPreJump=true;moveJump(); }
+		if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {database.incY=database.incY+parseFloat(trans[1]);database.incX=database.incX+parseFloat(trans[0]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
+		if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {database.incY=database.incY-parseFloat(trans[1]);database.incX=database.incX-parseFloat(trans[0]);if((!database.evtPreJump)&&(!database.evtJump))movePf();} 
+		if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {database.incY=database.incY+parseFloat(trans[0]);database.incX=database.incX-parseFloat(trans[1]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
+		if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {database.incY=database.incY-parseFloat(trans[0]);database.incX=database.incX+parseFloat(trans[1]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
+		
+		this._setposy(database.cube,(database.cubepos.y+database.incY*0.5*database.H/100));
+		this._setposx(database.cube,(database.cubepos.x+database.incX*0.5*database.H/100));	
+		this._setposz(camera,(database.cubepos.z+1.6-cuberot.x*1000+inc));
+		database.cubepos = this._getpos(database.cube);
+		cuberot = this._getrot(database.cube);
+		headpos = this._getpos(database.head);
+		headrot = this._getrot(database.head);
+		this._setposx(camera,(database.cubepos.x-2*inc*Math.cos((headrot.z) * 57 *Math.PI / 180)));
+		this._setposy(camera,(database.cubepos.y-2*inc*Math.sin((headrot.z) * 57* Math.PI / 180)));
+		
+		this._setposz(database.head,(database.cubepos.z-1.08));
+		this._setposx(database.head,(database.cubepos.x));
+		this._setposy(database.head,(database.cubepos.y));
+		
+		database.KRotz=interlopateHeight(database.KRotz,(database.cubepos.z+2+inc/1000),camera,0.001);
+			
+		if((((this.pPos.x-(headpos.x)>1)||(this.pPos.x-(headpos.x)<-1))||((this.pPos.z-(headpos.z)>1)||(this.pPos.z-(headpos.z)<-1))||((this.pPos.rx-(headrot.x)>1)||(this.pPos.rx-(headrot.x)<-1))||((this.pPos.rz-(headrot.z)>1)||(this.pPos.rz-(headrot.z)<-1))||((this.pPos.ry-(headrot.y)>1)||(this.pPos.ry-(headrot.y)<-1)))) {
+			var msg = (headpos.x)+ ";"+ (headpos.y)+";"+(headpos.z)+'|'+(headrot.x)+ ";"+ (headrot.y)+";"+(headrot.z);
+			this.pPos.x=(headpos.x);
+			this.pPos.y=(headpos.y);
+			this.pPos.z=(headpos.z);
+			this.pPos.rx=(headrot.x);
+			this.pPos.ry=(headrot.y);
+			this.pPos.rz=(headrot.z);		
+			send(msg);
+			database.tick=true;
+			setTimeout("window.DB.tick=false",10000);
 		}
 	}
 	
@@ -119,7 +288,7 @@ function Renderer() {
 	this._setcam = function () {
 		var camera = this.gameScene.camera;
 		camera.setAspect(this.renderWidth/this.renderHeight);
-		return camera;
+		this.camera=camera;
 	}
 	
 	this._getmesh = function (name) {
@@ -134,7 +303,6 @@ function Renderer() {
 		
 	this._getmouse = function () {
 		this.mouse =	new GLGE.MouseInput(document.getElementById(this.canvasEl));
-		return this.mouse;	
 	}	
 
 	this._getmousepos = function () {	
@@ -154,7 +322,7 @@ function Renderer() {
 	}	
 
 	this._getkeys = function () {		
-		return new GLGE.KeyInput();
+		this.keys = new GLGE.KeyInput();
 	}	
 		
 		
@@ -178,7 +346,9 @@ function DB() {
 	this.evtPreJump	= false; 		
 	this.evtAnim		= false;			
 	this.evtPAnim	= false;			
-	this.evtPAnimWalk= false;		
+	this.evtPAnimWalk= false;	
+    this.evtPick= false; 	
+	this.evtRay= false; 		
 	this.incY		= 0;					
 	this.incX		= 0;		
 	this.ob0			= null;
@@ -274,10 +444,8 @@ function PosRot(x,y,z,rx,ry,rz) {
 }
 
 ////////////////////////////////////////////////////////////////////////
-
 var db=new DB();
-var renderer 	= new Renderer(); 
-
+var renderer=new Renderer(); 
 ////////////////////////////////////////////////////////////////////////
 
 renderer.doc.onLoad = function() {	
@@ -285,15 +453,12 @@ renderer.doc.onLoad = function() {
 	renderer._setgr('canvas');
 	renderer._setsc("Scene");
 	renderer._setfog(20,2000);	
-	
-	var camera = renderer._setcam();
-	var mouse = renderer._getmouse();
-	var keys = renderer._getkeys();
+	renderer._setcam();
+	renderer._getmouse();
+	renderer._getkeys();
 	
 	setDomEvents(renderer);
-	
-	var pPos = new PosRot(0,0,0,0,0,0);
-	
+		
 	var initObjs = {'ObjBag' : 'graph',
 					'materialBlack' : 'black',
 					'materialGrass' : 'Material',
@@ -318,178 +483,55 @@ renderer.doc.onLoad = function() {
 	
 	setTimeout('moveP();moveP2();',1000); 
 	//init ennemies
-	var maxVelocity = 1;
-	var moveables = [];
-	var numMoveables = 10;
-	for(var i = 0; i < numMoveables; i++) {
-		moveables.push(new Moveable(random(db.moveableEnd), random(db.moveableEnd),db.materialGrass));
-		renderer._setobj( db.robot,"Moveable_",(new PosRot(null,moveables[i].y,moveables[i].z,-250,null,null)),db.materialRobot,true,db.ObjBag,db.objCount++,0,moveables[i]);
+	renderer.maxVelocity = 1;
+	renderer.moveables = [];
+	renderer.numMoveables = 10;
+	for(var i = 0; i < renderer.numMoveables; i++) {
+		renderer.moveables.push(new Moveable(random(db.moveableEnd), random(db.moveableEnd),db.materialGrass));
+		renderer._setobj( db.robot,"Moveable_",(new PosRot(null,renderer.moveables[i].y,renderer.moveables[i].z,-250,null,null)),db.materialRobot,true,db.ObjBag,db.objCount++,0,renderer.moveables[i]);
 	}
 	
 	function movemoveables() {
 		db.cubepos=db.cube.getPosition()
-		for(var i = 0; i < numMoveables; i++) {					
+		for(var i = 0; i < renderer.numMoveables; i++) {					
 		var distanceX = 0;
 		var distanceY = 0; 
 		var nPosX = 0;
 		var nPosY = 0; 
-		var distX = moveables[i].x - db.cubepos.x;
-		var distY = moveables[i].y - db.cubepos.y;
+		var distX = renderer.moveables[i].x - db.cubepos.x;
+		var distY = renderer.moveables[i].y - db.cubepos.y;
 		var distance =  Math.sqrt(distX * distX + distY * distY);
 		
 		if (distance>50) {
 			
-			if (( moveables[i].x>db.cubepos.x))
+			if (( renderer.moveables[i].x>db.cubepos.x))
 				distanceX = -1/distance*distance/500;
 			else
 				distanceX = 1/distance*distance/500;
-			if (( moveables[i].y>db.cubepos.y))
+			if (( renderer.moveables[i].y>db.cubepos.y))
 				distanceY = -1/distance*distance/500;
 			else
 				distanceY = 1/distance*distance/500;
 
 			}
 	
-			if (distanceY>0)moveables[i].accelY+=1;
-			else moveables[i].accelY-=1;
-			if (distanceX>0)moveables[i].accelX+=1;
-			else moveables[i].accelX-=1;
+			if (distanceY>0)renderer.moveables[i].accelY+=1;
+			else renderer.moveables[i].accelY-=1;
+			if (distanceX>0)renderer.moveables[i].accelX+=1;
+			else renderer.moveables[i].accelX-=1;
 			
-			nPosX=moveables[i].x+distanceX+moveables[i].accelX/1000
-			nPosY=moveables[i].y+distanceY+moveables[i].accelY/1000
+			nPosX=renderer.moveables[i].x+distanceX+renderer.moveables[i].accelX/1000
+			nPosY=renderer.moveables[i].y+distanceY+renderer.moveables[i].accelY/1000
 			
 	
-			renderer._setposx(moveables[i].el,nPosX);
-			renderer._setposy(moveables[i].el,nPosY);
-			moveables[i].x=nPosX
-			moveables[i].y=nPosY
+			renderer._setposx(renderer.moveables[i].el,nPosX);
+			renderer._setposy(renderer.moveables[i].el,nPosY);
+			renderer.moveables[i].x=nPosX
+			renderer.moveables[i].y=nPosY
 		}
 		
 		
 	}		
-
-	function process(){
-	
-		var camera = renderer._getcam();
-		var mousepos = renderer._getmousepos();
-
-		mousepos.x = mousepos.x - document.body.offsetLeft;
-		mousepos.y = mousepos.y	- document.body.offsetTop;			
-
-		var camerapos = renderer._getpos(camera);
-		var camerarot = renderer._getrot(camera);
-		db.cubepos = renderer._getpos(db.cube);
-		cuberot = renderer._getrot(db.cube);
-		groundObjectpos = renderer._getpos(db.groundObject);
-		
-		headrot =  renderer._getrot(db.head);
-		
-		processRay(mousepos);
-		
-		inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200)+2;
-		inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 200;
-		
-		if (inc <=0.5) inc=0.5;
-		var trans=GLGE.mulMat4Vec4(camera.getRotMatrix(),[0,0,-1,1]);
-		var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
-		trans[0]=trans[0]/mag;
-		trans[1]=trans[1]/mag;
-		
-		if (inc<1) {
-			renderer._setrotx(db.cube,(inc/1000));
-			renderer._setrotx(db.head,(inc/1000));
-		}
-		
-		renderer._setrotz(db.cube,(-inc2*2+1.57+db.dec));
-		renderer._setrotz(db.head,(-inc2*2+db.dec));
-		
-	
-		var H2=renderer.gameScene.getHeight(null);
-
-		//if (H2!=false)
-		//	buildNature();
-			
-		if (db.H==null)db.H=0;
-		
-		
-		
-		if ((!db.evtJump))
-			renderer._setposz(db.cube,(-H2));	
-			
-		for(prop in db)
-		{
-				$("#tim1").append(prop+" "+ db[prop]+"<br>")
-				
-		}
-		
-	
-			
-
-		if (db.evtJumped) {
-			renderer._setposz(db.cube,(db.cubepos.z-.1));	
-			setTimeout("db.evtJumped=false",500);
-		}		
-			
-		if (db.evtJump)
-			renderer._setposz(db.cube,(db.cubepos.z+.1));	
-		
-		db.H=H2
-		
-	var mat=db.cube.getRotMatrix();
-	var trans=GLGE.mulMat4Vec4(mat,[0,1,-1,1]);
-	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
-	if (db.evtJump) {
-		trans[0]=trans[0]/mag/8;
-		trans[1]=trans[1]/mag/8;
-	}
-	else {
-		trans[0]=trans[0]/mag/18;
-		trans[1]=trans[1]/mag/18;
-	}
-	
-	db.incY=0;
-	db.incX=0;
-	
-	if(keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("db.evtJump=true",1);db.evtPreJump=true;moveJump();	moveables.push(new Moveable(random(db.moveableEnd), random(db.moveableEnd),db.materialGrass));numMoveables++;}
-
-	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {db.incY=db.incY+parseFloat(trans[1]);db.incX=db.incX+parseFloat(trans[0]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
-	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {db.incY=db.incY-parseFloat(trans[1]);db.incX=db.incX-parseFloat(trans[0]);if((!db.evtPreJump)&&(!db.evtJump))movePf();} 
-	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {db.incY=db.incY+parseFloat(trans[0]);db.incX=db.incX-parseFloat(trans[1]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
-	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {db.incY=db.incY-parseFloat(trans[0]);db.incX=db.incX+parseFloat(trans[1]);if((!db.evtPreJump)&&(!db.evtJump))movePf();}
-
-	
-	renderer._setposy(db.cube,(db.cubepos.y+db.incY*0.5*db.H/100));
-	renderer._setposx(db.cube,(db.cubepos.x+db.incX*0.5*db.H/100));	
-	renderer._setposz(camera,(db.cubepos.z+1.6-cuberot.x*1000+inc));
-	db.cubepos = renderer._getpos(db.cube);
-	cuberot = renderer._getrot(db.cube);
-	headpos = renderer._getpos(db.head);
-	headrot = renderer._getrot(db.head);
-	renderer._setposx(camera,(db.cubepos.x-2*inc*Math.cos((headrot.z) * 57 *Math.PI / 180)));
-	renderer._setposy(camera,(db.cubepos.y-2*inc*Math.sin((headrot.z) * 57* Math.PI / 180)));
-	
-	renderer._setposz(db.head,(db.cubepos.z-1.08));
-	renderer._setposx(db.head,(db.cubepos.x));
-	renderer._setposy(db.head,(db.cubepos.y));
-	
-
-	db.KRotz=interlopateHeight(db.KRotz,(db.cubepos.z+2+inc/1000),camera,0.001);
-	
-	
-		
-	if((((pPos.x-(headpos.x)>1)||(pPos.x-(headpos.x)<-1))||((pPos.z-(headpos.z)>1)||(pPos.z-(headpos.z)<-1))||((pPos.rx-(headrot.x)>1)||(pPos.rx-(headrot.x)<-1))||((pPos.rz-(headrot.z)>1)||(pPos.rz-(headrot.z)<-1))||((pPos.ry-(headrot.y)>1)||(pPos.ry-(headrot.y)<-1)))) {
-		var msg = (headpos.x)+ ";"+ (headpos.y)+";"+(headpos.z)+'|'+(headrot.x)+ ";"+ (headrot.y)+";"+(headrot.z);
-		pPos.x=(headpos.x);
-		pPos.y=(headpos.y);
-		pPos.z=(headpos.z);
-		pPos.rx=(headrot.x);
-		pPos.ry=(headrot.y);
-		pPos.rz=(headrot.z);		
-		send(msg);
-		db.tick=true;
-		setTimeout("db.tick=false",10000);
-	}
-}
 	
 	canvas.onmousewheel = function( e ){
 		delta=e.wheelDelta/40;
@@ -536,74 +578,6 @@ renderer.doc.onLoad = function() {
 		}
 	}
 
-	function processRay(mousepos) {
-		
-		cx=mousepos.x;
-		cy=mousepos.y;
-		cx=renderer.renderWidth/2;
-		cy=renderer.renderHeight/2;
-		
-		
-//		$("#tim1").html(renderer.evtRay+" "+renderer.evtPick)
-		
-		if 	((!renderer.evtRay)&&(renderer.evtPick)) {	
-			
-			db.ob0=renderer.gameScene.pick3(cx, cy);
-			
-			
-			if(db.ob0['coord']) {
-				
-				db.pos0=[db.cubepos.x,db.cubepos.y,db.cubepos.z+1.5]
-				db.pos1=[db.ob0['coord'][0],db.ob0['coord'][1],db.ob0['coord'][2]];
-
-				renderer._setposx(db.p2,(db.pos0[0]));
-				renderer._setposy(db.p2,(db.pos0[1]));
-				renderer._setposz(db.p2,(db.pos0[2]));	
-				renderer._setrotx(db.p2,(cuberot.x+1.57));
-				renderer._setroty(db.p2,(cuberot.y));
-				renderer._setrotz(db.p2,(cuberot.z));
-				
-				send('COLLISION:'+db.pos1);
-			}
-		
-			db.nameObj=db.ob0['object']['id']+"_"
-			
-//			$("#tim1").html(db.nameObj.substring(0,4))
-			if (db.nameObj.substring(0,4)=='Moveable')
-				db.pickedObj=db.ob0['object'];
-		
-			renderer.evtRay=true;
-			setTimeout("renderer.evtRay=false;",100);
-			
-		}	
-		
-		if (renderer.evtRay) {	
-			var posi=[];
-			posi[0]	=	db.pos0[0]-(db.pos0[0]-db.pos1[0]);
-			posi[1]	=	db.pos0[1]-(db.pos0[1]-db.pos1[1]);
-			posi[2]	=	db.pos0[2]-(db.pos0[2]-db.pos1[2]);
-
-			renderer._setposx(db.p2,(posi[0]));
-			renderer._setposy(db.p2,(posi[1]));
-			renderer._setposz(db.p2,(posi[2]));
-			
-			db.pos0[0]	=	posi[0]
-			db.pos0[1]	=	posi[1]
-			db.pos0[2]	=	posi[2]
-			
-			for(var i = 0; i < numMoveables; i++) {									
-				var PdistX =  moveables[i].x-posi[0];
-				var PdistY =  moveables[i].y-posi[1];				
-				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY)//+ PdistZ * PdistZ);
-
-				//"kill" the moveable XD
-				if (Pdistance<5) {
-					renderer._setposz(moveables[i].el,(-1000));			
-				}
-			}
-		}
-	}
-	
 	function multi() {
 		
 		for (var i=0;i<ns.length;i++) {
@@ -661,9 +635,8 @@ renderer.doc.onLoad = function() {
 		}
 	}
 
-
 	function loop() {
-		process();
+		renderer._process(window.DB);
 		multi();
 		movemoveables();
 		renderer._render();		
@@ -847,8 +820,8 @@ var interlopateHeight = function(keep,value,obj,shift) {
 }	 
 
 var setDomEvents = function(iRenderer) {
-	$('#canvas').mousedown( function(e) { iRenderer.evtPick = true; } );
-	$('#canvas').mouseup( function(e) { iRenderer.evtPick = false; } );
+	$('#canvas').mousedown( function(e) { window.DB.evtPick = true; } );
+	$('#canvas').mouseup( function(e) { window.DB.evtPick = false; } );
 	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
 }
 
