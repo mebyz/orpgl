@@ -3,36 +3,37 @@
 // Renderer Class handles communication with the 3d engine
 function Renderer() {
 	
-	this.gameRenderer = null;
-	this.gameScene 	= null;		
-	this.canvasEl	= null;				
-	this.renderWidth = null;		
-	this.renderHeight= null;
-	this.lasttime=null;
-	this.now=null;
-	this.mouse=null;
-	this.camera =null;
-	this.mouse =null;
-	this.keys =null;
-	this.pPos = new PosRot(0,0,0,0,0,0);
-	this.numMoveables=0;
-	this.maxVelocity =0;
-	this.moveables =null;
+	this.gameRenderer = null; 				// game renderer (keeps canvas element)
+	this.gameScene 	= null;					// game scene	 (keeps all the scene objects)
+	this.canvasEl	= null;					// canvas element id
+	this.renderWidth = null;				// set to screen size at start (see _setgr)
+	this.renderHeight= null;				// see up
+	this.lasttime=null;						// keep last rendering time
+	this.now=null;							// time handler
+	this.mouse=null;						// I/O mouse handler
+	this.camera =null;						// main cam
+	this.keys =null;						// I/O keyboard handler
+	this.pPos = new PosRot(0,0,0,0,0,0);	// keeps the player pos & rot between loops
+	this.numMoveables=0;				 	// number of ennemies
+	this.moveables =null;				 	// ennemies obj array
 	
 	// START : GLGE INTERFACE //
 	
-	this.doc=new GLGE.Document();
+	this.doc=new GLGE.Document();		// initiate the document handler
 	
+	// load a xml scene
 	this._load = function (doc) {
 		this.doc.load(doc);
 	}
 	
+	// initialize an array of objects
 	this._initobjects = function (database,collection) {
 		for (var prop in collection) {
 			database[prop]=this._getmesh(collection[prop]);	
 		}
 	}
-
+	
+	// check if a collision just happened
 	this._getray = function (database,mousepos) {
 		var cx=this.renderWidth/2;
 		var cy=this.renderHeight/2;
@@ -87,6 +88,7 @@ function Renderer() {
 		}
 	}
 	
+	// main routine
 	this._process = function (database){
 	
 		var camera = this._getcam();
@@ -196,6 +198,8 @@ function Renderer() {
 		}
 	}
 	
+	// set object position in 3d
+	
 	this._setposx = function (o,x) {
 		o.setLocX(x);
 	}
@@ -208,6 +212,8 @@ function Renderer() {
 		o.setLocZ(z);
 	}
 	
+	// set object rotation in 3d	
+	
 	this._setrotx= function (o,x) {
 		o.setRotX(x);
 	}
@@ -219,11 +225,13 @@ function Renderer() {
 	this._setrotz= function (o,z) {
 		o.setRotZ(z);
 	}
-	
+
+	// push an object in a object collection
 	this._addobj = function (o,o2) {
 		o.addObject(o2);
 	}
-	
+
+	// create a new object
 	this._setobj = function (mesh,name,posrot,mat,pick,bag,counter,type,tvar) {
 		
 		var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
@@ -263,7 +271,8 @@ function Renderer() {
 		if (type==1)
 			tvar.push(obj);		
 	}
-
+	
+	// sets the game renderer size
 	this._setgr = function (el) {
 		this.canvasEl=el
 		this.gameRenderer = new GLGE.Renderer(document.getElementById(el));
@@ -280,6 +289,7 @@ function Renderer() {
 		}	  
 	}
 	
+	// create the scene	
 	this._setsc = function (name) {
 		this.gameScene = new GLGE.Scene();
 		this.gameScene = this.doc.getElement(name)
@@ -288,42 +298,51 @@ function Renderer() {
 		this.gameRenderer.canvas.height = this.renderHeight;
 	}
 	
+	// create the main camera
 	this._setcam = function () {
 		var camera = this.gameScene.camera;
 		camera.setAspect(this.renderWidth/this.renderHeight);
 		this.camera=camera;
 	}
 	
+	// get mesh from object name
 	this._getmesh = function (name) {
 		return this.doc.getElement(name);
 	}
 
+	// set the ambient fog
 	this._setfog = function (near, far) {		
 		this.gameScene.setFogType(GLGE.FOG_QUADRATIC);
 		this.gameScene.fogNear=near;
 		this.gameScene.fogFar=far;
 	}	
-		
+	
+	// create the mouse handler	
 	this._getmouse = function () {
 		this.mouse =	new GLGE.MouseInput(document.getElementById(this.canvasEl));
 	}	
 
+	// get current mouse pos
 	this._getmousepos = function () {	
 		return this.mouse.getMousePosition();
 	}
-
+	
+	// get current object pos (x,y,z)
 	this._getpos = function (obj) {	
 		return obj.getPosition();
 	}
 
+	// get current object pos (rx,ry,rz)
 	this._getrot = function (obj) {	
 		return obj.getRotation();
 	}
 	
+	// return the main camera
 	this._getcam = function () {		
 		return this.gameScene.camera;	
 	}	
-
+	
+	// create the keys handler
 	this._getkeys = function () {		
 		this.keys = new GLGE.KeyInput();
 	}	
@@ -484,7 +503,6 @@ renderer.doc.onLoad = function() {
 	
 	setTimeout('moveP();moveP2();',1000); 
 	//init ennemies
-	renderer.maxVelocity = 1;
 	renderer.moveables = [];
 	renderer.numMoveables = 10;
 	for(var i = 0; i < renderer.numMoveables; i++) {
