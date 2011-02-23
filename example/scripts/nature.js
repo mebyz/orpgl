@@ -57,7 +57,7 @@ function Renderer() {
 			if (database.nameObj.substring(0,4)=='Moveable')
 				database.pickedObj=database.ob0['object'];
 			database.evtRay=true;
-			setTimeout("window.DB.evtRay=false;",100); // NO GOOD
+			setTimeout("window.DB.evtRay=false;",100);
 		}	
 		
 		if (database.evtRay) {	
@@ -122,7 +122,6 @@ function Renderer() {
 		this._setrotz(database.cube,(-inc2*2+1.57+database.dec));
 		this._setrotz(database.head,(-inc2*2+database.dec));
 		
-	
 		var H2=this.gameScene.getHeight(null);
 
 		//if (H2!=false)
@@ -337,9 +336,7 @@ function Renderer() {
 		this.lasttime = this.now;		
 	}
 		
-	
 	// END : GLGE INTERFACE //
-	//////////////////////////
 }
 
 // DB Class handles objects instances and in-game variables
@@ -527,14 +524,11 @@ renderer.doc.onLoad = function() {
 			nPosX=renderer.moveables[i].x+distanceX+renderer.moveables[i].accelX/1000
 			nPosY=renderer.moveables[i].y+distanceY+renderer.moveables[i].accelY/1000
 			
-	
 			renderer._setposx(renderer.moveables[i].el,nPosX);
 			renderer._setposy(renderer.moveables[i].el,nPosY);
 			renderer.moveables[i].x=nPosX
 			renderer.moveables[i].y=nPosY
 		}
-		
-		
 	}		
 	
 	canvas.onmousewheel = function( e ){
@@ -544,7 +538,6 @@ renderer.doc.onLoad = function() {
 		}
 	}
 	
-
 	function buildNature() {
 
 		if (!db.evtClusterCrea){
@@ -585,19 +578,13 @@ renderer.doc.onLoad = function() {
 	function multi() {
 		
 		for (var i=0;i<ns.length;i++) {
-
-//			$("#tim").append(ns[i]+" "+ myJSONUserPosArray[ns[i]]+"<br/>")
 		   if (CONFIG.nick!=ns[i]) {
 				if (myJSONUserPosArray[ns[i]])	{
-					if (myJSONUserPosArray2[ns[i]])
-					{
-						
-						}
+
 					var straw=myJSONUserPosArray[ns[i]]+"";
 					var stmid=straw.split('|');
 					var st=stmid[0].split(';');
 					var strot=stmid[1].split(';');
-					
 					
 					if (myJSONUserPosArray2[ns[i]]) {
 						
@@ -621,7 +608,6 @@ renderer.doc.onLoad = function() {
 						var nlocY=((st2[1]*1) - ndistY);
 						var nlocZ=((st2[2]*1) - ndistZ);
 						
-					
 						renderer._setposx(db.player,(nlocX));
 						renderer._setposy(db.player,(nlocY));
 						renderer._setposz(db.player,(nlocZ+1));	
@@ -676,7 +662,6 @@ $("#tim1").html("d "+ ret['distance']+' '+ ret['id'])
 		if (ret['object']['id']=='Plane')
 			return ret['distance'];
 
-
 		return false;
 			
 	}
@@ -707,7 +692,6 @@ GLGE.Scene.prototype.pick3=function(x,y){
 	}else{
 		return false;
 	}
-	
 }
 
 var moveP = function() {
@@ -763,8 +747,6 @@ var movePf = function() {
 	}
 }
 var movePf2 = function() {
-
-		
 	if ((c3.actions)&&(!db.evtPAnim)){  
 		
 		for(n in c3.actions) { 
