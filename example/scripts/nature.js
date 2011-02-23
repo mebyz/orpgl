@@ -23,6 +23,10 @@ function Renderer() {
 	
 	this.doc=new GLGE.Document();
 	
+	this._load = function (doc) {
+		this.doc.load(doc);
+	}
+	
 	this._initobjects = function (database,collection) {
 		for (var prop in collection) {
 			database[prop]=this._getmesh(collection[prop]);	
@@ -825,4 +829,4 @@ var setDomEvents = function(iRenderer) {
 	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
 }
 
-renderer.doc.load("example/meshes/nature.xml");
+renderer._load("example/meshes/nature.xml");
