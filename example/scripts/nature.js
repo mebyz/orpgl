@@ -233,9 +233,10 @@ function Renderer() {
 		
 		if ((!database.eJump))
 			this._setposz(database.cube,(-H2));	
-			
+
+		$("#tim1").html("");
 		for(prop in db)	
-				$("#tim1").append(prop+" "+ db[prop]+"<br>")	
+				$("#tim1").append(prop+" "+ db[prop]+"<br>");
 
 		if (database.eJumped) {
 			this._setposz(database.cube,(database.playerPos.z-.1));	
