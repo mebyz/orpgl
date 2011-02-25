@@ -26,7 +26,7 @@ function Renderer() {
 		this.doc.load(doc);
 	}
 	
-	// initialize an array of objects
+	// adds a collection of objects to a 'database'
 	this._initobjects = function (database,collection) {
 		for (var prop in collection) {
 			database[prop]=this._getmesh(collection[prop]);	
@@ -35,53 +35,78 @@ function Renderer() {
 	
 	// check if a collision just happened
 	this._getray = function (database,mousepos) {
+		
+		// get the screen center position
 		var cx=this.renderWidth/2;
 		var cy=this.renderHeight/2;
-		
-		if 	((!database.evtRay)&&(database.evtPick)) {		
-			database.ob0=this.gameScene.pick3(cx, cy);
-			if(database.ob0['coord']) {			
-				database.pos0=[database.cubepos.x,database.cubepos.y,database.cubepos.z+1.5]
-				database.pos1=[database.ob0['coord'][0],database.ob0['coord'][1],database.ob0['coord'][2]];
 
-				this._setposx(database.p2,(database.pos0[0]));
-				this._setposy(database.p2,(database.pos0[1]));
-				this._setposz(database.p2,(database.pos0[2]));	
-				this._setrotx(database.p2,(cuberot.x+1.57));
-				this._setroty(database.p2,(cuberot.y));
-				this._setrotz(database.p2,(cuberot.z));
-				send('COLLISION:'+database.pos1);
-			}
+		// if user clicked AND ray timeout is passed
+		if 	((!database.evtRay)&&(database.evtPick)) {		
 			
-			database.nameObj=database.ob0['object']['id']+"_"
-	
-			if (database.nameObj.substring(0,4)=='Moveable')
-				database.pickedObj=database.ob0['object'];
-			database.evtRay=true;
-			setTimeout("window.DB.evtRay=false;",100);
+			// get collision test result
+			var hitObj=this.gameScene.pick3(cx, cy); 
+			
+			// the ray actually hit something
+			if(hitObj['coord']) {	
+				
+				// rayPosStart: player position 
+				// rayPosEnd: collision position
+				database.rayPosStart=[database.cubepos.x,database.cubepos.y,database.cubepos.z+1.5]
+				database.rayPosEnd=[hitObj['coord'][0],hitObj['coord'][1],hitObj['coord'][2]];
+
+				// Set the initial position and rotation of the bullet
+				this._setposx(database.bullet,(database.rayPosStart[0]));
+				this._setposy(database.bullet,(database.rayPosStart[1]));
+				this._setposz(database.bullet,(database.rayPosStart[2]));	
+				this._setrotx(database.bullet,(cuberot.x+(Math.PI/2)));
+				this._setroty(database.bullet,(cuberot.y));
+				this._setrotz(database.bullet,(cuberot.z));
+				
+				// Server needs to know a collision just happened
+				send('COLLISION:'+database.rayPosEnd);
+				
+				// hit an ennemy ?
+				var hitObjName=hitObj['object']['id']+"_"
+				if (hitObjName.substring(0,4)=='Moveable')
+					database.pickedObj=hitObj['object'];
+				
+				// initiate bullet movement
+				database.evtRay=true;
+				
+				// can't fire faster then 10 bullet per sec
+				setTimeout("window.DB.evtRay=false;",100);
+			}
 		}	
 		
+		// handles the bullet movement
 		if (database.evtRay) {	
+
+			// posi : next intermediate position of the bullet
 			var posi=[];
-			posi[0]	=	database.pos0[0]-(database.pos0[0]-database.pos1[0]);
-			posi[1]	=	database.pos0[1]-(database.pos0[1]-database.pos1[1]);
-			posi[2]	=	database.pos0[2]-(database.pos0[2]-database.pos1[2]);
+			posi[0]	=	database.rayPosStart[0]-(database.rayPosStart[0]-database.rayPosEnd[0]);
+			posi[1]	=	database.rayPosStart[1]-(database.rayPosStart[1]-database.rayPosEnd[1]);
+			posi[2]	=	database.rayPosStart[2]-(database.rayPosStart[2]-database.rayPosEnd[2]);
 
-			this._setposx(database.p2,(posi[0]));
-			this._setposy(database.p2,(posi[1]));
-			this._setposz(database.p2,(posi[2]));
+			// moves the bullet
+			this._setposx(database.bullet,(posi[0]));
+			this._setposy(database.bullet,(posi[1]));
+			this._setposz(database.bullet,(posi[2]));
 			
-			database.pos0[0]	=	posi[0]
-			database.pos0[1]	=	posi[1]
-			database.pos0[2]	=	posi[2]
+			// keep new "start" position for next pass
+			database.rayPosStart[0]	=	posi[0]
+			database.rayPosStart[1]	=	posi[1]
+			database.rayPosStart[2]	=	posi[2]
 			
+			// loop in the enemies' collection
 			for(var i = 0; i < this.numMoveables; i++) {									
-				var PdistX =  this.moveables[i].x-posi[0];
-				var PdistY =  this.moveables[i].y-posi[1];				
-				var Pdistance =  Math.sqrt(PdistX * PdistX + PdistY * PdistY)//+ PdistZ * PdistZ);
+				
+				// calcutate distance btween the bullet and the ennemy
+				var dX =  this.moveables[i].x-posi[0];
+				var dY =  this.moveables[i].y-posi[1];				
+				var dist =  Math.sqrt(dX * dX + dY * dY);
 
-				//"kill" the moveable XD
-				if (Pdistance<5) {
+				// if distance < 5 : kill the ennemy
+				if (dist<5) {
 					this._setposz(this.moveables[i].el,(-1000));			
 				}
 			}
@@ -159,17 +184,19 @@ function Renderer() {
 			trans[1]=trans[1]/mag/18;
 		}
 		
-		database.incY=0;
-		database.incX=0;
+		// moving forces along axis
+		var incY=0;
+		var incX=0;
 		
 		if(this.keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("window.DB.evtJump=true",1);database.evtPreJump=true;moveJump(); }
-		if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {database.incY=database.incY+parseFloat(trans[1]);database.incX=database.incX+parseFloat(trans[0]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
-		if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {database.incY=database.incY-parseFloat(trans[1]);database.incX=database.incX-parseFloat(trans[0]);if((!database.evtPreJump)&&(!database.evtJump))movePf();} 
-		if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {database.incY=database.incY+parseFloat(trans[0]);database.incX=database.incX-parseFloat(trans[1]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
-		if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {database.incY=database.incY-parseFloat(trans[0]);database.incX=database.incX+parseFloat(trans[1]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
+		if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {incY+=parseFloat(trans[1]);incX+=parseFloat(trans[0]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
+		if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {incY-=parseFloat(trans[1]);incX-=parseFloat(trans[0]);if((!database.evtPreJump)&&(!database.evtJump))movePf();} 
+		if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {incY+=parseFloat(trans[0]);incX-=parseFloat(trans[1]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
+		if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {incY-=parseFloat(trans[0]);incX+=parseFloat(trans[1]);if((!database.evtPreJump)&&(!database.evtJump))movePf();}
 		
-		this._setposy(database.cube,(database.cubepos.y+database.incY*0.5*database.H/100));
-		this._setposx(database.cube,(database.cubepos.x+database.incX*0.5*database.H/100));	
+		this._setposy(database.cube,(database.cubepos.y+incY*0.5*database.H/100));
+		this._setposx(database.cube,(database.cubepos.x+incX*0.5*database.H/100));	
+
 		this._setposz(camera,(database.cubepos.z+1.6-cuberot.x*1000+inc));
 		database.cubepos = this._getpos(database.cube);
 		cuberot = this._getrot(database.cube);
@@ -369,15 +396,11 @@ function DB() {
 	this.evtPAnimWalk= false;	
     this.evtPick= false; 	
 	this.evtRay= false; 		
-	this.incY		= 0;					
-	this.incX		= 0;		
-	this.ob0			= null;
 	this.dec			= 0;
 	this.pickedObj	= null;
-	this.nameObj		= null;
 	this.ret			= null;
-	this.pos0		= null
-	this.pos1		= null;
+	this.rayPosStart		= null
+	this.rayPosEnd		= null;
 	this.testt		= [];
 	this.H			= null;
 	this.evtClusterCrea 	= false; 
@@ -390,7 +413,6 @@ function DB() {
 	this.ObjBag		= null;
 	this.head		= null;
 	this.player		= null;
-	this.p2		= null;
 	this.cube		= null;
 	this.Forest		= null;
 	this.Grass		= null;
@@ -485,7 +507,7 @@ renderer.doc.onLoad = function() {
 					'robot' : 'Sphere',
 					'head' : 'head',
 					'player' : 'plane2',
-					'p2' : 'Cube',
+					'bullet' : 'Cube',
 					'cube' : 'plane',
 					'tree' : 'plant_pmat8.001',
 					'bush' : 'Bush 1',
