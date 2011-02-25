@@ -21,22 +21,22 @@ function Renderer() {
 	
 	this.doc=new GLGE.Document();		// initiate the document handler
 	
-	// load a xml scene
+	// *** _load *** load a xml scene
 	this._load = function (doc) {
 		this.doc.load(doc);
 	}
 	
-	// adds a collection of objects to a 'database'
+	// *** _initobjects *** add a collection of objects to a js object
 	this._initobjects = function (database,collection) {
 		for (var prop in collection) {
 			database[prop]=this._getmesh(collection[prop]);	
 		}
 	}
 	
-	// check if a collision just happened
+	// *** _getray *** check if a collision just happened
 	this._getray = function (database,mousepos) {
 		
-		// get the screen center position
+		// get the screen center's position
 		var cx=this.renderWidth/2;
 		var cy=this.renderHeight/2;
 
