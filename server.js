@@ -170,9 +170,9 @@ function loaddir(path, callback) {
 console.log("loading folder "+appfolder+" ...");
 loaddir(appfolder);
 console.log("creating nature ...");
-createnature(trees,20);
-createnature(bush,20);
-createnature(branch,20);
+createnature(trees,30);
+createnature(bush,5);
+createnature(branch,50);
 
 
 fu.get("/", fu.staticHandler("index.html"));

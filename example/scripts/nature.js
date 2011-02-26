@@ -125,9 +125,9 @@ Renderer.prototype.getray = function (database,mousepos) {
 
 		// posi : next intermediate position of the bullet
 		var posi=[];
-		posi[0]	=	database.rayPosStart[0]-(database.rayPosStart[0]-database.rayPosEnd[0]);
-		posi[1]	=	database.rayPosStart[1]-(database.rayPosStart[1]-database.rayPosEnd[1]);
-		posi[2]	=	database.rayPosStart[2]-(database.rayPosStart[2]-database.rayPosEnd[2]);
+		posi[0]	=	database.rayPosStart[0]-(database.rayPosStart[0]-database.rayPosEnd[0])/10;
+		posi[1]	=	database.rayPosStart[1]-(database.rayPosStart[1]-database.rayPosEnd[1])/10;
+		posi[2]	=	database.rayPosStart[2]-(database.rayPosStart[2]-database.rayPosEnd[2])/10;
 
 		// moves the bullet along its path
 		this.setposx(database.bullet,(posi[0]));
