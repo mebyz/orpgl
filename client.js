@@ -307,6 +307,15 @@ setTimeOut("armatue.setAction(manland,150,true)",1000);}*/
 		}, "json");          
           break;
 
+        case "joinadmin":
+          userJoin(message.nick, message.timestamp);          
+		jQuery.get("/who", {}, function (data, status) {
+		if (status != "success") return;
+		ns = String(data.nicks);
+		ns=ns.split(',');
+		}, "json");          
+          break;
+
         case "part":
           userPart(message.nick, message.timestamp);
           break;
@@ -513,7 +522,41 @@ $(document).ready(function() {
            });
     return false;
   });
+  
+  $("#connectAdminButton").click(function () {
+    //lock the UI while waiting for a response
+    showLoad();
+    var nick = $("#nickInput").attr("value");
 
+    //dont bother the backend if we fail easy validations
+    if (nick.length > 50) {
+      alert("Nick too long. 50 character max.");
+      showConnect();
+      return false;
+    }
+
+    //more validations
+    if (/[^\w_\-^!]/.exec(nick)) {
+      alert("Bad character in nick. Can only have letters, numbers, and '_', '-', '^', '!'");
+      showConnect();
+      return false;
+    }
+
+    //make the actual join request to the server
+    $.ajax({ cache: false
+           , type: "GET" // XXX should be POST
+           , dataType: "json"
+           , url: "/joinadmin"
+           , data: { nick: nick }
+           , error: function () {
+               alert("error connecting to server");
+               showConnect();
+             }
+           , success: onConnect
+           });
+    return false;
+  });
+  
   // update the daemon uptime every 10 seconds
   setInterval(function () {
     updateUptime();

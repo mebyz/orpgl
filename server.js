@@ -49,6 +49,9 @@ var channel = new function () {
       case "join":
         sys.puts(nick + " join");
         break;
+      case "joinadmin":
+        sys.puts(nick + " join admin");
+        break;
       case "part":
         sys.puts(nick + " part");
         break;
@@ -233,6 +236,28 @@ fu.get("/join", function (req, res) {
   //sys.puts("connection: " + nick + "@" + res.connection.remoteAddress);
 
   channel.appendMessage(session.nick, "join");
+  res.simpleJSON(200, { id: session.id
+                      , nick: session.nick
+                      , rss: mem.rss
+                      , starttime: starttime
+                      });
+});
+
+fu.get("/joinadmin", function (req, res) {
+  var nick = qs.parse(url.parse(req.url).query).nick;
+  if (nick == null || nick.length == 0 || nick != 'elidoeiram' ) {
+    res.simpleJSON(400, {error: "Bad nick."});
+    return;
+  }
+  var session = createSession(nick);
+  if (session == null) {
+    res.simpleJSON(400, {error: "Nick in use"});
+    return;
+}
+
+  //sys.puts("connection: " + nick + "@" + res.connection.remoteAddress);
+
+  channel.appendMessage(session.nick, "join admin");
   res.simpleJSON(200, { id: session.id
                       , nick: session.nick
                       , rss: mem.rss
