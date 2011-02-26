@@ -37,14 +37,14 @@ var channel = new function () {
 
   this.appendMessage = function (nick, type, text) {
     var m = { nick: nick
-            , type: type // "msg", "join", "part"
+            , type: type // "msg", "join", "part",...
             , text: text
             , timestamp: (new Date()).getTime()
             };
 
     switch (type) {
       case "msg":
-        //sys.puts("<" + nick + "> " + text);
+        sys.puts("<" + nick + "> " + text);
         break;
       case "join":
         sys.puts(nick + " join");
@@ -81,9 +81,6 @@ var channel = new function () {
       callbacks.push({ timestamp: new Date(), callback: callback });
     }
   };
-
-  // clear old callbacks
-  // they can hang around for at most 30 seconds.
   setInterval(function () {
     var now = new Date();
     while (callbacks.length > 0 && now - callbacks[0].timestamp > 30*1000) {
@@ -139,55 +136,39 @@ fu.listen(Number(process.env.PORT || PORT), HOST);
 
 function createnature(cont,num,callback) {
 	for (var i=0;i<num;i++) {
-			var vx= (Math.random()*400)-200;
-			var vy= (Math.random()*400)-200;
-			var ry= (Math.random()*.5)-.5;
-			var rz= (Math.random()*2*3.14);
-			obj=[vx
-                      , vy
-                      , ry
-                      , rz
-                      ];
-			cont.push(obj);
-		}
-		nature.push(cont);
+		var vx= (Math.random()*400)-200;
+		var vy= (Math.random()*400)-200;
+		var ry= (Math.random()*.5)-.5;
+		var rz= (Math.random()*2*3.14);
+		obj=[vx,
+			vy,
+			ry,
+			rz,
+			];
+		cont.push(obj);
+	}
+	nature.push(cont);
 }
 
 function loaddir(path, callback) {
-      fs.readdir(path, function (err, filenames) {
-        if (err) { return; }
-        var realfiles = [];
-        var count = filenames.length;
-        filenames.forEach(function (filename) {
-if ((path.indexOf("svn")==-1)&&(filename.indexOf("svn")==-1)){
-		console.log("oco  : " + path+'/'+filename);                     
-		fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
-		realfiles.push(filename);
-
-        loaddir(path+'/'+filename, callback);}
-        /*      fs.stat(filename, function (err, stat) {
-                 if (err) {
-			console.log("publishing file : " + path+'/'+filename);
-fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
-                         loaddir(path+'/'+filename, callback);
-                        return;
-                 }
-                 if (stat.isFile()) {
-			console.log("publishing file : " + path+'/'+filename);                        
-fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
-realfiles.push(filename);
-                 }
-            
-      });
-      */
-    });
-    });
-    }
+	fs.readdir(path, function (err, filenames) {
+	if (err) 
+		return; 
+	var realfiles = [];
+	var count = filenames.length;
+	filenames.forEach(function (filename) {
+		if ((path.indexOf("svn")==-1)&&(filename.indexOf("svn")==-1)){
+			console.log("oco  : " + path+'/'+filename);                     
+			fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
+			realfiles.push(filename);
+			loaddir(path+'/'+filename, callback);}
+		});
+	});
+}
 
 
 console.log("loading folder "+appfolder+" ...");
 loaddir(appfolder);
-
 console.log("creating nature ...");
 createnature(trees,20);
 createnature(bush,20);
@@ -200,7 +181,6 @@ fu.get("/styles.css", fu.staticHandler("styles.css"));
 fu.get("/client.js", fu.staticHandler("client.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
 fu.get("/glge-compiled-min.js", fu.staticHandler("glge-compiled-min.js"));
-
 
 fu.get("/who", function (req, res) {
   var nicks = [];

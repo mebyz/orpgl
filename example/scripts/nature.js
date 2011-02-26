@@ -461,10 +461,12 @@ Renderer.prototype.setobjectsground = function (database,coll) {
 		cp =coll.cElems[i].getPosition();
 		this.setposx(database.cube,cp.x);
 		this.setposy(database.cube,cp.y);
+		database.playerPos = this.getpos(database.cube);
 		H3=this.getheight(database.playerPos,null);
 		this.setposz(coll.cElems[i],-H3+1);
 		this.setposx(database.cube,cup.x);
 		this.setposy(database.cube,cup.y);
+		database.playerPos = this.getpos(database.cube);
 	}
 }
 
