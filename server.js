@@ -192,6 +192,7 @@ createnature(branch,20);
 
 
 fu.get("/", fu.staticHandler("index.html"));
+fu.get("/admin.html", fu.staticHandler("admin.html"));
 fu.get("/styles.css", fu.staticHandler("styles.css"));
 fu.get("/client.js", fu.staticHandler("client.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
