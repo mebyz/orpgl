@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------//
 
 // Renderer Class handles communication with the 3d engine
-function Renderer() {
+var Renderer = function () {
 	this.gameRenderer = null; 				// game renderer
 	this.gameScene 	= null;					// game scene
 	this.canvasEl	= null;					// canvas element name
@@ -20,8 +20,8 @@ function Renderer() {
 }
 
 // START : GLGE INTERFACE //
-// *** load *** load a xml scene
-Renderer.prototype.load = function (doc) {
+// *** loadxml *** load a xml scene
+Renderer.prototype.loadxml = function (doc) {
 	this.doc.load(doc);
 }
 
@@ -51,7 +51,7 @@ Renderer.prototype.getheight = function(pos,shift){
 }
 
 // *** pick *** handle mouse picking
-Renderer.prototype.pick = function(x,y){
+Renderer.prototype.mousepick = function(x,y){
 	if(!this.camera){
 		GLGE.error("No camera set for picking");
 		return false;
@@ -86,7 +86,7 @@ Renderer.prototype.getray = function (database,mousepos) {
 	if 	((!database.eRay)&&(database.ePick)) {		
 		
 		// get collision test result
-		var hitObj=this.pick(aimX, aimY); 
+		var hitObj=this.mousepick(aimX, aimY); 
 		
 		// the ray actually hit something
 		if(hitObj['coord']) {	
@@ -100,9 +100,9 @@ Renderer.prototype.getray = function (database,mousepos) {
 			this.setposx(database.bullet,(database.rayPosStart[0]));
 			this.setposy(database.bullet,(database.rayPosStart[1]));
 			this.setposz(database.bullet,(database.rayPosStart[2]));	
-			this.setrotx(database.bullet,(cuberot.x+(Math.PI/2)));
-			this.setroty(database.bullet,(cuberot.y));
-			this.setrotz(database.bullet,(cuberot.z));
+			this.setrotx(database.bullet,(database.cuberot.x+(Math.PI/2)));
+			this.setroty(database.bullet,(database.cuberot.y));
+			this.setrotz(database.bullet,(database.cuberot.z));
 			
 			// Server needs to know a collision just happened
 			send('COLLISION:'+database.rayPosEnd);
@@ -201,10 +201,9 @@ Renderer.prototype.process = function (database){
 	
 	database.playerPos = this.getpos(database.cube);
 	
-	cuberot = this.getrot(database.cube);
-	groundObjectpos = this.getpos(database.groundObject);
+	database.cuberot = this.getrot(database.cube);
 	
-	headrot =  this.getrot(database.head);
+	database.headrot =  this.getrot(database.head);
 	
 	this.getray(database,mousepos);
 	
@@ -274,13 +273,13 @@ Renderer.prototype.process = function (database){
 	this.setposy(database.cube,(database.playerPos.y+incY*0.5*database.playerHeight/100));
 	this.setposx(database.cube,(database.playerPos.x+incX*0.5*database.playerHeight/100));	
 
-	this.setposz(camera,(database.playerPos.z+1.6-cuberot.x*1000+inc));
+	this.setposz(camera,(database.playerPos.z+1.6-database.cuberot.x*1000+inc));
 
-	cuberot = this.getrot(database.cube);
-	headpos = this.getpos(database.head);
-	headrot = this.getrot(database.head);
-	this.setposx(camera,(database.playerPos.x-2*inc*Math.cos((headrot.z) * 57 *Math.PI / 180)));
-	this.setposy(camera,(database.playerPos.y-2*inc*Math.sin((headrot.z) * 57* Math.PI / 180)));
+	database.cuberot = this.getrot(database.cube);
+	database.headpos = this.getpos(database.head);
+	database.headrot = this.getrot(database.head);
+	this.setposx(camera,(database.playerPos.x-2*inc*Math.cos((database.headrot.z) * 57 *Math.PI / 180)));
+	this.setposy(camera,(database.playerPos.y-2*inc*Math.sin((database.headrot.z) * 57* Math.PI / 180)));
 	
 	this.setposz(database.head,(database.playerPos.z-1.08));
 	this.setposx(database.head,(database.playerPos.x));
@@ -288,14 +287,14 @@ Renderer.prototype.process = function (database){
 	
 	database.playerTempHeight=this.setheightfrustrum(database.playerTempHeight,(database.playerPos.z+2+inc/1000),camera,0.001);
 		
-	if((((this.pPos.x-(headpos.x)>1)||(this.pPos.x-(headpos.x)<-1))||((this.pPos.z-(headpos.z)>1)||(this.pPos.z-(headpos.z)<-1))||((this.pPos.rx-(headrot.x)>1)||(this.pPos.rx-(headrot.x)<-1))||((this.pPos.rz-(headrot.z)>1)||(this.pPos.rz-(headrot.z)<-1))||((this.pPos.ry-(headrot.y)>1)||(this.pPos.ry-(headrot.y)<-1)))) {
-		var msg = (headpos.x)+ ";"+ (headpos.y)+";"+(headpos.z)+'|'+(headrot.x)+ ";"+ (headrot.y)+";"+(headrot.z);
-		this.pPos.x=(headpos.x);
-		this.pPos.y=(headpos.y);
-		this.pPos.z=(headpos.z);
-		this.pPos.rx=(headrot.x);
-		this.pPos.ry=(headrot.y);
-		this.pPos.rz=(headrot.z);		
+	if((((this.pPos.x-(database.headpos.x)>1)||(this.pPos.x-(database.headpos.x)<-1))||((this.pPos.z-(database.headpos.z)>1)||(this.pPos.z-(database.headpos.z)<-1))||((this.pPos.rx-(database.headrot.x)>1)||(this.pPos.rx-(database.headrot.x)<-1))||((this.pPos.rz-(database.headrot.z)>1)||(this.pPos.rz-(database.headrot.z)<-1))||((this.pPos.ry-(database.headrot.y)>1)||(this.pPos.ry-(database.headrot.y)<-1)))) {
+		var msg = (database.headpos.x)+ ";"+ (database.headpos.y)+";"+(database.headpos.z)+'|'+(database.headrot.x)+ ";"+ (database.headrot.y)+";"+(database.headrot.z);
+		this.pPos.x=(database.headpos.x);
+		this.pPos.y=(database.headpos.y);
+		this.pPos.z=(database.headpos.z);
+		this.pPos.rx=(database.headrot.x);
+		this.pPos.ry=(database.headrot.y);
+		this.pPos.rz=(database.headrot.z);		
 		send(msg);
 		database.tick=true;
 		setTimeout("window.DB.tick=false",10000);
@@ -491,7 +490,7 @@ Renderer.prototype.buildnature = function (database) {
 // END : GLGE INTERFACE //
 
 // DB Class handles objects instances and in-game variables
-function DB() {
+var DB = function () {
 	
 	this.eJump		= false; 		
 	this.eJumped		= false; 		
@@ -512,6 +511,9 @@ function DB() {
 	this.playerPos	= null;
 	this.objectsCounter	= 0;
 	this.tick		= false;
+	this.cuberot	= null;
+	this.headrot	= null;
+	this.headpos	= null;
 	
 	this.AnimFramesArray = [0,120,125,135];
 	
@@ -520,7 +522,7 @@ function DB() {
 };
 
 // Moveable Class Represent a positionable object in the 3d space 
-function Moveable(x, y,mat) {
+var Moveable = function (x, y,mat) {
 	this.x = x;
 	this.y = y;
 	this.el=null;
@@ -531,7 +533,7 @@ function Moveable(x, y,mat) {
 }
 
 // Cluster Class contains a cluster of clone objects (forest,grass,..)
-function Cluster(_rd,_db) {
+var Cluster = function (_rd,_db) {
 	this.clusterObj=null;
 	this.objContainer=null;
 	this.count=0;
@@ -557,60 +559,81 @@ Cluster.prototype.load = function (obj,cont,mat,idx) {
 		this.dtb.eClusterCrea=true;
 }
 
-function PosRot(x,y,z,rx,ry,rz) {
-	this.x=x
-	this.y=y
-	this.z=z
-	this.rx=rx
-	this.ry=ry
-	this.rz=rz
+var PosRot = function (x,y,z,rx,ry,rz) {
+	this.x=x;
+	this.y=y;
+	this.z=z;
+	this.rx=rx;
+	this.ry=ry;
+	this.rz=rz;
 }
 
+var Utils = function () {
+this.loaded=true;	
+}
+
+Utils.prototype.setdom = function(iRenderer) {
+	$('#canvas').mousedown( function(e) { window.DB.ePick = true; } );
+	$('#canvas').mouseup( function(e) { window.DB.ePick = false; } );
+	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
+}
+
+Utils.prototype.random = function(maxNum) {
+	return Math.ceil(Math.random() * maxNum);
+}
+
+Utils.prototype.setmousewheel = function() {
+	canvas.onmousewheel = function( e ){
+		delta=e.wheelDelta/40;
+		if(delta!=0){
+			renderer.camera.setFovY(parseFloat(renderer.camera.getFovY())-delta);
+		}
+	}
+}
 ////////////////////////////////////////////////////////////////////////
+var utils=new Utils();
 var db=new DB();
 var renderer=new Renderer(); 
 ////////////////////////////////////////////////////////////////////////
 
-renderer.doc.onLoad = function() {	
-	
-	var initObjs = {'ObjBag' : 'graph',
-					'materialBlack' : 'black',
-					'materialGrass' : 'Material',
-					'robot' : 'Sphere',
-					'head' : 'head',
-					'player' : 'plane2',
-					'bullet' : 'Cube',
-					'cube' : 'plane',
-					'tree' : 'plant_pmat8.001',
-					'bush' : 'Bush 1',
-					'branches' : 'Bush 2',
-					'materialBush' : 'Bush Green.001',
-					'materialRobot' : 'Material.003',
-					'materialFlower' : 'Flower Green',
-					'groundObject':'groundObject'};
-					
+renderer.doc.onLoad = function() {
 	renderer.setgr('canvas');
 	renderer.setsc("Scene");
-	renderer.setfog(20,2000);	
+	renderer.setfog(20,2000);
 	renderer.setcam();
 	renderer.getmouse();
 	renderer.getkeyboard();
-	renderer.initobjects(db,initObjs);
+	renderer.initobjects(db,{
+	'ObjBag' : 'graph',
+	'materialBlack' : 'black',
+	'materialGrass' : 'Material',
+	'robot' : 'Sphere',
+	'head' : 'head',
+	'player' : 'plane2',
+	'bullet' : 'Cube',
+	'cube' : 'plane',
+	'tree' : 'plant_pmat8.001',
+	'bush' : 'Bush 1',
+	'branches' : 'Bush 2',
+	'materialBush' : 'Bush Green.001',
+	'materialRobot' : 'Material.003',
+	'materialFlower' : 'Flower Green',
+	'groundObject':'groundObject'});
 	renderer.setposz(db.groundObject,150);
-	setDomEvents(renderer);
-	
+	utils.setdom(renderer);
+	utils.setmousewheel();
 	setTimeout('moveP();moveP2();',1000); 
 	
 	//init ennemies
 	renderer.ennemyArray = [];
 	renderer.numEnnemies = 10;
 	for(var i = 0; i < renderer.numEnnemies; i++) {
-		renderer.ennemyArray.push(new Moveable(random(100), random(100),db.materialGrass));
+		renderer.ennemyArray.push(new Moveable(utils.random(100), utils.random(100),db.materialGrass));
 		renderer.setobj( db.robot,"Moveable_",(new PosRot(null,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,-250,null,null)),db.materialRobot,true,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
 	}
 	
 	function moveEnnemies() {
-		for(var i = 0; i < renderer.numEnnemies; i++) {					
+		for(var i = 0; i < renderer.numEnnemies; i++) {
 		var distanceX = 0;
 		var distanceY = 0; 
 		var nPosX = 0;
@@ -645,14 +668,8 @@ renderer.doc.onLoad = function() {
 			renderer.ennemyArray[i].x=nPosX
 			renderer.ennemyArray[i].y=nPosY
 		}
-	}		
-	
-	canvas.onmousewheel = function( e ){
-		delta=e.wheelDelta/40;
-		if(delta!=0){
-			renderer.camera.setFovY(parseFloat(renderer.camera.getFovY())-delta);
-		}
 	}
+	
 	
 	function multi() {
 		
@@ -691,27 +708,24 @@ renderer.doc.onLoad = function() {
 						renderer.setposy(db.player,(nlocY));
 						renderer.setposz(db.player,(nlocZ+1));	
 						renderer.setrotz(db.player,((strot[2])-4.8));
-						if (moveplayer)	{		
+						if (moveplayer)	{
 							movePf2();
 							moveplayer=false;
 						}
-						
-						myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]						
-
+						myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]
 					}
 				}
-			}     
+			}
 		}
 	}
-
-	function loop() {
+	
+	setInterval( function () {
 		renderer.process(window.DB);
 		multi();
 		moveEnnemies();
-		renderer.render();		
-	}
+		renderer.render();
+	},1);
 	
-	setInterval(loop,1);
 	var inc=.2;
 };
 
@@ -758,7 +772,7 @@ var movePf = function() {
 			db.eAnim=true; 
 			c2.setAction(c2.actions[n],0,true);
 			play_multi_sound('multiaudio1');
-			break;			
+			break;
 		} 
 		setTimeout('db.eAnim=false;db.ePAnimWalk=false;if(!db.eJump)moveP();',800);
 	}
@@ -768,7 +782,7 @@ var movePf2 = function() {
 		
 		for(n in c3.actions) { 
 			c3.actions[n].setStartFrame(db.AnimFramesArray[2]);
-			c3.actions[n].setFrames(150); 			
+			c3.actions[n].setFrames(150);
 			db.ePAnim=true; 
 			c3.setAction(c3.actions[n],0,false);
 			break;
@@ -792,14 +806,4 @@ var moveJump = function() {
 	}	
 }
 
-var random = function(maxNum) {
-	return Math.ceil(Math.random() * maxNum);
-}
-
-var setDomEvents = function(iRenderer) {
-	$('#canvas').mousedown( function(e) { window.DB.ePick = true; } );
-	$('#canvas').mouseup( function(e) { window.DB.ePick = false; } );
-	$('#mcur').show().css({"left":(iRenderer.renderWidth/2-20)+"px","top":(iRenderer.renderHeight/2-20)+"px"});
-}
-
-renderer.load("example/meshes/nature.xml");
+renderer.loadxml("example/meshes/nature.xml");
