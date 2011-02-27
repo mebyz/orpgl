@@ -7,9 +7,6 @@ var GTime = 0;							// global time ticker
 var appfolder='example';				// main game folder
 var starttime = (new Date()).getTime();	// initial timedate
 var nature = [];
-var trees = [];
-var bush = [];
-var branch = [];
 var mem = process.memoryUsage();
 var fu = require("./fu");
 var fs = require("fs");
@@ -130,7 +127,8 @@ setInterval(function () {
   }
 }, 1000);
 
-function createnature(cont,num,callback) {
+function createnature(num,callback) {
+	var cont = [];
 	for (var i=0;i<num;i++) {
 		var vx= (Math.random()*400)-200;
 		var vy= (Math.random()*400)-200;
@@ -285,7 +283,7 @@ fu.get("/GST", function (req, res) {
   }
 });
 
-/// STARTING SERVER INSTANCE
+// STARTING SERVER INSTANCE
 fu.listen(Number(process.env.PORT || PORT), HOST);
 
 console.log("loading folder "+appfolder+" ...");
@@ -299,6 +297,6 @@ fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
 fu.get("/glge-compiled-min.js", fu.staticHandler("glge-compiled-min.js"));
 
 console.log("creating nature ...");
-createnature(trees,30);		///set trees positions
-createnature(bush,5);		// set plants1 positions
-createnature(branch,50);	// set plants2 positions
+createnature(30);		// set trees positions
+createnature(5);		// set plants1 positions
+createnature(50);	// set plants2 positions
