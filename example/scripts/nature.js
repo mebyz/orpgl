@@ -28,7 +28,7 @@ Renderer.prototype.loadxml = function (doc) {
 // *** initobjects *** add a collection of objects to a js object
 Renderer.prototype.initobjects = function (database,collection) {
 	for (var prop in collection) {
-		database[prop]=this.getmesh(collection[prop]);	
+		database[prop]=this.getmeshxml(collection[prop]);	
 	}
 }
 
@@ -210,7 +210,7 @@ Renderer.prototype.process = function (database){
 	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200)+2;
 	inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 200;
 	
-	if (inc <=0.5) inc=0.5;
+	if (inc <=0.1) inc=0.1;
 	var trans=GLGE.mulMat4Vec4(camera.getRotMatrix(),[0,0,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
 	trans[0]=trans[0]/mag;
@@ -237,6 +237,9 @@ Renderer.prototype.process = function (database){
 	$("#tim1").html("");
 	for(prop in db)	
 			$("#tim1").append(prop+" "+ db[prop]+"<br>");
+	
+/*	for(var i = 0; i < renderer.numEnnemies; i++) 
+				$("#tim1").append(renderer.ennemyArray[i].x+" "+renderer.ennemyArray[i].y+" "+renderer.ennemyArray[i].z+"<br>"); */
 
 	if (database.eJumped) {
 		this.setposz(database.cube,(database.playerPos.z-.1));	
@@ -366,9 +369,9 @@ Renderer.prototype.setobj = function (mesh,name,posrot,mat,pick,bag,counter,type
 	this.addobj(bag,obj);
 	posSav = this.getpos(obj)
 	
-	if (type==0)
+	if (type==0) {
 		tvar.el=obj;
-			
+	}
 	if (type==1)
 		tvar.push(obj);		
 }
@@ -407,7 +410,7 @@ Renderer.prototype.setcam = function () {
 }
 
 // get mesh from object name
-Renderer.prototype.getmesh = function (name) {
+Renderer.prototype.getmeshxml = function (name) {
 	return this.doc.getElement(name);
 }
 
@@ -521,17 +524,39 @@ var DB = function () {
 	
 };
 
-// Moveable Class Represent a positionable object in the 3d space 
-var Moveable = function (x, y,mat) {
+// Vector Class Represent a 3d Vector which can be associated either to an object's position, a velocity,... 
+var Vector = function (x, y, z) {
 	this.x = x;
 	this.y = y;
+	this.z = z;
 	this.el=null;
-	this.accelX=0;
-	this.accelY=0;
-	this.xVelocity = 1;
-	this.yVelocity = -1;	
+	this.velocity=null;
 }
 
+Vector.prototype.addvectorpos = function (pos){
+	this.x+=pos.x;
+	this.y+=pos.y;
+	this.z+=pos.z;
+}
+
+Vector.prototype.remvectorpos = function (pos){
+	this.x-=pos.x;
+	this.y-=pos.y;
+	this.z-=pos.z;
+}
+
+Vector.prototype.getdistpos = function (pos){
+	var distX = this.x-pos.x;
+	var distY = this.y-pos.y;
+	var distZ = this.z-pos.z;
+	return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
+}
+
+Vector.prototype.divector = function (div){
+	this.x/=div;
+	this.y/=div;
+	this.z/=div;
+}
 // Cluster Class contains a cluster of clone objects (forest,grass,..)
 var Cluster = function (_rd,_db) {
 	this.clusterObj=null;
@@ -626,14 +651,15 @@ renderer.doc.onLoad = function() {
 	
 	//init ennemies
 	renderer.ennemyArray = [];
-	renderer.numEnnemies = 10;
+	renderer.numEnnemies = 50;
 	for(var i = 0; i < renderer.numEnnemies; i++) {
-		renderer.ennemyArray.push(new Moveable(utils.random(100), utils.random(100),db.materialGrass));
-		renderer.setobj( db.robot,"Moveable_",(new PosRot(null,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,-250,null,null)),db.materialRobot,true,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
+		renderer.ennemyArray.push(new Vector(utils.random(100), utils.random(100),-200));
+		renderer.ennemyArray[i].velocity=new Vector(0,0,0);
+		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,true,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
 	}
 	
 	function moveEnnemies() {
-		for(var i = 0; i < renderer.numEnnemies; i++) {
+/*		for(var i = 0; i < renderer.numEnnemies; i++) {
 		var distanceX = 0;
 		var distanceY = 0; 
 		var nPosX = 0;
@@ -662,12 +688,65 @@ renderer.doc.onLoad = function() {
 			
 			nPosX=renderer.ennemyArray[i].x+distanceX+renderer.ennemyArray[i].accelX/1000
 			nPosY=renderer.ennemyArray[i].y+distanceY+renderer.ennemyArray[i].accelY/1000
-			
+
 			renderer.setposx(renderer.ennemyArray[i].el,nPosX);
 			renderer.setposy(renderer.ennemyArray[i].el,nPosY);
 			renderer.ennemyArray[i].x=nPosX
 			renderer.ennemyArray[i].y=nPosY
+		}*/
+		
+		
+		var virt= new Vector(0,0,0);
+		
+		for(var i = 0; i < renderer.numEnnemies; i++) {
+			virt.addvectorpos({'x':renderer.ennemyArray[i].x,'y':renderer.ennemyArray[i].y,'z':renderer.ennemyArray[i].z});
 		}
+		virt.divector(renderer.numEnnemies-1);
+		
+		
+		
+		for(var i = 0; i < renderer.numEnnemies; i++) {
+
+			//rule1
+			var virt1 = new Vector(renderer.ennemyArray[i].x-virt.x,renderer.ennemyArray[i].y-virt.y,renderer.ennemyArray[i].z-virt.z);
+			virt1.divector(1000);
+			renderer.ennemyArray[i].remvectorpos({'x':virt1.x,'y':virt1.y,'z':virt1.z});
+			
+			var virt2 = new Vector(0,0,0);
+			var virt3 = new Vector(0,0,0);
+			for(var j = 0; j < renderer.numEnnemies; j++) {
+				//rule2
+				
+				 if (i!=j) {
+					if (renderer.ennemyArray[i].getdistpos({'x':renderer.ennemyArray[j].x,'y':renderer.ennemyArray[j].y,'z':renderer.ennemyArray[j].z}) < 10 ) {
+						virt2.addvectorpos({'x':renderer.ennemyArray[i].x-renderer.ennemyArray[j].x,'y':renderer.ennemyArray[i].y-renderer.ennemyArray[j].y,'z':renderer.ennemyArray[i].z-renderer.ennemyArray[j].z});
+						virt2.divector(1000);
+						renderer.ennemyArray[i].addvectorpos({'x':virt2.x,'y':virt2.y,'z':virt2.z});
+					}
+				}
+				
+				//rule3
+				if (i!=j) {
+					virt3.addvectorpos({'x':renderer.ennemyArray[i].velocity.x-renderer.ennemyArray[j].velocity.x,'y':renderer.ennemyArray[i].velocity.y-renderer.ennemyArray[j].velocity.y,'z':renderer.ennemyArray[i].velocity.z-renderer.ennemyArray[j].velocity.z});
+					virt3.divector(1000);
+				}
+				
+			}
+			
+			var addvelocity = new Vector(0,0,0);
+			addvelocity.addvectorpos({'x':virt1.x,'y':virt1.y,'z':virt1.z});
+			addvelocity.addvectorpos({'x':virt2.x,'y':virt2.y,'z':virt2.z});
+			addvelocity.addvectorpos({'x':virt3.x,'y':virt3.y,'z':virt3.z});
+			
+			
+			renderer.ennemyArray[i].velocity.addvectorpos(addvelocity);
+			
+			renderer.setposx(renderer.ennemyArray[i].el,renderer.ennemyArray[i].x);
+			renderer.setposy(renderer.ennemyArray[i].el,renderer.ennemyArray[i].y);
+			renderer.setposz(renderer.ennemyArray[i].el,renderer.ennemyArray[i].z);
+		}
+		
+		
 	}
 	
 	
