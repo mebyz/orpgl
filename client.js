@@ -11,8 +11,7 @@ var myJSONUserPosArray2 =new Array(); // users positions array
 var gameScene; // our main scene object
 var moveplayer =false; // users positions array
 
-var CONFIG = { debug: false
-             , nick: "#"   // set in onConnect
+var CONFIG = { nick: "#"   // set in onConnect
              , id: null    // set in onConnect
              , last_message_time: 1
              , focus: true //event listeners bound in onConnect
@@ -46,29 +45,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
- * Returns a description of this past date in relative terms.
- * Takes an optional parameter (default: 0) setting the threshold in ms which
- * is considered "Just now".
- *
- * Examples, where new Date().toString() == "Mon Nov 23 2009 17:36:51 GMT-0500 (EST)":
- *
- * new Date().toRelativeTime()
- * --> 'Just now'
- *
- * new Date("Nov 21, 2009").toRelativeTime()
- * --> '2 days ago'
- *
- * // One second ago
- * new Date("Nov 23 2009 17:36:50 GMT-0500 (EST)").toRelativeTime()
- * --> '1 second ago'
- *
- * // One second ago, now setting a now_threshold to 5 seconds
- * new Date("Nov 23 2009 17:36:50 GMT-0500 (EST)").toRelativeTime(5000)
- * --> 'Just now'
- *
- */
+*/
 Date.prototype.toRelativeTime = function(now_threshold) {
   var delta = new Date() - this;
 
@@ -112,23 +89,13 @@ Date.prototype.toRelativeTime = function(now_threshold) {
 Date.fromString = function(str) {
   return new Date(Date.parse(str));
 };
-
 //  CUT  ///////////////////////////////////////////////////////////////////
-
-
-
-function updateUsersLink ( ) {
-  var t = nicks.length.toString() + " user";
-  if (nicks.length != 1) t += "s";
-  $("#usersLink").text(t);
-}
 
 function userJoin(nick, timestamp) {
   addMessage(nick, "joined", timestamp, "join");
   for (var i = 0; i < nicks.length; i++)
     if (nicks[i] == nick) return;
   nicks.push(nick);
-  updateUsersLink();
 }
 
 function userPart(nick, timestamp) {
@@ -139,9 +106,7 @@ function userPart(nick, timestamp) {
       break;
     }
   }
-  updateUsersLink();
 }
-
 
 util = {
   urlRE: /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s]*(\?\S+)?)?)?/g, 
@@ -172,11 +137,6 @@ util = {
     return (text.match(blank) !== null);
   }
 };
-
-function scrollDown () {
-  window.scrollBy(0, 100000000000000000);
-  $("#entry").focus();
-}
 
 function addMessage (from, text, time, _class) {
   if (text === null)
@@ -211,13 +171,6 @@ function addMessage (from, text, time, _class) {
   messageElement.html(content);
 
 
-}
-
-
-function updateUptime () {
-  if (starttime) {
-    $("#uptime").text(starttime.toRelativeTime());
-  }
 }
 
 var transmission_errors = 0;
@@ -298,15 +251,11 @@ function longPoll (data) {
 }
 
 function send(msg) {
-  if (CONFIG.debug === false) {
     jQuery.get("/send", {id: CONFIG.id, text: msg}, function (data) { }, "json");
-  }
 }
 
 function getServerTime(msg) {
-  if (CONFIG.debug === false) {
     jQuery.get("/GST", {id: CONFIG.id}, function (data) {$("#tim1").html("Global Time Server (refresh 10 secs) : "+ data.GST + " Time Units")}, "json");
-  }
 }
 
 //Transition the page to the state that prompts the user for a nickname
@@ -332,7 +281,6 @@ function showChat (nick) {
   $("#connect").hide();
   $("#loading").hide();
 
-  //scrollDown();
 }
 
 //we want to show a count of unread messages when the window does not have focus
@@ -360,8 +308,7 @@ $("#canvas").css({"height":"300px","width":"600px"})
   CONFIG.nick = session.nick;
   CONFIG.id   = session.id;
   starttime   = new Date(session.starttime);
-  updateUptime();
-
+  
   //update the UI to show the chat
   showChat(CONFIG.nick);
 
@@ -481,18 +428,6 @@ $(document).ready(function() {
     return false;
   });
   
-  // update the daemon uptime every 10 seconds
-  setInterval(function () {
-    updateUptime();
-	getServerTime()
-  }, 10*1000);
-
-  if (CONFIG.debug) {
-    $("#loading").hide();
-    $("#connect").hide();
-    return;
-  }
-
   $("#log table").remove();
 
   longPoll();
