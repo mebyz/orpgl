@@ -1,7 +1,8 @@
--  HTML5+WebGL+NodeJS Multiplayer Game Implementation  -
--  e.botros@gmail.com,2011 -
+HTML5+WebGL+NodeJS Multiplayer Game Implementation  
+Copyrights E. BOTROS (c) 2011 - emmanuel.botros@gmail.com 
+Creative Commons BY 3.0 License Terms
 
-please read LICENSE file
+see LICENSE file
 + Ryan Dahl's node-chat base source licensing : see LICENSE-MIT 
 + supereggbert (Paul Brunt) GLGE : see example/GLGE/README
 
