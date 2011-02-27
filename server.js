@@ -1,18 +1,25 @@
-HOST = null; // localhost
-PORT = 8080; 
+//emmanuel.botros@gmail.com (2011) - Creative Commons BY 3.0 License Terms//
+//------------------------------------------------------------------------//
 
-GTime=0;
-
-var appfolder='example';
-var starttime = (new Date()).getTime();
+var HOST = null; 						// running server on localhost
+var PORT = 8080; 						// listening port
+var GTime = 0;							// global time ticker
+var appfolder='example';				// main game folder
+var starttime = (new Date()).getTime();	// initial timedate
 var nature = [];
 var trees = [];
 var bush = [];
 var branch = [];
-  
 var mem = process.memoryUsage();
+var fu = require("./fu");
+var fs = require("fs");
+var sys = require("sys");
+var url = require("url");
+var qs = require("querystring");
+var MESSAGE_BACKLOG = 1;
+var SESSION_TIMEOUT = 60 * 1000;
 
-// every 10 seconds poll for the memory.
+// every 10 seconds > poll for the memory.
 setInterval(function () {
   mem = process.memoryUsage();
 }, 10*1000);
@@ -22,16 +29,7 @@ setInterval(function () {
 GTime+=1;
 }, 10);
 
-var fu = require("./fu"),
-    fs = require("fs"),
-    sys = require("sys"),
-    url = require("url"),
-    qs = require("querystring");
-
-var MESSAGE_BACKLOG = 1,
-    SESSION_TIMEOUT = 60 * 1000;
-
-var channel = new function () {
+var server = new function () {
   var messages = [],
       callbacks = [];
 
@@ -44,7 +42,7 @@ var channel = new function () {
 
     switch (type) {
       case "msg":
-        sys.puts("<" + nick + "> " + text);
+        //sys.puts("<" + nick + "> " + text);
         break;
       case "join":
         sys.puts(nick + " join");
@@ -110,7 +108,7 @@ function createSession (nick) {
     },
 
     destroy: function () {
-      channel.appendMessage(session.nick, "part");
+      server.appendMessage(session.nick, "part");
       delete sessions[session.id];
     }
   };
@@ -131,8 +129,6 @@ setInterval(function () {
     }
   }
 }, 1000);
-
-fu.listen(Number(process.env.PORT || PORT), HOST);
 
 function createnature(cont,num,callback) {
 	for (var i=0;i<num;i++) {
@@ -165,22 +161,6 @@ function loaddir(path, callback) {
 		});
 	});
 }
-
-
-console.log("loading folder "+appfolder+" ...");
-loaddir(appfolder);
-console.log("creating nature ...");
-createnature(trees,30);
-createnature(bush,5);
-createnature(branch,50);
-
-
-fu.get("/", fu.staticHandler("index.html"));
-fu.get("/admin.html", fu.staticHandler("admin.html"));
-fu.get("/styles.css", fu.staticHandler("styles.css"));
-fu.get("/client.js", fu.staticHandler("client.js"));
-fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
-fu.get("/glge-compiled-min.js", fu.staticHandler("glge-compiled-min.js"));
 
 fu.get("/who", function (req, res) {
   var nicks = [];
@@ -215,7 +195,7 @@ fu.get("/join", function (req, res) {
 
   //sys.puts("connection: " + nick + "@" + res.connection.remoteAddress);
 
-  channel.appendMessage(session.nick, "join");
+  server.appendMessage(session.nick, "join");
   res.simpleJSON(200, { id: session.id
                       , nick: session.nick
                       , rss: mem.rss
@@ -237,7 +217,7 @@ fu.get("/joinadmin", function (req, res) {
 
   //sys.puts("connection: " + nick + "@" + res.connection.remoteAddress);
 
-  channel.appendMessage(session.nick, "join admin");
+  server.appendMessage(session.nick, "join admin");
   res.simpleJSON(200, { id: session.id
                       , nick: session.nick
                       , rss: mem.rss
@@ -269,7 +249,7 @@ fu.get("/recv", function (req, res) {
 
   var since = parseInt(qs.parse(url.parse(req.url).query).since, 10);
 
-  channel.query(since, function (messages) {
+  server.query(since, function (messages) {
     if (session) session.poke();
     res.simpleJSON(200, { messages: messages, rss: mem.rss });
   });
@@ -288,7 +268,7 @@ fu.get("/send", function (req, res) {
   session.poke();
   if (session.nick) {
 	console.log(session.nick +"(time "+GTime+") msg:"+ text);
-	channel.appendMessage(session.nick, "msg", text);
+	server.appendMessage(session.nick, "msg", text);
 	res.simpleJSON(200, { rss: mem.rss });
   }
 });
@@ -304,3 +284,21 @@ fu.get("/GST", function (req, res) {
 	res.simpleJSON(200, { GST: GTime });
   }
 });
+
+/// STARTING SERVER INSTANCE
+fu.listen(Number(process.env.PORT || PORT), HOST);
+
+console.log("loading folder "+appfolder+" ...");
+loaddir(appfolder); 
+
+fu.get("/", fu.staticHandler("index.html"));
+fu.get("/admin.html", fu.staticHandler("admin.html"));
+fu.get("/styles.css", fu.staticHandler("styles.css"));
+fu.get("/client.js", fu.staticHandler("client.js"));
+fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
+fu.get("/glge-compiled-min.js", fu.staticHandler("glge-compiled-min.js"));
+
+console.log("creating nature ...");
+createnature(trees,30);		///set trees positions
+createnature(bush,5);		// set plants1 positions
+createnature(branch,50);	// set plants2 positions

@@ -1,4 +1,5 @@
-
+//emmanuel.botros@gmail.com (2011) - Creative Commons BY 3.0 License Terms//
+//------------------------------------------------------------------------//
 
 var ns=0; // connected users counter
 var myJSONUserPosArray =new Array(); // users positions array

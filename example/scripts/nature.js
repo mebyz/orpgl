@@ -530,7 +530,7 @@ function Moveable(x, y,mat) {
 	this.yVelocity = -1;	
 }
 
-// Cluster Class contains a cluster of clone objects 
+// Cluster Class contains a cluster of clone objects (forest,grass,..)
 function Cluster(_rd,_db) {
 	this.clusterObj=null;
 	this.objContainer=null;
