@@ -1,6 +1,68 @@
 //emmanuel.botros@gmail.com (2011) - Creative Commons BY 3.0 License Terms//
 //------------------------------------------------------------------------//
 
+
+// AIMoveable Class handles AI rules defining objects paths in 3d space 
+var AIMoveable = function () {
+	// virtual vectors used in member methods
+	this.virt=null;
+	this.virt1=null;
+	this.virt2=null;
+	this.virt3=null;
+}
+
+// move a collection of objects for a renderer (rd:renderer, coll:collection of objects, num:collection size) 
+AIMoveable.prototype.movecoll = function (rd,coll,num){
+	this.virt= new Vector(0,0,0);
+	
+	// get the center of gravity of the collection
+	for(var i = 0; i < num; i++) {
+		this.virt.addvectorpos({'x':coll[i].x,'y':coll[i].y,'z':coll[i].z});
+	}
+	this.virt.divector(num-1);
+	
+	for(var i = 0; i < num; i++) {
+
+		//rule1 : each object approaches the collective center of gravity
+		this.virt1 = new Vector(coll[i].x-this.virt.x,coll[i].y-this.virt.y,coll[i].z-this.virt.z);
+		this.virt1.divector(1000);
+		coll[i].remvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
+		
+		this.virt2 = new Vector(0,0,0);
+		this.virt3 = new Vector(0,0,0);
+		for(var j = 0; j < num; j++) {
+			//rule2 : if distance between 2 objects is too low, they repulse each other
+			
+			 if (i!=j) {
+				if (coll[i].getdistpos({'x':coll[j].x,'y':coll[j].y,'z':coll[j].z}) < 10 ) {
+					this.virt2.addvectorpos({'x':coll[i].x-coll[j].x,'y':coll[i].y-coll[j].y,'z':coll[i].z-coll[j].z});
+					this.virt2.divector(1000);
+					coll[i].addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
+				}
+			}
+			
+			//rule3 : objects try to get to the same speed
+			if (i!=j) {
+				this.virt3.addvectorpos({'x':coll[i].velocity.x-coll[j].velocity.x,'y':coll[i].velocity.y-coll[j].velocity.y,'z':coll[i].velocity.z-coll[j].velocity.z});
+				this.virt3.divector(1000);
+			}
+			
+		}
+		
+		var addvelocity = new Vector(0,0,0);
+		addvelocity.addvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
+		addvelocity.addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
+		addvelocity.addvectorpos({'x':this.virt3.x,'y':this.virt3.y,'z':this.virt3.z});
+		
+		
+		coll[i].velocity.addvectorpos(addvelocity);
+		
+		rd.setposx(coll[i].el,coll[i].x);
+		rd.setposy(coll[i].el,coll[i].y);
+		rd.setposz(coll[i].el,coll[i].z);
+	}
+}
+
 // Renderer Class handles communication with the 3d engine
 var Renderer = function () {
 	this.gameRenderer = null; 				// game renderer
@@ -77,7 +139,7 @@ Renderer.prototype.mousepick = function(x,y){
 
 // *** getray *** check collision state after a mouse click
 Renderer.prototype.getray = function (database,mousepos) {
-	
+
 	// get the screen center's position
 	var aimX=this.renderWidth/2;
 	var aimY=this.renderHeight/2;
@@ -109,14 +171,14 @@ Renderer.prototype.getray = function (database,mousepos) {
 			
 			// hit an ennemy ?
 			var hitObjName=hitObj['object']['id']+"_"
-			if (hitObjName.substring(0,4)=='Moveable')
+			if (hitObjName.substring(0,8)=='Moveable')
 				database.pickedObj=hitObj['object'];
 			
 			// initiate bullet movement
 			database.eRay=true;
 			
 			// can't fire faster then 10 bullet per sec
-			setTimeout("window.DB.eRay=false;",100);
+			setTimeout("window.DB.eRay=false;",1000);
 		}
 	}	
 	
@@ -125,9 +187,21 @@ Renderer.prototype.getray = function (database,mousepos) {
 
 		// posi : next intermediate position of the bullet
 		var posi=[];
-		posi[0]	=	database.rayPosStart[0]-(database.rayPosStart[0]-database.rayPosEnd[0])/10;
-		posi[1]	=	database.rayPosStart[1]-(database.rayPosStart[1]-database.rayPosEnd[1])/10;
-		posi[2]	=	database.rayPosStart[2]-(database.rayPosStart[2]-database.rayPosEnd[2])/10;
+		
+		var distX=(database.rayPosStart[0]-database.rayPosEnd[0])
+		var distY=(database.rayPosStart[1]-database.rayPosEnd[1])
+		var distZ=(database.rayPosStart[2]-database.rayPosEnd[2])
+		
+		// 3d intermediate distance
+		var dist3d = Math.sqrt(distX * distX + distY * distY + distZ * distZ);
+		// constant speed
+		var speed= 10;
+		// intermediate eta 
+		var tps=dist3d/speed;
+		
+		posi[0]	=	database.rayPosStart[0]-((database.rayPosStart[0]-database.rayPosEnd[0])/tps);
+		posi[1]	=	database.rayPosStart[1]-((database.rayPosStart[1]-database.rayPosEnd[1])/tps);
+		posi[2]	=	database.rayPosStart[2]-((database.rayPosStart[2]-database.rayPosEnd[2])/tps);
 
 		// moves the bullet along its path
 		this.setposx(database.bullet,(posi[0]));
@@ -145,10 +219,11 @@ Renderer.prototype.getray = function (database,mousepos) {
 			// calcutate distance btween the bullet and the ennemy
 			var dX =  this.ennemyArray[i].x-posi[0];
 			var dY =  this.ennemyArray[i].y-posi[1];				
-			var dist =  Math.sqrt(dX * dX + dY * dY);
-
-			// if distance < 5 : kill the ennemy
-			if (dist<5) {
+			var dZ =  this.ennemyArray[i].z-posi[2];				
+			var dist =  Math.sqrt(dX * dX + dY * dY + dZ * dZ);
+			
+				// if distance < 5 : kill the ennemy
+			if (dist<500) {
 				this.setposz(this.ennemyArray[i].el,(-1000));			
 			}
 		}
@@ -255,12 +330,12 @@ Renderer.prototype.process = function (database){
 	var trans=GLGE.mulMat4Vec4(mat,[0,1,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
 	if (database.eJump) {
-		trans[0]=trans[0]/mag/8;
-		trans[1]=trans[1]/mag/8;
+		trans[0]=trans[0]/mag*2;
+		trans[1]=trans[1]/mag*2;
 	}
 	else {
-		trans[0]=trans[0]/mag/18;
-		trans[1]=trans[1]/mag/18;
+		trans[0]=trans[0]/mag;
+		trans[1]=trans[1]/mag;
 	}
 	
 	// moving forces along axis
@@ -619,6 +694,7 @@ Utils.prototype.setmousewheel = function() {
 var utils=new Utils();
 var db=new DB();
 var renderer=new Renderer(); 
+var ai=new AIMoveable();
 ////////////////////////////////////////////////////////////////////////
 
 renderer.doc.onLoad = function() {
@@ -658,96 +734,7 @@ renderer.doc.onLoad = function() {
 		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,true,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
 	}
 	
-	function moveEnnemies() {
-/*		for(var i = 0; i < renderer.numEnnemies; i++) {
-		var distanceX = 0;
-		var distanceY = 0; 
-		var nPosX = 0;
-		var nPosY = 0; 
-		var distX = renderer.ennemyArray[i].x - db.playerPos.x;
-		var distY = renderer.ennemyArray[i].y - db.playerPos.y;
-		var distance =  Math.sqrt(distX * distX + distY * distY);
-		
-		if (distance>50) {
-			
-			if (( renderer.ennemyArray[i].x>db.playerPos.x))
-				distanceX = -1/distance*distance/500;
-			else
-				distanceX = 1/distance*distance/500;
-			if (( renderer.ennemyArray[i].y>db.playerPos.y))
-				distanceY = -1/distance*distance/500;
-			else
-				distanceY = 1/distance*distance/500;
-
-			}
 	
-			if (distanceY>0)renderer.ennemyArray[i].accelY+=1;
-			else renderer.ennemyArray[i].accelY-=1;
-			if (distanceX>0)renderer.ennemyArray[i].accelX+=1;
-			else renderer.ennemyArray[i].accelX-=1;
-			
-			nPosX=renderer.ennemyArray[i].x+distanceX+renderer.ennemyArray[i].accelX/1000
-			nPosY=renderer.ennemyArray[i].y+distanceY+renderer.ennemyArray[i].accelY/1000
-
-			renderer.setposx(renderer.ennemyArray[i].el,nPosX);
-			renderer.setposy(renderer.ennemyArray[i].el,nPosY);
-			renderer.ennemyArray[i].x=nPosX
-			renderer.ennemyArray[i].y=nPosY
-		}*/
-		
-		
-		var virt= new Vector(0,0,0);
-		
-		for(var i = 0; i < renderer.numEnnemies; i++) {
-			virt.addvectorpos({'x':renderer.ennemyArray[i].x,'y':renderer.ennemyArray[i].y,'z':renderer.ennemyArray[i].z});
-		}
-		virt.divector(renderer.numEnnemies-1);
-		
-		
-		
-		for(var i = 0; i < renderer.numEnnemies; i++) {
-
-			//rule1
-			var virt1 = new Vector(renderer.ennemyArray[i].x-virt.x,renderer.ennemyArray[i].y-virt.y,renderer.ennemyArray[i].z-virt.z);
-			virt1.divector(1000);
-			renderer.ennemyArray[i].remvectorpos({'x':virt1.x,'y':virt1.y,'z':virt1.z});
-			
-			var virt2 = new Vector(0,0,0);
-			var virt3 = new Vector(0,0,0);
-			for(var j = 0; j < renderer.numEnnemies; j++) {
-				//rule2
-				
-				 if (i!=j) {
-					if (renderer.ennemyArray[i].getdistpos({'x':renderer.ennemyArray[j].x,'y':renderer.ennemyArray[j].y,'z':renderer.ennemyArray[j].z}) < 10 ) {
-						virt2.addvectorpos({'x':renderer.ennemyArray[i].x-renderer.ennemyArray[j].x,'y':renderer.ennemyArray[i].y-renderer.ennemyArray[j].y,'z':renderer.ennemyArray[i].z-renderer.ennemyArray[j].z});
-						virt2.divector(1000);
-						renderer.ennemyArray[i].addvectorpos({'x':virt2.x,'y':virt2.y,'z':virt2.z});
-					}
-				}
-				
-				//rule3
-				if (i!=j) {
-					virt3.addvectorpos({'x':renderer.ennemyArray[i].velocity.x-renderer.ennemyArray[j].velocity.x,'y':renderer.ennemyArray[i].velocity.y-renderer.ennemyArray[j].velocity.y,'z':renderer.ennemyArray[i].velocity.z-renderer.ennemyArray[j].velocity.z});
-					virt3.divector(1000);
-				}
-				
-			}
-			
-			var addvelocity = new Vector(0,0,0);
-			addvelocity.addvectorpos({'x':virt1.x,'y':virt1.y,'z':virt1.z});
-			addvelocity.addvectorpos({'x':virt2.x,'y':virt2.y,'z':virt2.z});
-			addvelocity.addvectorpos({'x':virt3.x,'y':virt3.y,'z':virt3.z});
-			
-			
-			renderer.ennemyArray[i].velocity.addvectorpos(addvelocity);
-			
-			renderer.setposx(renderer.ennemyArray[i].el,renderer.ennemyArray[i].x);
-			renderer.setposy(renderer.ennemyArray[i].el,renderer.ennemyArray[i].y);
-			renderer.setposz(renderer.ennemyArray[i].el,renderer.ennemyArray[i].z);
-		}
-		
-		
-	}
 	
 	
 	function multi() {
@@ -801,11 +788,11 @@ renderer.doc.onLoad = function() {
 	setInterval( function () {
 		renderer.process(window.DB);
 		multi();
-		moveEnnemies();
+		ai.movecoll(renderer,renderer.ennemyArray,renderer.numEnnemies);
 		renderer.render();
 	},1);
 	
-	var inc=.2;
+	var inc=2;
 };
 
 var moveP = function() {
