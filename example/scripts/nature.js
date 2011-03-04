@@ -15,51 +15,57 @@ var AIMoveable = function () {
 AIMoveable.prototype.movecoll = function (rd,coll,num){
 	this.virt= new Vector(0,0,0);
 	
+	var killed=0;
 	// get the center of gravity of the collection
 	for(var i = 0; i < num; i++) {
-		this.virt.addvectorpos({'x':coll[i].x,'y':coll[i].y,'z':coll[i].z});
+		if (coll[i].active==true)
+			this.virt.addvectorpos({'x':coll[i].x,'y':coll[i].y,'z':coll[i].z});
+		else 
+			killed++;
 	}
-	this.virt.divector(num-1);
+	this.virt.divector((num-killed)-1);
 	
 	for(var i = 0; i < num; i++) {
-
-		//rule1 : each object approaches the collective center of gravity
-		this.virt1 = new Vector(coll[i].x-this.virt.x,coll[i].y-this.virt.y,coll[i].z-this.virt.z);
-		this.virt1.divector(1000);
-		coll[i].remvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
-		
-		this.virt2 = new Vector(0,0,0);
-		this.virt3 = new Vector(0,0,0);
-		for(var j = 0; j < num; j++) {
-			//rule2 : if distance between 2 objects is too low, they repulse each other
+		if (coll[i].active==true) {
 			
-			 if (i!=j) {
-				if (coll[i].getdistpos({'x':coll[j].x,'y':coll[j].y,'z':coll[j].z}) < 10 ) {
-					this.virt2.addvectorpos({'x':coll[i].x-coll[j].x,'y':coll[i].y-coll[j].y,'z':coll[i].z-coll[j].z});
-					this.virt2.divector(1000);
-					coll[i].addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
+			//rule1 : each object approaches the collective center of gravity
+			this.virt1 = new Vector(coll[i].x-this.virt.x,coll[i].y-this.virt.y,coll[i].z-this.virt.z);
+			this.virt1.divector(1000);
+			coll[i].remvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
+			
+			this.virt2 = new Vector(0,0,0);
+			this.virt3 = new Vector(0,0,0);
+			for(var j = 0; j < num; j++) {
+				//rule2 : if distance between 2 objects is too low, they repulse each other
+				
+				 if (i!=j) {
+					if (coll[i].getdistpos({'x':coll[j].x,'y':coll[j].y,'z':coll[j].z}) < 1 ) {
+						this.virt2.addvectorpos({'x':coll[i].x-coll[j].x,'y':coll[i].y-coll[j].y,'z':coll[i].z-coll[j].z});
+						this.virt2.divector(10);
+						coll[i].addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
+					}
 				}
+				
+				//rule3 : objects try to get to the same speed
+				if (i!=j) {
+					this.virt3.addvectorpos({'x':coll[i].velocity.x-coll[j].velocity.x,'y':coll[i].velocity.y-coll[j].velocity.y,'z':coll[i].velocity.z-coll[j].velocity.z});
+					this.virt3.divector(.001);
+				}
+				
 			}
 			
-			//rule3 : objects try to get to the same speed
-			if (i!=j) {
-				this.virt3.addvectorpos({'x':coll[i].velocity.x-coll[j].velocity.x,'y':coll[i].velocity.y-coll[j].velocity.y,'z':coll[i].velocity.z-coll[j].velocity.z});
-				this.virt3.divector(1000);
-			}
+			var addvelocity = new Vector(0,0,0);
+			addvelocity.addvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
+			addvelocity.addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
+			addvelocity.addvectorpos({'x':this.virt3.x,'y':this.virt3.y,'z':this.virt3.z});
 			
+			
+			coll[i].velocity.addvectorpos(addvelocity);
+			
+			rd.setposx(coll[i].el,coll[i].x);
+			rd.setposy(coll[i].el,coll[i].y);
+			rd.setposz(coll[i].el,coll[i].z);
 		}
-		
-		var addvelocity = new Vector(0,0,0);
-		addvelocity.addvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
-		addvelocity.addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
-		addvelocity.addvectorpos({'x':this.virt3.x,'y':this.virt3.y,'z':this.virt3.z});
-		
-		
-		coll[i].velocity.addvectorpos(addvelocity);
-		
-		rd.setposx(coll[i].el,coll[i].x);
-		rd.setposy(coll[i].el,coll[i].y);
-		rd.setposz(coll[i].el,coll[i].z);
 	}
 }
 
@@ -171,7 +177,8 @@ Renderer.prototype.getray = function (database,mousepos) {
 			
 			// hit an ennemy ?
 			var hitObjName=hitObj['object']['id']+"_"
-			if (hitObjName.substring(0,8)=='Moveable')
+			//if (hitObjName.substring(0,8)=='Moveable')
+				
 				database.pickedObj=hitObj['object'];
 			
 			// initiate bullet movement
@@ -181,6 +188,15 @@ Renderer.prototype.getray = function (database,mousepos) {
 			setTimeout("window.DB.eRay=false;",1000);
 		}
 	}	
+	
+	//	$("#tim2").html("");
+	/*	for(var i = 0; i < this.numEnnemies; i++) {									
+			if (this.ennemyArray[i].active==true) {
+				$("#tim2").append(this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+"<br>");
+			}
+		}				
+	*/		
+	
 	
 	// handles the bullet movement
 	if (database.eRay) {	
@@ -212,19 +228,29 @@ Renderer.prototype.getray = function (database,mousepos) {
 		database.rayPosStart[0]	=	posi[0]
 		database.rayPosStart[1]	=	posi[1]
 		database.rayPosStart[2]	=	posi[2]
-		
+
+		//$("#tim2").html("");
 		// loop in the enemies' collection
 		for(var i = 0; i < this.numEnnemies; i++) {									
-			
-			// calcutate distance btween the bullet and the ennemy
-			var dX =  this.ennemyArray[i].x-posi[0];
-			var dY =  this.ennemyArray[i].y-posi[1];				
-			var dZ =  this.ennemyArray[i].z-posi[2];				
-			var dist =  Math.sqrt(dX * dX + dY * dY + dZ * dZ);
-			
-				// if distance < 5 : kill the ennemy
-			if (dist<500) {
-				this.setposz(this.ennemyArray[i].el,(-1000));			
+			if (this.ennemyArray[i].active==true) {
+				
+				// calcutate distance btween the bullet and the ennemy
+				var dX =  this.ennemyArray[i].x-posi[0];
+				var dY =  this.ennemyArray[i].y-posi[1];				
+				var dZ =  this.ennemyArray[i].z-posi[2];				
+				var dist =  Math.sqrt(dX * dX + dY * dY + dZ * dZ);
+				
+			/*	if  (database.pickedObj!=null) {
+					$("#tim2").append(this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+" - ");
+					$("#tim2").append(posi[0]+" "+posi[1]+" "+posi[2]+" >>> ");
+					$("#tim2").append(dist+"<br>");
+				}*/
+					// if distance < 5 : kill the ennemy
+				if (dist<3) {
+					//$("#tim2").append("COLLISION near "+this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+"<br>");
+					this.setposz(this.ennemyArray[i].el,-1000);			
+					this.ennemyArray[i].active=false;
+				}
 			}
 		}
 	}
@@ -309,9 +335,9 @@ Renderer.prototype.process = function (database){
 	if ((!database.eJump))
 		this.setposz(database.cube,(-H2));	
 
-	$("#tim1").html("");
-	for(prop in db)	
-			$("#tim1").append(prop+" "+ db[prop]+"<br>");
+//	$("#tim1").html("");
+//	for(prop in db)	
+//			$("#tim1").append(prop+" "+ db[prop]+"<br>");
 	
 /*	for(var i = 0; i < renderer.numEnnemies; i++) 
 				$("#tim1").append(renderer.ennemyArray[i].x+" "+renderer.ennemyArray[i].y+" "+renderer.ennemyArray[i].z+"<br>"); */
@@ -604,6 +630,7 @@ var Vector = function (x, y, z) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
+	this.active=true;
 	this.el=null;
 	this.velocity=null;
 }
@@ -720,18 +747,18 @@ renderer.doc.onLoad = function() {
 	'materialRobot' : 'Material.003',
 	'materialFlower' : 'Flower Green',
 	'groundObject':'groundObject'});
-	renderer.setposz(db.groundObject,150);
+	renderer.setposz(db.groundObject,-300);
 	utils.setdom(renderer);
 	utils.setmousewheel();
 	setTimeout('moveP();moveP2();',1000); 
 	
 	//init ennemies
 	renderer.ennemyArray = [];
-	renderer.numEnnemies = 50;
+	renderer.numEnnemies = 10;
 	for(var i = 0; i < renderer.numEnnemies; i++) {
-		renderer.ennemyArray.push(new Vector(utils.random(100), utils.random(100),-200));
+		renderer.ennemyArray.push(new Vector(utils.random(300), utils.random(300),-170));
 		renderer.ennemyArray[i].velocity=new Vector(0,0,0);
-		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,true,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
+		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,false,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
 	}
 	
 	
@@ -786,9 +813,9 @@ renderer.doc.onLoad = function() {
 	}
 	
 	setInterval( function () {
+		ai.movecoll(renderer,renderer.ennemyArray,renderer.numEnnemies);
 		renderer.process(window.DB);
 		multi();
-		ai.movecoll(renderer,renderer.ennemyArray,renderer.numEnnemies);
 		renderer.render();
 	},1);
 	
