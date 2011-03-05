@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glge SYSTEM "glge.dtd">
-<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature3.blend' -->
+<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature4.blend' -->
 <glge>
 	<material id="Boden" color="rgb(204,204,204)" specular="0.000000" shininess="50.000000" emit="0.000000" >
 		<texture id="Texture.003Tex" src="textures/terr_texture.jpg" />

@@ -156,10 +156,10 @@ def writeScene(file, scene):
     file.write('\n\t\t<collada document="head.dae" id="head" scale="0" rot_y="0"/>')    
     file.write('\n\t\t<collada document="head.dae" id="player" scale="0.98" rot_y="0"/>')    
     file.write('\n\t\t<collada document="rabbit.dae" id="plane" scale="0.05" />')    
-    file.write('\n\t\t<collada document="rabbit.dae" id="plane2" scale="0.05" />')    
+    file.write('\n\t\t<collada document="rabbit.dae" id="plane2" scale="0.05" />')     
 #    file.write('<text id="text1" loc_z="-240" text="P1" size="100" font="arial" color="yellow" lookat="#maincamera" /> ')
 #    file.write('<text id="text2" loc_z="-250" text="P2" size="100" font="arial" color="yellow" lookat="#maincamera" /> ')
-    file.write('\n\t\t<object id="groundObject" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />')    
+    file.write('\n\t\t<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />')    
 
     file.write('\n\t</scene>')    
 

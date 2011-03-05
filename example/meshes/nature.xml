@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glge SYSTEM "glge.dtd">
-<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature3.blend' -->
+<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature4.blend' -->
 <glge>
 	<import url="meshes.xml" />
 	<import url="materials.xml" />
@@ -30,9 +30,9 @@
 		/>
 		<object id="Plane" mesh="#Plane.002Mesh"
 			rot_order="ROT_ZYX"
-			scale_x="203.305176" scale_y="203.305176" scale_z="420.059387"
+			scale_x="203.305176" scale_y="203.305176" scale_z="35.878761"
 			material="#Material"
-			loc_x="13.700546" loc_y="-19.939754" loc_z="-313.925781"
+			loc_x="13.700546" loc_y="-19.939754" loc_z="-243.848343"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<object id="Plane.001" mesh="#Plane.001Mesh"
@@ -93,6 +93,6 @@
 		<collada document="head.dae" id="player" scale="0.98" rot_y="0"/>
 		<collada document="rabbit.dae" id="plane" scale="0.05" />
 		<collada document="rabbit.dae" id="plane2" scale="0.05" />
-		<object id="groundObject" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
+		<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
 	</scene>
 </glge>

@@ -746,7 +746,7 @@ renderer.doc.onLoad = function() {
 	'materialBush' : 'Bush Green.001',
 	'materialRobot' : 'Material.003',
 	'materialFlower' : 'Flower Green',
-	'groundObject':'groundObject'});
+	'groundObject':'ground'});
 	renderer.setposz(db.groundObject,-300);
 	utils.setdom(renderer);
 	utils.setmousewheel();
