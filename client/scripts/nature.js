@@ -394,8 +394,25 @@ Renderer.prototype.process = function (database){
 	database.headpos = this.getpos(database.head);
 	database.headrot = this.getrot(database.head);
 		
+		
 	if((((this.pPos.x-(database.headpos.x)>1)||(this.pPos.x-(database.headpos.x)<-1))||((this.pPos.z-(database.headpos.z)>1)||(this.pPos.z-(database.headpos.z)<-1))||((this.pPos.rx-(database.headrot.x)>1)||(this.pPos.rx-(database.headrot.x)<-1))||((this.pPos.rz-(database.headrot.z)>1)||(this.pPos.rz-(database.headrot.z)<-1))||((this.pPos.ry-(database.headrot.y)>1)||(this.pPos.ry-(database.headrot.y)<-1)))) {
-		var msg = (database.headpos.x)+ ";"+ (database.headpos.y)+";"+(database.headpos.z)+'|'+(database.headrot.x)+ ";"+ (database.headrot.y)+";"+(database.headrot.z);
+
+		var sx='';
+		var sy='';
+		var sz='';
+		var srx='';
+		var sry='';
+		var srz='';
+			
+		if (this.pPos.x!=database.headpos.x) sx=Math.round(database.headpos.x*100)/100;
+		if (this.pPos.y!=database.headpos.y) sy=Math.round(database.headpos.y*100)/100;
+		if (this.pPos.z!=database.headpos.z) sz=Math.round(database.headpos.z*100)/100;
+		if (this.pPos.rx!=database.headrot.x) srx=Math.round(database.headrot.x*100)/100;
+		if (this.pPos.ry!=database.headrot.y) sry=Math.round(database.headrot.y*100)/100;
+		if (this.pPos.rz!=database.headrot.z) srz=Math.round(database.headrot.z*100)/100;
+		var msg = (sx)+ ";"+ (sy)+";"+(sz)+'|'+(srx)+ ";"+ (sry)+";"+(srz);
+			
+		//var msg = (database.headpos.x)+ ";"+ (database.headpos.y)+";"+(database.headpos.z)+'|'+(database.headrot.x)+ ";"+ (database.headrot.y)+";"+(database.headrot.z);
 		this.pPos.x=(database.headpos.x);
 		this.pPos.y=(database.headpos.y);
 		this.pPos.z=(database.headpos.z);
