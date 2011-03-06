@@ -390,6 +390,9 @@ Renderer.prototype.process = function (database){
 	this.setposy(database.head,(database.playerPos.y));
 	
 	database.playerTempHeight=this.setheightfrustrum(database.playerTempHeight,(database.playerPos.z+2+inc/1000),camera,0.001);
+	
+	database.headpos = this.getpos(database.head);
+	database.headrot = this.getrot(database.head);
 		
 	if((((this.pPos.x-(database.headpos.x)>1)||(this.pPos.x-(database.headpos.x)<-1))||((this.pPos.z-(database.headpos.z)>1)||(this.pPos.z-(database.headpos.z)<-1))||((this.pPos.rx-(database.headrot.x)>1)||(this.pPos.rx-(database.headrot.x)<-1))||((this.pPos.rz-(database.headrot.z)>1)||(this.pPos.rz-(database.headrot.z)<-1))||((this.pPos.ry-(database.headrot.y)>1)||(this.pPos.ry-(database.headrot.y)<-1)))) {
 		var msg = (database.headpos.x)+ ";"+ (database.headpos.y)+";"+(database.headpos.z)+'|'+(database.headrot.x)+ ";"+ (database.headrot.y)+";"+(database.headrot.z);

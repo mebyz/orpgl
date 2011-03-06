@@ -1,22 +1,18 @@
-//emmanuel.botros@gmail.com (2011) - Creative Commons BY 3.0 License Terms//
-//------------------------------------------------------------------------//
+HOST = null; // localhost
+PORT = 8080; 
 
-var HOST = null; 						// running server on localhost
-var PORT = 8080; 						// listening port
-var GTime = 0;							// global time ticker
-var appfolder='client';				// main game folder
-var starttime = (new Date()).getTime();	// initial timedate
+GTime=0;
+
+var appfolder='client';
+var starttime = (new Date()).getTime();
 var nature = [];
+var trees = [];
+var bush = [];
+var branch = [];
+  
 var mem = process.memoryUsage();
-var fu = require("./fu");
-var fs = require("fs");
-var sys = require("sys");
-var url = require("url");
-var qs = require("querystring");
-var MESSAGE_BACKLOG = 1;
-var SESSION_TIMEOUT = 60 * 1000;
 
-// every 10 seconds > poll for the memory.
+// every 10 seconds poll for the memory.
 setInterval(function () {
   mem = process.memoryUsage();
 }, 10*1000);
@@ -26,13 +22,22 @@ setInterval(function () {
 GTime+=1;
 }, 10);
 
+var fu = require("./fu"),
+    fs = require("fs"),
+    sys = require("sys"),
+    url = require("url"),
+    qs = require("querystring");
+
+var MESSAGE_BACKLOG = 1,
+    SESSION_TIMEOUT = 60 * 1000;
+
 var server = new function () {
   var messages = [],
       callbacks = [];
 
   this.appendMessage = function (nick, type, text) {
     var m = { nick: nick
-            , type: type // "msg", "join", "part",...
+            , type: type // "msg", "join", "part"
             , text: text
             , timestamp: (new Date()).getTime()
             };
@@ -43,9 +48,6 @@ var server = new function () {
         break;
       case "join":
         sys.puts(nick + " join");
-        break;
-      case "joinadmin":
-        sys.puts(nick + " join admin");
         break;
       case "part":
         sys.puts(nick + " part");
@@ -76,6 +78,9 @@ var server = new function () {
       callbacks.push({ timestamp: new Date(), callback: callback });
     }
   };
+
+  // clear old callbacks
+  // they can hang around for at most 30 seconds.
   setInterval(function () {
     var now = new Date();
     while (callbacks.length > 0 && now - callbacks[0].timestamp > 30*1000) {
@@ -127,38 +132,57 @@ setInterval(function () {
   }
 }, 1000);
 
-function createnature(num,callback) {
-	var cont = [];
+fu.listen(Number(process.env.PORT || PORT), HOST);
+
+function createnature(cont,num,callback) {
 	for (var i=0;i<num;i++) {
-		var vx= (Math.random()*400)-200;
-		var vy= (Math.random()*400)-200;
-		var ry= (Math.random()*.5)-.5;
-		var rz= (Math.random()*2*3.14);
-		obj=[vx,
-			vy,
-			ry,
-			rz,
-			];
-		cont.push(obj);
-	}
-	nature.push(cont);
+			var vx= (Math.random()*400)-200;
+			var vy= (Math.random()*400)-200;
+			var ry= (Math.random()*.5)-.5;
+			var rz= (Math.random()*2*3.14);
+			obj=[vx
+                      , vy
+                      , ry
+                      , rz
+                      ];
+			cont.push(obj);
+		}
+		nature.push(cont);
 }
 
 function loaddir(path, callback) {
-	fs.readdir(path, function (err, filenames) {
-	if (err) 
-		return; 
-	var realfiles = [];
-	var count = filenames.length;
-	filenames.forEach(function (filename) {
-		if ((path.indexOf("svn")==-1)&&(filename.indexOf("svn")==-1)){
-			console.log("oco  : " + path+'/'+filename);                     
-			fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
-			realfiles.push(filename);
-			loaddir(path+'/'+filename, callback);}
-		});
-	});
-}
+      fs.readdir(path, function (err, filenames) {
+        if (err) { return; }
+        var realfiles = [];
+        var count = filenames.length;
+        filenames.forEach(function (filename) {
+if ((path.indexOf("svn")==-1)&&(filename.indexOf("svn")==-1)){
+		console.log("oco  : " + path+'/'+filename);                     
+		fu.get('/'+path+'/'+filename, fu.staticHandler(path+'/'+filename));
+		realfiles.push(filename);
+
+        loaddir(path+'/'+filename, callback);}
+
+    });
+    });
+    }
+
+
+console.log("loading folder "+appfolder+" ...");
+loaddir(appfolder);
+
+console.log("creating nature ...");
+createnature(trees,30);
+createnature(bush,50);
+createnature(branch,10);
+
+
+fu.get("/", fu.staticHandler("index.html"));
+fu.get("/styles.css", fu.staticHandler("styles.css"));
+fu.get("/client.js", fu.staticHandler("client.js"));
+fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
+fu.get("/glge/glge-compiled-min.js", fu.staticHandler("glge/glge-compiled-min.js"));
+
 
 fu.get("/who", function (req, res) {
   var nicks = [];
@@ -168,7 +192,6 @@ fu.get("/who", function (req, res) {
     nicks.push(session.nick);
   }
   res.simpleJSON(200, { nicks: nicks
-                      , rss: mem.rss
                       });
 });
 
@@ -196,29 +219,6 @@ fu.get("/join", function (req, res) {
   server.appendMessage(session.nick, "join");
   res.simpleJSON(200, { id: session.id
                       , nick: session.nick
-                      , rss: mem.rss
-                      , starttime: starttime
-                      });
-});
-
-fu.get("/joinadmin", function (req, res) {
-  var nick = qs.parse(url.parse(req.url).query).nick;
-  if (nick == null || nick.length == 0 || nick != 'elidoeiram' ) {
-    res.simpleJSON(400, {error: "Bad nick."});
-    return;
-  }
-  var session = createSession(nick);
-  if (session == null) {
-    res.simpleJSON(400, {error: "Nick in use"});
-    return;
-}
-
-  //sys.puts("connection: " + nick + "@" + res.connection.remoteAddress);
-
-  server.appendMessage(session.nick, "join admin");
-  res.simpleJSON(200, { id: session.id
-                      , nick: session.nick
-                      , rss: mem.rss
                       , starttime: starttime
                       });
 });
@@ -230,7 +230,6 @@ fu.get("/part", function (req, res) {
     session = sessions[id];
     session.destroy();
   }
-  res.simpleJSON(200, { rss: mem.rss });
 });
 
 fu.get("/recv", function (req, res) {
@@ -249,7 +248,7 @@ fu.get("/recv", function (req, res) {
 
   server.query(since, function (messages) {
     if (session) session.poke();
-    res.simpleJSON(200, { messages: messages, rss: mem.rss });
+    res.simpleJSON(200, { messages: messages });
   });
 });
 
@@ -267,7 +266,7 @@ fu.get("/send", function (req, res) {
   if (session.nick) {
 	console.log(session.nick +"(time "+GTime+") msg:"+ text);
 	server.appendMessage(session.nick, "msg", text);
-	res.simpleJSON(200, { rss: mem.rss });
+	res.simpleJSON(200, {});
   }
 });
 
@@ -282,21 +281,3 @@ fu.get("/GST", function (req, res) {
 	res.simpleJSON(200, { GST: GTime });
   }
 });
-
-// STARTING SERVER INSTANCE
-fu.listen(Number(process.env.PORT || PORT), HOST);
-
-console.log("loading folder "+appfolder+" ...");
-loaddir(appfolder); 
-
-fu.get("/", fu.staticHandler("index.html"));
-fu.get("/admin.html", fu.staticHandler("admin.html"));
-fu.get("/styles.css", fu.staticHandler("styles.css"));
-fu.get("/client.js", fu.staticHandler("client.js"));
-fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
-fu.get("/glge/glge-compiled-min.js", fu.staticHandler("glge/glge-compiled-min.js"));
-
-console.log("creating nature ...");
-createnature(30);		// set trees positions
-createnature(5);		// set plants1 positions
-createnature(50);	// set plants2 positions
