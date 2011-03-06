@@ -29,38 +29,41 @@ AIMoveable.prototype.movecoll = function (rd,coll,num){
 		if (coll[i].active==true) {
 			
 			//rule1 : each object approaches the collective center of gravity
-			this.virt1 = new Vector(coll[i].x-this.virt.x,coll[i].y-this.virt.y,coll[i].z-this.virt.z);
-			this.virt1.divector(1000);
-			coll[i].remvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
+			this.virt1 = new Vector(this.virt.x-coll[i].x,this.virt.y-coll[i].y,this.virt.z-coll[i].z);
+			this.virt1.divector(100);
 			
 			this.virt2 = new Vector(0,0,0);
 			this.virt3 = new Vector(0,0,0);
 			for(var j = 0; j < num; j++) {
-				//rule2 : if distance between 2 objects is too low, they repulse each other
 				
+				//rule2 : if distance between 2 objects is too low, they repulse each other
 				 if (i!=j) {
-					if (coll[i].getdistpos({'x':coll[j].x,'y':coll[j].y,'z':coll[j].z}) < 1 ) {
+					if (coll[i].getdistpos({'x':coll[j].x,'y':coll[j].y,'z':coll[j].z}) < 2 ) {
 						this.virt2.addvectorpos({'x':coll[i].x-coll[j].x,'y':coll[i].y-coll[j].y,'z':coll[i].z-coll[j].z});
 						this.virt2.divector(10);
-						coll[i].addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
-					}
+						}
 				}
 				
 				//rule3 : objects try to get to the same speed
 				if (i!=j) {
 					this.virt3.addvectorpos({'x':coll[i].velocity.x-coll[j].velocity.x,'y':coll[i].velocity.y-coll[j].velocity.y,'z':coll[i].velocity.z-coll[j].velocity.z});
-					this.virt3.divector(.001);
+					this.virt3.divector(10000);
 				}
 				
 			}
 			
 			var addvelocity = new Vector(0,0,0);
+			
 			addvelocity.addvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
 			addvelocity.addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
 			addvelocity.addvectorpos({'x':this.virt3.x,'y':this.virt3.y,'z':this.virt3.z});
+			//rule4 : each object keeps around the origin
+			addvelocity.addvectorpos({'x':-coll[i].x/500,'y':-coll[i].y/500,'z':-coll[i].z/100});
 			
 			
 			coll[i].velocity.addvectorpos(addvelocity);
+			coll[i].addvectorpos(addvelocity);
+			
 			
 			rd.setposx(coll[i].el,coll[i].x);
 			rd.setposy(coll[i].el,coll[i].y);
@@ -186,6 +189,7 @@ Renderer.prototype.getray = function (database,mousepos) {
 			
 			// can't fire faster then 10 bullet per sec
 			setTimeout("window.DB.eRay=false;",1000);
+			setTimeout("$('#tim2').html('');",10000);
 		}
 	}	
 	
@@ -215,10 +219,16 @@ Renderer.prototype.getray = function (database,mousepos) {
 		// intermediate eta 
 		var tps=dist3d/speed;
 		
-		posi[0]	=	database.rayPosStart[0]-((database.rayPosStart[0]-database.rayPosEnd[0])/tps);
-		posi[1]	=	database.rayPosStart[1]-((database.rayPosStart[1]-database.rayPosEnd[1])/tps);
-		posi[2]	=	database.rayPosStart[2]-((database.rayPosStart[2]-database.rayPosEnd[2])/tps);
-
+		if (dist3d<speed){
+			posi[0]	=	database.rayPosEnd[0];
+			posi[1]	=	database.rayPosEnd[1];
+			posi[2]	=	database.rayPosEnd[2];
+		}
+		else {
+			posi[0]	=	database.rayPosStart[0]-((database.rayPosStart[0]-database.rayPosEnd[0])/tps);
+			posi[1]	=	database.rayPosStart[1]-((database.rayPosStart[1]-database.rayPosEnd[1])/tps);
+			posi[2]	=	database.rayPosStart[2]-((database.rayPosStart[2]-database.rayPosEnd[2])/tps);
+		}
 		// moves the bullet along its path
 		this.setposx(database.bullet,(posi[0]));
 		this.setposy(database.bullet,(posi[1]));
@@ -229,7 +239,7 @@ Renderer.prototype.getray = function (database,mousepos) {
 		database.rayPosStart[1]	=	posi[1]
 		database.rayPosStart[2]	=	posi[2]
 
-		//$("#tim2").html("");
+		
 		// loop in the enemies' collection
 		for(var i = 0; i < this.numEnnemies; i++) {									
 			if (this.ennemyArray[i].active==true) {
@@ -246,7 +256,9 @@ Renderer.prototype.getray = function (database,mousepos) {
 					$("#tim2").append(dist+"<br>");
 				}*/
 					// if distance < 5 : kill the ennemy
-				if (dist<3) {
+				
+				
+				if (dist<=5) {
 					//$("#tim2").append("COLLISION near "+this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+"<br>");
 					this.setposz(this.ennemyArray[i].el,-1000);			
 					this.ennemyArray[i].active=false;
