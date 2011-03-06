@@ -293,19 +293,14 @@ Renderer.prototype.process = function (database){
 
 	var camera = this.getcam();
 	var mousepos = this.getmousepos();
-
-	mousepos.x = mousepos.x - document.body.offsetLeft;
-	mousepos.y = mousepos.y	- document.body.offsetTop;			
-
 	var camerapos = this.getpos(camera);
 	var camerarot = this.getrot(camera);
-	
 	database.playerPos = this.getpos(database.cube);
-	
 	database.cuberot = this.getrot(database.cube);
-	
 	database.headrot =  this.getrot(database.head);
 	
+	mousepos.x = mousepos.x - document.body.offsetLeft;
+	mousepos.y = mousepos.y	- document.body.offsetTop;			
 	this.getray(database,mousepos);
 	
 	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200)+2;
@@ -457,13 +452,14 @@ Renderer.prototype.addobj = function (o,o2) {
 }
 
 // create a new object
-Renderer.prototype.setobj = function (mesh,name,posrot,mat,pick,bag,counter,type,tvar) {
+Renderer.prototype.setobj = function (mesh,name,posrot,mat,pick,bag,counter,type,tvar,scale) {
 	
 	var	obj=(new GLGE.Object).setDrawType(GLGE.DRAW_TRIANGLES);
 			
 	obj.setMesh(mesh);
+	obj.setScale(scale);
 	obj.setMaterial(mat);
-	obj.setZtransparent(false);
+	obj.setZtransparent(true);
 	obj.id=name+counter;
 	obj.pickable=pick;
 			
@@ -596,11 +592,11 @@ Renderer.prototype.setobjectsground = function (database,coll) {
 Renderer.prototype.buildnature = function (database) {
 		if (!database.eClusterCrea){
 			database.Forest=new Cluster(this,database);
-			database.Forest.load(database.tree,database.ObjBag,database.materialGrass,0);	
+			database.Forest.load(database.tree,database.ObjBag,database.materialGrass,0,1);	
 			database.Grass=new Cluster(this,database);
-			database.Grass.load(database.bush,database.ObjBag,database.materialFlower,1);	
+			database.Grass.load(database.bush,database.ObjBag,database.materialFlower,1,5);	
 			database.Branches=new Cluster(this,database);
-			database.Branches.load(database.branches,database.ObjBag,database.materialBush,2);	
+			database.Branches.load(database.branches,database.ObjBag,database.materialBush,2,1);	
 			database.eClusterCrea=true;	
 		}
 		
@@ -691,7 +687,7 @@ var Cluster = function (_rd,_db) {
 	this.dtb=_db;
 }
 
-Cluster.prototype.load = function (obj,cont,mat,idx) {
+Cluster.prototype.load = function (obj,cont,mat,idx,sc) {
 		this.idx=idx;
 		this.Elems=Nature[idx];
 		this.count=this.Elems.length;		
@@ -700,7 +696,7 @@ Cluster.prototype.load = function (obj,cont,mat,idx) {
 		
 		for (var i=0;i<this.count;i++) {
 			// rd is a Renderer Instance
-			this.rd.setobj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,db.objectsCounter++,1,this.cElems);
+			this.rd.setobj( this.clusterObj.getMesh(),"Cube_",(new PosRot(this.Elems[i][0],this.Elems[i][1],null,null,this.Elems[i][2],this.Elems[i][3])),mat,false,this.objContainer,db.objectsCounter++,1,this.cElems,sc);
 		}
 		
 		this.dtb.eClusterCrea=true;
@@ -765,7 +761,7 @@ renderer.doc.onLoad = function() {
 	'branches' : 'Bush 2',
 	'materialBush' : 'Bush Green.001',
 	'materialRobot' : 'Material.003',
-	'materialFlower' : 'Flower Green',
+	'materialFlower' : 'fougere',
 	'groundObject':'ground'});
 	renderer.setposz(db.groundObject,-300);
 	utils.setdom(renderer);
@@ -778,7 +774,7 @@ renderer.doc.onLoad = function() {
 	for(var i = 0; i < renderer.numEnnemies; i++) {
 		renderer.ennemyArray.push(new Vector(utils.random(300), utils.random(300),-170));
 		renderer.ennemyArray[i].velocity=new Vector(0,0,0);
-		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,false,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i]);
+		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,false,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i],1);
 	}
 	
 	

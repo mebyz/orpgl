@@ -138,7 +138,7 @@ function createnature(cont,num,callback) {
 	for (var i=0;i<num;i++) {
 			var vx= (Math.random()*400)-200;
 			var vy= (Math.random()*400)-200;
-			var ry= (Math.random()*.5)-.5;
+			var ry= (Math.random()*.1)-.1;
 			var rz= (Math.random()*2*3.14);
 			obj=[vx
                       , vy
@@ -174,7 +174,7 @@ loaddir(appfolder);
 console.log("creating nature ...");
 createnature(trees,30);
 createnature(bush,50);
-createnature(branch,10);
+createnature(branch,30);
 
 
 fu.get("/", fu.staticHandler("index.html"));

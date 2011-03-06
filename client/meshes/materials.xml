@@ -18,6 +18,11 @@
 	</material>
 	<material id="Flower Red.002" color="rgb(237,80,0)" specular="0.000000" shininess="50.000000" emit="0.000000" >
 	</material>
+	<material id="fougere" color="rgb(56,74,27)" specular="0.000000" shininess="50.000000" emit="0.000000" >
+		<texture id="Tex.017Tex" src="textures/Fern_diff.png" />
+		<material_layer texture="#Tex.017Tex" mapinput="UV1" mapto="M_COLOR" />
+		<material_layer texture="#Tex.017Tex" mapinput="UV1" mapto="M_ALPHA" />
+	</material>
 	<material id="Material" color="rgb(204,204,204)" specular="0.000000" shininess="50.000000" emit="0.000000" >
 		<texture id="Texture.001Tex" src="textures/terr_texture.jpg" />
 		<material_layer texture="#Texture.001Tex" mapinput="UV1" mapto="M_COLOR" />

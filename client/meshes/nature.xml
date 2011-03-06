@@ -70,7 +70,7 @@
 			loc_x="-3.413240" loc_y="101.188568" loc_z="-132.284958"
 			rot_x="0.000000" rot_y="-0.000000" rot_z="-0.893289"
 		/>
-		<object id="Bush 1" mesh="#Plane.003Mesh"
+		<object id="Bush 1f" mesh="#Plane.003Mesh"
 			rot_order="ROT_ZYX"
 			scale_x="0.326500" scale_y="0.326500" scale_z="0.326500"
 			material="#Flower Green"
@@ -83,6 +83,14 @@
 			material="#Bush Green.001"
 			loc_x="-12.673321" loc_y="-8.169106" loc_z="2.325790"
 			rot_x="-0.103128" rot_y="-0.142171" rot_z="-2.439326"
+		/>
+		<object id="Bush 1" mesh="#Plane.005Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="26.331409" scale_y="23.907887" scale_z="9.284536"
+			material="#fougere"
+			ztransparent="TRUE"
+			loc_x="-1.107937" loc_y="-1.631102" loc_z="2.497913"
+			rot_x="-0.528614" rot_y="0.012257" rot_z="-1.091431"
 		/>
 		<group id="graph">
 			<object id="xaxis" draw_type="DRAW_LINES" line_width="2" mesh="#xline" material="#red"  />
