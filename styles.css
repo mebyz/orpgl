@@ -16,15 +16,15 @@ figure{
 body{
 	/* Setting the default text color, size, page background and a font stack: */
 	font-size:0.825em;
-	color:#fcfcfc;
-	background-color:#355664;
+	color:#ddd;
+	background-color:#fff;
 	font-family:Arial, Helvetica, sans-serif;
 }
 
 /* Hyperlink Styles: */
 
 a, a:visited {
-	color:#0196e3;
+	color:#34ee2e;
 	text-decoration:none;
 	outline:none;
 }
@@ -41,7 +41,8 @@ a img{
 
 h1,h2,h3{
 	font-family:"Myriad Pro","Helvetica Neue",Helvetica,Arial,Sans-Serif;
-	text-shadow:0 1px 1px black;
+	color:#66a1d2;
+	text-shadow:0 3px 3px #043c6b;
 }
 
 h1{
@@ -75,7 +76,7 @@ p{
 .line{
 	/* The dividing line: */
 	height:1px;
-	background-color:#24404c;
+	/*background-color:#24404c;*/
 	border-bottom:1px solid #416371;
 	margin:1em 0;
 	overflow:hidden;
@@ -83,7 +84,7 @@ p{
 
 article .line{
 	/* The dividing line inside of the article is darker: */
-	background-color:#15242a;
+	/*background-color:#15242a;*/
 	border-bottom-color:#204656;
 	margin:1.3em 0;
 }
@@ -156,10 +157,12 @@ nav, article, nav ul li a,figure{
 }
 
 article{
-	background-color:#213E4A;
+	/*background-color:#213E4A;*/
 	padding:20px;
-	margin-bottom:20px;
-	text-shadow:0 2px 0 black;
+	margin-bottom:20px;	
+	font-family:"Myriad Pro","Helvetica Neue",Helvetica,Arial,Sans-Serif;
+	color:#204060;
+	text-shadow:0 3px 3px #043c6b;
 }
 
 footer{

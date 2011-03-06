@@ -864,7 +864,7 @@ var movePf = function() {
 			c2.actions[n].setFrames(db.AnimFramesArray[3]); 
 			db.eAnim=true; 
 			c2.setAction(c2.actions[n],0,true);
-			play_multi_sound('multiaudio1');
+			//play_multi_sound('multiaudio1');
 			break;
 		} 
 		setTimeout('db.eAnim=false;db.ePAnimWalk=false;if(!db.eJump)moveP();',800);
@@ -899,4 +899,4 @@ var moveJump = function() {
 	}	
 }
 
-renderer.loadxml("example/meshes/nature.xml");
+renderer.loadxml("client/meshes/nature.xml");

@@ -1,113 +1,73 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        
-        <title>HTML5-WebGL-NodeJS Multiplayer Game Experiment by E.BOTROS</title>
-        
-        <link rel="stylesheet" type="text/css" href="styles.css" />
-        
-     
-        
-        <!--[if IE]>
-        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        
-        <style type="text/css">
-        .clear {
-          zoom: 1;
-          display: block;
-        }
-        </style>
-
-        
-        <![endif]-->
-        <script>
-		var c2=-1;
-		var c3=-1;
-	</script>
-  	<script src="jquery-1.2.6.min.js" type="text/javascript"></script>
-	<script src="client.js" type="text/javascript"></script>
-	<!--<script src="glge-compiled-min.js" type="text/javascript"></script>-->
-	<script type="text/javascript" src="example/GLGE/glge_math.js"></script>
-	<script type="text/javascript" src="example/GLGE/glge_math.js"></script>
-	<script type="text/javascript" src="example/GLGE/glge.js"></script>
-	<script type="text/javascript" src="example/GLGE/glge_input.js"></script>
-	<script type="text/javascript" src="example/GLGE/glge_collada.js"></script>
-		
-	<style type="text/css">
-		 #toolbar {
-			position:absolute;
-			bottom:5px;
-			left:0px;
-			color: white;
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>HTML5-WebGL-NodeJS Multiplayer Game Experiment by E.BOTROS</title>
+		<link rel="stylesheet" type="text/css" href="styles.css" />
+		<!--[if IE]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<style type="text/css">
+		.clear {
+		  zoom: 1;
+		  display: block;
 		}
-	</style>		
-    </head>
-    <body>		
+		</style>
+		<![endif]-->
+		<script>
+			var c2=-1;
+			var c3=-1;
+		</script>
+		<script src="jquery-1.2.6.min.js" type="text/javascript"></script>
+		<script src="client.js" type="text/javascript"></script>
+		<script src="glge/glge-compiled-min.js" type="text/javascript"></script>
+	
+	
+		<style type="text/css">
+			 #toolbar {
+				position:absolute;
+				bottom:5px;
+				left:0px;
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
 		<canvas id="canvas" style="z-index:1000;position:absolute;top:0px;left:0px;cursor:none;"></canvas>
 		<div>
-		<div style="z-index:1001;position:absolute;top:0px;left:0px;" id="tim"></div>
-		<div style="z-index:1001;position:absolute;top:15px;right:0px;" id="tim1"></div>
-		<div style="z-index:1001;position:absolute;top:30px;left:0px;" id="tim2"></div>
-		<div style="z-index:1001;position:absolute;top:45px;left:0px;" id="tim3"></div>
-		<img id="mcur" src="example/images/cur.png" style="z-index:1001;display:none;position:absolute;top:0px;left:0px;" />
+			<div style="z-index:1001;position:absolute;top:0px;left:0px;" id="tim"></div>
+			<div style="z-index:1001;position:absolute;top:15px;right:0px;" id="tim1"></div>
+			<div style="z-index:1001;position:absolute;top:30px;left:0px;" id="tim2"></div>
+			<div style="z-index:1001;position:absolute;top:45px;left:0px;" id="tim3"></div>
+			<img id="mcur" src="client/images/cur.png" style="z-index:1001;display:none;position:absolute;top:0px;left:0px;" />
 		</div>
-
-    	<section id="page">
-    
-            <header> 
-            
-                <hgroup>
-                    <h3>an HTML5-WebGL-NodeJS Multiplayer Game Experiment.</h3>
-                    <h5>contact : <a href="mailto:emmanuel.botros@gmail.com">E.BOTROS</a></h5>
-                </hgroup>
-                                
-                
-            
-            </header>
-            
-            <section id="articles"> 
-
-			
-                <div class="line"></div> 
-                
-                <article id="article1"> 
-                <nav class="clear"> 
-                    <ul>
-                        <li><a href="#article1">Launch The Demo :</a></li>
-                    </ul>
-                    
-                </nav><br/>You need a Webgl friendly browser to use this demo<br/>
-                    <div class="line"></div>
-                    	<p>
-									
-									Enter a nickname and click "join". Use the directional keys and the mouse to move and space to jump.<br/>
-									Please remember this is an experiment. thanks !<br/>
-						</p>
-                    <div class="articleBody clear">
-												
+		<section id="page">
+			<header> 
+				<hgroup>
+					<h3>HTML5-WebGL-NodeJS Multiplayer Game Experiment.</h3>
+					<h5>contact : <a href="mailto:emmanuel.botros@gmail.com">E.BOTROS</a></h5>
+				</hgroup>
+			</header>
+			<section id="articles"> 
+				<article id="article1"> 
+					<nav class="clear"> 
+						<ul>
+							<li><a href="#article1">Launch The Demo :</a>
+								  <div id="connect">
+									<form action="#">
+										<input id="nickInput" class="text"type="text" name="nick" value="Nickname"/>
+										<input id="connectButton" class="button" type="submit" name="" value="Join"/>
+									</form>
+								  </div>
+							</li>
+						</ul>
+					</nav>
+					<div class="articleBody clear">
 						<div id="app">
-							<audio id="snd" loop="loop" autoplay="autoplay"><source src="example/enviro-desert01.ogg" /></audio>
-							  <div id="connect">
-								<form action="#">
-											   
-								
-												
-
-
-									<label for="nick">Input a Nickname</label>
-									<input id="nickInput" class="text"type="text" name="nick" value=""/>
-									<input id="connectButton" class="button" type="submit" name="" value="Join"/>
-
-								</form>
-							  </div>
+							<audio id="snd" loop="loop" autoplay="autoplay"><source src="client/enviro-desert01.ogg" /></audio>
 							  <div id="loading"><p>loading</p></div>
 							  <div id="log">
 							  </div>
 							  <div id="toolbar">
-
-
 								<ul id="status">
 								  <li><a id="usersLink" href="#">5 users</a></li>
 								  <li>uptime: <span id="uptime">?</span></li>
@@ -115,81 +75,31 @@
 								<input tabindex="1" type="text" id="entry" style="font-size:10px;width:800px;"/>
 								<div id="logrender" style="display:none;width:900px;font-size:8px;height:300px;overflow-y:auto;"></div>
 							  </div>
-						<div id="logDiv">
+							<div id="logDiv">
 						</div>
-                        
-                   </div>
-                </article>
-                
-  <article id="article2"> 
-                <nav class="clear"> 
-                    <ul>
-                        <li><a href="#article1">In-Game Shots :</a></li>
-                    </ul>
-                </nav><br/><p>
-<center>								<img src="example/images/screen1.png" width="250" />	
-								<img src="example/images/screen2.png" width="250" />	</center>
-						</p>
-                    <div class="articleBody clear">
-					
-                        
-                   </div>
-                </article>
-                      
-  <article id="article3"> 
-                <nav class="clear"> 
-                    <ul>
-                        <li><a href="#article1">The Buzz :</a></li>
-                    </ul>
-                </nav><br/>How to let other people know about this work<br/>
-                    <div class="line"></div>
-                    	<p>
-							<audio id="multiaudio1" src="example/test.wav" preload="auto" loop="loop"></audio>
-
-
-							<a href="javascript:play_multi_sound('multiaudio1');">test</a><br />
-							<script type="text/javascript">
-								var channel_max = 10;										// number of channels
-								audiochannels = new Array();
-								for (a=0;a<channel_max;a++) {									// prepare the channels
-									audiochannels[a] = new Array();
-									audiochannels[a]['channel'] = new Audio();						// create a new audio object
-									audiochannels[a]['finished'] = -1;							// expected end time for this channel
-								}
-								function play_multi_sound(s) {
-									for (a=0;a<audiochannels.length;a++) {
-										thistime = new Date();
-										if (audiochannels[a]['finished'] < thistime.getTime()) {			// is this channel finished?
-											audiochannels[a]['finished'] = thistime.getTime() + document.getElementById(s).duration*1000;
-											audiochannels[a]['channel'].src = document.getElementById(s).src;
-											audiochannels[a]['channel'].load();
-											audiochannels[a]['channel'].play();
-											break;
-										}
-									}
-								}
-							</script>
-						
-						</p>
-                    <div class="articleBody clear">
-					
-                        
-                   </div>
-                </article>
-            </section>
-
-        <footer> 
-
-           <div class="line"></div>
-           
-           <p>Copyright 2011 - emmanuel.botros@gmail.com</p> 
-           
-           <a href="#" class="by">uses : mainly GLGE and NodeJs</a>
-           
-
-        </footer>
-            
+					</div>
+				</article>
+				<article id="article2"> 
+					<nav class="clear"> 
+						<ul>
+							<li><a href="#article1">In-Game Shots :</a></li>
+						</ul>
+					</nav>
+					<br/>
+					<p>
+					<center>
+						<img src="client/images/screen1.png" width="250" />
+						<img src="client/images/screen2.png" width="250" />
+					</center>
+					</p>
+					<div class="articleBody clear">
+				   </div>
+				</article>
+			</section>
+			<footer>
+				<div class="line"></div>
+				<p>Copyright 2011 - emmanuel.botros@gmail.com</p> 
+			</footer>
 		</section>
-        
-    </body>
+	</body>
 </html>

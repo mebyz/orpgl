@@ -302,7 +302,7 @@ $("#canvas").css({"height":"300px","width":"600px"})
     return;
   }
   
-    var str='<script type="text/javascript" src="example/scripts/nature.js"></script>';
+    var str='<script type="text/javascript" src="client/scripts/nature.js"></script>';
     $("#app").append(str);
 
   CONFIG.nick = session.nick;

@@ -4,7 +4,7 @@ Creative Commons BY 3.0 License Terms
 
 see LICENSE file
 + Ryan Dahl's node-chat base source licensing : see LICENSE-MIT 
-+ supereggbert (Paul Brunt) GLGE : see example/GLGE/README
++ supereggbert (Paul Brunt) GLGE : see glge/README
 
 REQUIREMENTS:
 server side > nodejs

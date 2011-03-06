@@ -4,7 +4,7 @@
 var HOST = null; 						// running server on localhost
 var PORT = 8080; 						// listening port
 var GTime = 0;							// global time ticker
-var appfolder='example';				// main game folder
+var appfolder='client';				// main game folder
 var starttime = (new Date()).getTime();	// initial timedate
 var nature = [];
 var mem = process.memoryUsage();
@@ -294,7 +294,7 @@ fu.get("/admin.html", fu.staticHandler("admin.html"));
 fu.get("/styles.css", fu.staticHandler("styles.css"));
 fu.get("/client.js", fu.staticHandler("client.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
-fu.get("/glge-compiled-min.js", fu.staticHandler("glge-compiled-min.js"));
+fu.get("/glge/glge-compiled-min.js", fu.staticHandler("glge/glge-compiled-min.js"));
 
 console.log("creating nature ...");
 createnature(30);		// set trees positions
