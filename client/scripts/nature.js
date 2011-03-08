@@ -398,11 +398,11 @@ Renderer.prototype.process = function (database){
 	var incX=0;
 	var mvanim="anim1";
 
-	if(this.keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("window.DB.eJump=true",1);database.ePreJump=true;moveJump(); }
-	if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {mvanim="anim3";incY-=parseFloat(trans[1]);incX-=parseFloat(trans[0]);if((!database.ePreJump)&&(!database.eJump))movePf();}
-	if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {mvanim="anim3";incY+=parseFloat(trans[1]);incX+=parseFloat(trans[0]);if((!database.ePreJump)&&(!database.eJump))movePf();} 
-	if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {mvanim="turnl";incY=parseFloat(trans[0]);incX-=parseFloat(trans[1]);if((!database.ePreJump)&&(!database.eJump))movePf();}
-	if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {mvanim="turnr";incY-=parseFloat(trans[0]);incX+=parseFloat(trans[1]);if((!database.ePreJump)&&(!database.eJump))movePf();}
+	if(this.keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("window.DB.eJump=true",1);database.ePreJump=true;}
+	if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {mvanim="anim3";incY-=parseFloat(trans[1]);incX-=parseFloat(trans[0]);}
+	if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {mvanim="anim3";incY+=parseFloat(trans[1]);incX+=parseFloat(trans[0]);} 
+	if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {mvanim="turnl";incY=parseFloat(trans[0]);incX-=parseFloat(trans[1]);}
+	if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {mvanim="turnr";incY-=parseFloat(trans[0]);incX+=parseFloat(trans[1]);}
 	
 	
 	if((incY==0)&&(incX==0)){
@@ -892,10 +892,10 @@ renderer.doc.onLoad = function() {
 						renderer.setposy(db.player,(nlocY));
 						renderer.setposz(db.player,(nlocZ+1));	
 						renderer.setrotz(db.player,((strot[2])-4.8));
-						if (moveplayer)	{
+						/*if (moveplayer)	{
 							movePf2();
 							moveplayer=false;
-						}
+						}*/
 						myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]
 					}
 				}
@@ -912,84 +912,5 @@ renderer.doc.onLoad = function() {
 	
 	var inc=2;
 };
-
-var moveP = function() {
-	if ((db.eJump)||(db.ePreJump)) 
-		return;
-		
-	if ((c2.actions)&&(!db.eAnim)){ 
-		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(db.AnimFramesArray[0]+1);
-			c2.actions[n].setFrames(db.AnimFramesArray[1]); 
-			c2.setAction(c2.actions[n],0,true);
-			break;
-		}
-		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(db.AnimFramesArray[0]+1);
-			c3.actions[n].setFrames(db.AnimFramesArray[1]); 
-			c3.setAction(c3.actions[n],0,true);
-			break;
-		}
-	}
-}	
-var moveP2 = function() {
-		
-	if ((c3.actions)&&(!db.ePAnim)){ 
-		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(db.AnimFramesArray[0]+1);
-			c3.actions[n].setFrames(db.AnimFramesArray[1]); 
-			c3.setAction(c3.actions[n],0,true);
-			break;
-		}
-	}
-}	
-var movePf = function() {
-	
-	if ((db.eJump)||(db.ePreJump)) 
-		return;
-		
-	if ((c2.actions)&&(!db.eAnim)){  
-		db.ePAnimWalk=true; 
-		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(db.AnimFramesArray[2]);
-			c2.actions[n].setFrames(db.AnimFramesArray[3]); 
-			db.eAnim=true; 
-			c2.setAction(c2.actions[n],0,true);
-			//play_multi_sound('multiaudio1');
-			break;
-		} 
-		setTimeout('db.eAnim=false;db.ePAnimWalk=false;if(!db.eJump)moveP();',800);
-	}
-}
-var movePf2 = function() {
-	if ((c3.actions)&&(!db.ePAnim)){  
-		
-		for(n in c3.actions) { 
-			c3.actions[n].setStartFrame(db.AnimFramesArray[2]);
-			c3.actions[n].setFrames(150);
-			db.ePAnim=true; 
-			c3.setAction(c3.actions[n],0,false);
-			break;
-		} 
-		
-		setTimeout('db.ePAnim=false;moveP2();',1000);
-	}
-}
-var moveJump = function() {
-	
-	if ((c2.actions)&&((!db.eAnim)||(db.ePAnimWalk))){  
-		db.ePAnimWalk= false; 
-		for(n in c2.actions) { 
-			c2.actions[n].setStartFrame(db.AnimFramesArray[2]);
-			c2.actions[n].setFrames(db.AnimFramesArray[3]); 
-			db.eAnim=true; 
-			c2.setAction(c2.actions[n],0,false);
-			break;
-		} 
-		setTimeout('db.eAnim=false;db.eJump=false;db.ePreJump=false;db.eJumped=true;moveP();',1000);
-	}	
-}
-
-
 
 renderer.loadxml("client/meshes/nature.xml");
