@@ -57,7 +57,7 @@ AIMoveable.prototype.movecoll = function (rd,coll,num){
 			addvelocity.addvectorpos({'x':this.virt1.x,'y':this.virt1.y,'z':this.virt1.z});
 			addvelocity.addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
 			addvelocity.addvectorpos({'x':this.virt3.x,'y':this.virt3.y,'z':this.virt3.z});
-			//rule4 : each object keeps around the origin
+			//rule4 : each object approachs the origin
 			//addvelocity.addvectorpos({'x':-coll[i].x/1000,'y':-coll[i].y/1000,'z':-coll[i].z/900});
 			
 			
@@ -92,6 +92,7 @@ var Renderer = function (db) {
 }
 
 // START : GLGE INTERFACE //
+
 // *** loadxml *** load a xml scene
 Renderer.prototype.loadxml = function (doc) {
 	this.doc.load(doc);
@@ -678,11 +679,64 @@ Renderer.prototype.setanim = function (db,object,anim) {
 	db.state=anim;
 }
 
+Renderer.prototype.initennemies = function (database) {
+//init ennemies
+	this.ennemyArray = [];
+	this.numEnnemies = 50;
+	for(var i = 0; i < this.numEnnemies; i++) {
+		this.ennemyArray.push(new Vector(window.UTILS.random(300), window.UTILS.random(300),-170));
+		this.ennemyArray[i].velocity=new Vector(0,0,0);
+		this.setobj( database.robot.getMesh(),"Moveable_",(new PosRot(this.ennemyArray[i].x,this.ennemyArray[i].y,this.ennemyArray[i].z,null,null,null)),database.materialRobot,false,database.ObjBag,database.objectsCounter++,0,this.ennemyArray[i],1);
+	}
+}
+
+Renderer.prototype.multi = function (database) {
+	for (var i=0;i<ns.length;i++) {
+	   if (CONFIG.nick!=ns[i]) {
+			if (myJSONUserPosArray[ns[i]])	{
+
+				var straw=myJSONUserPosArray[ns[i]]+"";
+				var stmid=straw.split('|');
+				var st=stmid[0].split(';');
+				var strot=stmid[1].split(';');
+				
+				if (myJSONUserPosArray2[ns[i]]) {
+					
+					var straw2=myJSONUserPosArray2[ns[i]]+"";
+					var stmid2=straw2.split('|');
+					var st2=stmid2[0].split(';');
+					var strot2=stmid2[1].split(';');
+					
+					var ndistX=((st2[0]*1)-(st[0]*1))/2;
+					var ndistY=((st2[1]*1)-(st[1]*1))/2;
+					var ndistZ=((st2[2]*1)-(st[2]*1))/2;
+					
+					if (ndistX>1) ndistX=1;
+					if (ndistY>1) ndistY=1;
+					if (ndistZ>1) ndistZ=1;
+					if (ndistX<-1) ndistX=-1;
+					if (ndistY<-1) ndistY=-1;
+					if (ndistZ<-1) ndistZ=-1;
+					
+					var nlocX=((st2[0]*1) - ndistX);
+					var nlocY=((st2[1]*1) - ndistY);
+					var nlocZ=((st2[2]*1) - ndistZ);
+					
+					this.setposx(database.player,(nlocX));
+					this.setposy(database.player,(nlocY));
+					this.setposz(database.player,(nlocZ+1));	
+					this.setrotz(database.player,((strot[2])-4.8));
+					myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]
+				}
+			}
+		}
+	}
+}
 
 // END : GLGE INTERFACE //
 
 // DB Class handles objects instances and in-game variables
-var DB = function () {
+var DB = function (utils) {
 	this.timer		= null;
 	this.state		= "idle";
 	this.eJump		= false; 		
@@ -712,11 +766,9 @@ var DB = function () {
 	this.RD		= null; // renderer instance
 	
 	window.DB	= this;
+	window.UTILS= utils;
 	
 };
-
-
-
 
 // Vector Class Represent a 3d Vector which can be associated either to an object's position, a velocity,... 
 var Vector = function (x, y, z) {
@@ -812,7 +864,7 @@ Utils.prototype.setmousewheel = function() {
 }
 ////////////////////////////////////////////////////////////////////////
 var utils=new Utils();
-var db=new DB();
+var db=new DB(utils);
 var renderer=new Renderer(db); 
 var ai=new AIMoveable();
 ////////////////////////////////////////////////////////////////////////
@@ -843,71 +895,13 @@ renderer.doc.onLoad = function() {
 	utils.setdom(renderer);
 	utils.setmousewheel();
 	
-	//init ennemies
-	renderer.ennemyArray = [];
-	renderer.numEnnemies = 50;
-	for(var i = 0; i < renderer.numEnnemies; i++) {
-		renderer.ennemyArray.push(new Vector(utils.random(300), utils.random(300),-170));
-		renderer.ennemyArray[i].velocity=new Vector(0,0,0);
-		renderer.setobj( db.robot.getMesh(),"Moveable_",(new PosRot(renderer.ennemyArray[i].x,renderer.ennemyArray[i].y,renderer.ennemyArray[i].z,null,null,null)),db.materialRobot,false,db.ObjBag,db.objectsCounter++,0,renderer.ennemyArray[i],1);
-	}
-	
-	
-	
-	
-	function multi() {
-		
-		for (var i=0;i<ns.length;i++) {
-		   if (CONFIG.nick!=ns[i]) {
-				if (myJSONUserPosArray[ns[i]])	{
-
-					var straw=myJSONUserPosArray[ns[i]]+"";
-					var stmid=straw.split('|');
-					var st=stmid[0].split(';');
-					var strot=stmid[1].split(';');
-					
-					if (myJSONUserPosArray2[ns[i]]) {
-						
-						var straw2=myJSONUserPosArray2[ns[i]]+"";
-						var stmid2=straw2.split('|');
-						var st2=stmid2[0].split(';');
-						var strot2=stmid2[1].split(';');
-						
-						var ndistX=((st2[0]*1)-(st[0]*1))/2;
-						var ndistY=((st2[1]*1)-(st[1]*1))/2;
-						var ndistZ=((st2[2]*1)-(st[2]*1))/2;
-						
-						if (ndistX>1) ndistX=1;
-						if (ndistY>1) ndistY=1;
-						if (ndistZ>1) ndistZ=1;
-						if (ndistX<-1) ndistX=-1;
-						if (ndistY<-1) ndistY=-1;
-						if (ndistZ<-1) ndistZ=-1;
-						
-						var nlocX=((st2[0]*1) - ndistX);
-						var nlocY=((st2[1]*1) - ndistY);
-						var nlocZ=((st2[2]*1) - ndistZ);
-						
-						renderer.setposx(db.player,(nlocX));
-						renderer.setposy(db.player,(nlocY));
-						renderer.setposz(db.player,(nlocZ+1));	
-						renderer.setrotz(db.player,((strot[2])-4.8));
-						/*if (moveplayer)	{
-							movePf2();
-							moveplayer=false;
-						}*/
-						myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]
-					}
-				}
-			}
-		}
-	}
+	renderer.initennemies(db);
 	
 	setInterval( function () {
 		ai.movecoll(renderer,renderer.ennemyArray,renderer.numEnnemies);
 		renderer.process(window.DB);
-		multi();
-		renderer.render();
+		renderer.multi(window.DB);
+		renderer.render(db,utils);
 	},1);
 	
 	var inc=2;
