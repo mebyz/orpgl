@@ -30,7 +30,7 @@ AIMoveable.prototype.movecoll = function (rd,coll,num){
 			
 			//rule1 : each object approaches the collective center of gravity
 			this.virt1 = new Vector(this.virt.x-coll[i].x,this.virt.y-coll[i].y,this.virt.z-coll[i].z);
-			this.virt1.divector(100);
+			this.virt1.divector(5000);
 			
 			this.virt2 = new Vector(0,0,0);
 			this.virt3 = new Vector(0,0,0);
@@ -40,7 +40,7 @@ AIMoveable.prototype.movecoll = function (rd,coll,num){
 				 if (i!=j) {
 					if (coll[i].getdistpos({'x':coll[j].x,'y':coll[j].y,'z':coll[j].z}) < 2 ) {
 						this.virt2.addvectorpos({'x':coll[i].x-coll[j].x,'y':coll[i].y-coll[j].y,'z':coll[i].z-coll[j].z});
-						this.virt2.divector(10);
+						this.virt2.divector(100);
 						}
 				}
 				
@@ -58,7 +58,7 @@ AIMoveable.prototype.movecoll = function (rd,coll,num){
 			addvelocity.addvectorpos({'x':this.virt2.x,'y':this.virt2.y,'z':this.virt2.z});
 			addvelocity.addvectorpos({'x':this.virt3.x,'y':this.virt3.y,'z':this.virt3.z});
 			//rule4 : each object keeps around the origin
-			addvelocity.addvectorpos({'x':-coll[i].x/500,'y':-coll[i].y/500,'z':-coll[i].z/100});
+			//addvelocity.addvectorpos({'x':-coll[i].x/1000,'y':-coll[i].y/1000,'z':-coll[i].z/900});
 			
 			
 			coll[i].velocity.addvectorpos(addvelocity);
@@ -73,7 +73,7 @@ AIMoveable.prototype.movecoll = function (rd,coll,num){
 }
 
 // Renderer Class handles communication with the 3d engine
-var Renderer = function () {
+var Renderer = function (db) {
 	this.gameRenderer = null; 				// game renderer
 	this.gameScene 	= null;					// game scene
 	this.canvasEl	= null;					// canvas element name
@@ -88,6 +88,7 @@ var Renderer = function () {
 	this.numEnnemies=0;				 		// number of ennemies
 	this.ennemyArray =null;				 	// ennemies obj array
 	this.doc=new GLGE.Document();			// initiate the document handler
+	db.RD=this;
 }
 
 // START : GLGE INTERFACE //
@@ -171,9 +172,9 @@ Renderer.prototype.getray = function (database,mousepos) {
 			this.setposx(database.bullet,(database.rayPosStart[0]));
 			this.setposy(database.bullet,(database.rayPosStart[1]));
 			this.setposz(database.bullet,(database.rayPosStart[2]));	
-			this.setrotx(database.bullet,(database.cuberot.x+(Math.PI/2)));
-			this.setroty(database.bullet,(database.cuberot.y));
-			this.setrotz(database.bullet,(database.cuberot.z));
+			this.setrotx(database.bullet,(database.playerrot.x+(Math.PI/2)));
+			this.setroty(database.bullet,(database.playerrot.y));
+			this.setrotz(database.bullet,(database.playerrot.z));
 			
 			// Server needs to know a collision just happened
 			send('COLLISION:'+database.rayPosEnd);
@@ -192,15 +193,6 @@ Renderer.prototype.getray = function (database,mousepos) {
 			setTimeout("$('#tim2').html('');",10000);
 		}
 	}	
-	
-	//	$("#tim2").html("");
-	/*	for(var i = 0; i < this.numEnnemies; i++) {									
-			if (this.ennemyArray[i].active==true) {
-				$("#tim2").append(this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+"<br>");
-			}
-		}				
-	*/		
-	
 	
 	// handles the bullet movement
 	if (database.eRay) {	
@@ -238,27 +230,57 @@ Renderer.prototype.getray = function (database,mousepos) {
 		database.rayPosStart[0]	=	posi[0]
 		database.rayPosStart[1]	=	posi[1]
 		database.rayPosStart[2]	=	posi[2]
-
 		
+		// posi2 : next intermediate position prediction (the "next" posi[])
+		var posi2=[];
+
+		var distX=(database.rayPosStart[0]-database.rayPosEnd[0])
+		var distY=(database.rayPosStart[1]-database.rayPosEnd[1])
+		var distZ=(database.rayPosStart[2]-database.rayPosEnd[2])
+		
+		// 3d intermediate distance
+		var dist3d = Math.sqrt(distX * distX + distY * distY + distZ * distZ);
+		// constant speed
+		var speed= 10;
+		// intermediate eta 
+		var tps=dist3d/speed;
+		
+		if (dist3d<speed){
+			posi2[0]	=	database.rayPosEnd[0];
+			posi2[1]	=	database.rayPosEnd[1];
+			posi2[2]	=	database.rayPosEnd[2];
+		}
+		else {
+			posi2[0]	=	database.rayPosStart[0]-((database.rayPosStart[0]-database.rayPosEnd[0])/tps);
+			posi2[1]	=	database.rayPosStart[1]-((database.rayPosStart[1]-database.rayPosEnd[1])/tps);
+			posi2[2]	=	database.rayPosStart[2]-((database.rayPosStart[2]-database.rayPosEnd[2])/tps);
+		}
+		
+		// reminder : posmed is the median point between posi and the next posi[] (posi2)
+		// used to double precision on collision detection 
+		var posmed=[];
+		
+		posmed[0]=	(posi[0]+posi2[0])/2;
+		posmed[1]=	(posi[1]+posi2[1])/2;
+		posmed[2]=	(posi[2]+posi2[2])/2;
+	
 		// loop in the enemies' collection
 		for(var i = 0; i < this.numEnnemies; i++) {									
 			if (this.ennemyArray[i].active==true) {
 				
-				// calcutate distance btween the bullet and the ennemy
+				// calcutate distance btween the bullet position (posi) and the ennemy
 				var dX =  this.ennemyArray[i].x-posi[0];
 				var dY =  this.ennemyArray[i].y-posi[1];				
 				var dZ =  this.ennemyArray[i].z-posi[2];				
 				var dist =  Math.sqrt(dX * dX + dY * dY + dZ * dZ);
-				
-			/*	if  (database.pickedObj!=null) {
-					$("#tim2").append(this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+" - ");
-					$("#tim2").append(posi[0]+" "+posi[1]+" "+posi[2]+" >>> ");
-					$("#tim2").append(dist+"<br>");
-				}*/
-					// if distance < 5 : kill the ennemy
-				
-				
-				if (dist<=5) {
+			
+				// calcutate distance btween the bullet PREDICTED position (posmed) and the ennemy
+				var d2X =  this.ennemyArray[i].x-posmed[0];
+				var d2Y =  this.ennemyArray[i].y-posmed[1];				
+				var d2Z =  this.ennemyArray[i].z-posmed[2];				
+				var dist2 =  Math.sqrt(d2X * d2X + d2Y * d2Y + d2Z * d2Z);
+
+				if ((dist<=3)||(dist2<=3)) {
 					//$("#tim2").append("COLLISION near "+this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+"<br>");
 					this.setposz(this.ennemyArray[i].el,-1000);			
 					this.ennemyArray[i].active=false;
@@ -307,59 +329,59 @@ Renderer.prototype.process = function (database){
 	var mousepos = this.getmousepos();
 	var camerapos = this.getpos(camera);
 	var camerarot = this.getrot(camera);
-	database.playerPos = this.getpos(database.cube);
-	database.cuberot = this.getrot(database.cube);
+	database.playerPos = this.getpos(database.player);
+	database.playerrot = this.getrot(database.player);
 	database.headrot =  this.getrot(database.head);
 	
 	mousepos.x = mousepos.x - document.body.offsetLeft;
 	mousepos.y = mousepos.y	- document.body.offsetTop;			
 	this.getray(database,mousepos);
 	
-	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200)+2;
+	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200);
 	inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 200;
 	
-	if (inc <=0.1) inc=0.1;
+	if (inc <=0.1) 
+		inc=0.1;
+	
 	var trans=GLGE.mulMat4Vec4(camera.getRotMatrix(),[0,0,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
 	trans[0]=trans[0]/mag;
 	trans[1]=trans[1]/mag;
 	
 	if (inc<1) {
-		this.setrotx(database.cube,(inc/1000));
-		this.setrotx(database.head,(inc/1000));
+		this.setrotx(database.player,inc/10000);
+		this.setrotx(database.head,inc/10000);
 	}
 	
-	this.setrotz(database.cube,(-inc2*2+1.57));
-	this.setrotz(database.head,(-inc2*2));
+	this.setrotz(database.player,(-inc2-1.57));
+	this.setrotz(database.head,(-inc2));
 	
 	var H2=this.getheight(db.playerPos,null);
-
+	
 	if (H2!=false)
 		renderer.buildnature(db);
 		
-	if (database.playerHeight==null)database.playerHeight=0;
-	
+	if (database.playerHeight==null)
+		database.playerHeight=0;
+		
 	if ((!database.eJump))
-		this.setposz(database.cube,(-H2));	
+		this.setposz(database.player,(-H2)+2);	
 
 //	$("#tim1").html("");
 //	for(prop in db)	
 //			$("#tim1").append(prop+" "+ db[prop]+"<br>");
-	
-/*	for(var i = 0; i < renderer.numEnnemies; i++) 
-				$("#tim1").append(renderer.ennemyArray[i].x+" "+renderer.ennemyArray[i].y+" "+renderer.ennemyArray[i].z+"<br>"); */
 
 	if (database.eJumped) {
-		this.setposz(database.cube,(database.playerPos.z-.1));	
+		this.setposz(database.player,(database.playerPos.z-.1));	
 		setTimeout("window.DB.eJumped=false",500);
 	}		
 		
 	if (database.eJump)
-		this.setposz(database.cube,(database.playerPos.z+.1));	
+		this.setposz(database.player,(database.playerPos.z+.1));	
 	
 	database.playerHeight=H2
 	
-	var mat=database.cube.getRotMatrix();
+	var mat=database.player.getRotMatrix();
 	var trans=GLGE.mulMat4Vec4(mat,[0,1,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
 	if (database.eJump) {
@@ -374,23 +396,38 @@ Renderer.prototype.process = function (database){
 	// moving forces along axis
 	var incY=0;
 	var incX=0;
-	
+	var mvanim="anim1";
+
 	if(this.keys.isKeyPressed(GLGE.KI_SPACE)) {setTimeout("window.DB.eJump=true",1);database.ePreJump=true;moveJump(); }
-	if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {incY+=parseFloat(trans[1]);incX+=parseFloat(trans[0]);if((!database.ePreJump)&&(!database.eJump))movePf();}
-	if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {incY-=parseFloat(trans[1]);incX-=parseFloat(trans[0]);if((!database.ePreJump)&&(!database.eJump))movePf();} 
-	if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {incY+=parseFloat(trans[0]);incX-=parseFloat(trans[1]);if((!database.ePreJump)&&(!database.eJump))movePf();}
-	if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {incY-=parseFloat(trans[0]);incX+=parseFloat(trans[1]);if((!database.ePreJump)&&(!database.eJump))movePf();}
+	if(this.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {mvanim="anim3";incY-=parseFloat(trans[1]);incX-=parseFloat(trans[0]);if((!database.ePreJump)&&(!database.eJump))movePf();}
+	if(this.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {mvanim="anim3";incY+=parseFloat(trans[1]);incX+=parseFloat(trans[0]);if((!database.ePreJump)&&(!database.eJump))movePf();} 
+	if(this.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {mvanim="turnl";incY=parseFloat(trans[0]);incX-=parseFloat(trans[1]);if((!database.ePreJump)&&(!database.eJump))movePf();}
+	if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {mvanim="turnr";incY-=parseFloat(trans[0]);incX+=parseFloat(trans[1]);if((!database.ePreJump)&&(!database.eJump))movePf();}
 	
-	this.setposy(database.cube,(database.playerPos.y+incY*0.5*database.playerHeight/100));
-	this.setposx(database.cube,(database.playerPos.x+incX*0.5*database.playerHeight/100));	
+	
+	if((incY==0)&&(incX==0)){
+		if(database.timer==null) 
+			database.timer=setTimeout(function(){database.RD.setanim(database,database.player,"idle");},300);
+	}
+	else{
+		if(database.timer){
+			clearTimeout(database.timer);
+			database.timer=null;
+		}
+		database.RD.setanim(database,database.player,mvanim);
+	}
 
-	this.setposz(camera,(database.playerPos.z+1.6-database.cuberot.x*1000+inc));
+	
+	this.setposy(database.player,(database.playerPos.y+incY*0.5*database.playerHeight/100));
+	this.setposx(database.player,(database.playerPos.x+incX*0.5*database.playerHeight/100));	
 
-	database.cuberot = this.getrot(database.cube);
+	this.setposz(camera,(database.playerPos.z+1.6-database.playerrot.x*1000+inc));
+
+	database.playerrot = this.getrot(database.player);
 	database.headpos = this.getpos(database.head);
 	database.headrot = this.getrot(database.head);
-	this.setposx(camera,(database.playerPos.x-2*inc*Math.cos((database.headrot.z) * 57 *Math.PI / 180)));
-	this.setposy(camera,(database.playerPos.y-2*inc*Math.sin((database.headrot.z) * 57* Math.PI / 180)));
+	this.setposx(camera,(database.playerPos.x-5*inc*Math.cos((database.headrot.z) * 57 *Math.PI / 180)));
+	this.setposy(camera,(database.playerPos.y-5*inc*Math.sin((database.headrot.z) * 57* Math.PI / 180)));
 	
 	this.setposz(database.head,(database.playerPos.z-1.08));
 	this.setposx(database.head,(database.playerPos.x));
@@ -588,16 +625,16 @@ Renderer.prototype.render = function () {
 // set a collection of objects to the ground
 Renderer.prototype.setobjectsground = function (database,coll) {
 	for (var i=0;i<coll.count;i++) {
-		cup=database.cube.getPosition();
+		cup=database.player.getPosition();
 		cp =coll.cElems[i].getPosition();
-		this.setposx(database.cube,cp.x);
-		this.setposy(database.cube,cp.y);
-		database.playerPos = this.getpos(database.cube);
+		this.setposx(database.player,cp.x);
+		this.setposy(database.player,cp.y);
+		database.playerPos = this.getpos(database.player);
 		H3=this.getheight(database.playerPos,null);
 		this.setposz(coll.cElems[i],-H3+1);
-		this.setposx(database.cube,cup.x);
-		this.setposy(database.cube,cup.y);
-		database.playerPos = this.getpos(database.cube);
+		this.setposx(database.player,cup.x);
+		this.setposy(database.player,cup.y);
+		database.playerPos = this.getpos(database.player);
 	}
 }
 
@@ -619,14 +656,38 @@ Renderer.prototype.buildnature = function (database) {
 			database.eClusterPos=true;
 		}
 }
+
+Renderer.prototype.setanim = function (db,object,anim) {
+	if((db.state==anim)&&(anim!="idle")) return;
+	if(anim=="anim1"){
+		object.setStartFrame(290,200,true);
+		object.setFrames(18);
+	}else if(anim=="idle"){
+		object.setStartFrame(0,200,true);
+		object.setFrames(270);
+	}else if(anim=="anim3"){
+		object.setStartFrame(270,100,true);
+		object.setFrames(19);
+	}else if(anim=="turnl"){
+		object.setStartFrame(309,200,true);
+		object.setFrames(12);
+	}else if(anim=="turnr"){
+		object.setStartFrame(322,200,true);
+		object.setFrames(12);
+	}
+	db.state=anim;
+}
+
+
 // END : GLGE INTERFACE //
 
 // DB Class handles objects instances and in-game variables
 var DB = function () {
-	
+	this.timer		= null;
+	this.state		= "idle";
 	this.eJump		= false; 		
-	this.eJumped		= false; 		
-	this.ePreJump		= false; 		
+	this.eJumped	= false; 		
+	this.ePreJump	= false; 		
 	this.eAnim		= false;			
 	this.ePAnim		= false;			
 	this.ePAnimWalk	= false;	
@@ -643,15 +704,19 @@ var DB = function () {
 	this.playerPos	= null;
 	this.objectsCounter	= 0;
 	this.tick		= false;
-	this.cuberot	= null;
+	this.playerrot	= null;
 	this.headrot	= null;
 	this.headpos	= null;
 	
 	this.AnimFramesArray = [0,120,125,135];
+	this.RD		= null; // renderer instance
 	
-	window.DB=this;
+	window.DB	= this;
 	
 };
+
+
+
 
 // Vector Class Represent a 3d Vector which can be associated either to an object's position, a velocity,... 
 var Vector = function (x, y, z) {
@@ -748,7 +813,7 @@ Utils.prototype.setmousewheel = function() {
 ////////////////////////////////////////////////////////////////////////
 var utils=new Utils();
 var db=new DB();
-var renderer=new Renderer(); 
+var renderer=new Renderer(db); 
 var ai=new AIMoveable();
 ////////////////////////////////////////////////////////////////////////
 
@@ -765,9 +830,8 @@ renderer.doc.onLoad = function() {
 	'materialGrass' : 'Material',
 	'robot' : 'Sphere',
 	'head' : 'head',
-	'player' : 'plane2',
 	'bullet' : 'Cube',
-	'cube' : 'plane',
+	'player' : 'player',
 	'tree' : 'plant_pmat8.001',
 	'bush' : 'Bush 1',
 	'branches' : 'Bush 2',
@@ -778,11 +842,10 @@ renderer.doc.onLoad = function() {
 	renderer.setposz(db.groundObject,-300);
 	utils.setdom(renderer);
 	utils.setmousewheel();
-	setTimeout('moveP();moveP2();',1000); 
 	
 	//init ennemies
 	renderer.ennemyArray = [];
-	renderer.numEnnemies = 10;
+	renderer.numEnnemies = 50;
 	for(var i = 0; i < renderer.numEnnemies; i++) {
 		renderer.ennemyArray.push(new Vector(utils.random(300), utils.random(300),-170));
 		renderer.ennemyArray[i].velocity=new Vector(0,0,0);
@@ -926,5 +989,7 @@ var moveJump = function() {
 		setTimeout('db.eAnim=false;db.eJump=false;db.ePreJump=false;db.eJumped=true;moveP();',1000);
 	}	
 }
+
+
 
 renderer.loadxml("client/meshes/nature.xml");

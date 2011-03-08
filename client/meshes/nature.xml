@@ -98,8 +98,8 @@
 			<object id="zaxis" draw_type="DRAW_LINES" line_width="2" mesh="#zline" material="#blue"  />
 		</group>
 		<collada document="head.dae" id="head" scale="0" rot_y="0"/>
-		<collada document="head.dae" id="player" scale="0.98" rot_y="0"/>
-		<collada document="rabbit.dae" id="plane" scale="0.05" />
+		<collada document="head.dae" id="player2" scale="0.98" rot_y="0"/>
+		<collada document="frankie.dae" id="player" scale="5"/>
 		<collada document="rabbit.dae" id="plane2" scale="0.05" />
 		<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
 	</scene>
