@@ -93,9 +93,6 @@
 			rot_x="-0.528614" rot_y="0.012257" rot_z="-1.091431"
 		/>
 		<group id="graph">
-			<object id="xaxis" draw_type="DRAW_LINES" line_width="2" mesh="#xline" material="#red"  />
-			<object id="yaxis" draw_type="DRAW_LINES" line_width="2" mesh="#yline" material="#green"  />
-			<object id="zaxis" draw_type="DRAW_LINES" line_width="2" mesh="#zline" material="#blue"  />
 		</group>
 		<collada document="head.dae" id="head" scale="0" rot_y="0"/>
 		<collada document="head.dae" id="player2" scale="0.98" rot_y="0"/>

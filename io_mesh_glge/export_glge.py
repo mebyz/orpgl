@@ -148,9 +148,6 @@ def writeScene(file, scene):
 
 
     file.write('\n\t\t<group id="graph">')    
-    file.write('\n\t\t\t<object id="xaxis" draw_type="DRAW_LINES" line_width="2" mesh="#xline" material="#red"  />')    
-    file.write('\n\t\t\t<object id="yaxis" draw_type="DRAW_LINES" line_width="2" mesh="#yline" material="#green"  />')    
-    file.write('\n\t\t\t<object id="zaxis" draw_type="DRAW_LINES" line_width="2" mesh="#zline" material="#blue"  />')       
     file.write('\n\t\t</group>') 
        
     file.write('\n\t\t<collada document="head.dae" id="head" scale="0" rot_y="0"/>')    
