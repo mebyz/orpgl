@@ -440,8 +440,18 @@ Renderer.prototype.process = function (database){
 	database.headrot = this.getrot(database.head);
 		
 		
-	if((((this.pPos.x-(database.headpos.x)>1)||(this.pPos.x-(database.headpos.x)<-1))||((this.pPos.z-(database.headpos.z)>1)||(this.pPos.z-(database.headpos.z)<-1))||((this.pPos.rx-(database.headrot.x)>1)||(this.pPos.rx-(database.headrot.x)<-1))||((this.pPos.rz-(database.headrot.z)>1)||(this.pPos.rz-(database.headrot.z)<-1))||((this.pPos.ry-(database.headrot.y)>1)||(this.pPos.ry-(database.headrot.y)<-1)))) {
-
+	if ((this.pPos.x-(database.headpos.x)>3)||
+		(this.pPos.x-(database.headpos.x)<-3)||
+		(this.pPos.y-(database.headpos.y)>3)||
+		(this.pPos.y-(database.headpos.y)<-3)||
+		(this.pPos.z-(database.headpos.z)>3)||
+		(this.pPos.z-(database.headpos.z)<-3)||
+		(this.pPos.rx-(database.headrot.x)>1)||
+		(this.pPos.rx-(database.headrot.x)<-1)||
+		(this.pPos.ry-(database.headrot.y)>1)||
+		(this.pPos.ry-(database.headrot.y)<-1)||
+		(this.pPos.rz-(database.headrot.z)>1)||
+		(this.pPos.rz-(database.headrot.z)<-1)) {
 		var sx='';
 		var sy='';
 		var sz='';
@@ -449,13 +459,19 @@ Renderer.prototype.process = function (database){
 		var sry='';
 		var srz='';
 			
-		if (this.pPos.x!=database.headpos.x) sx=Math.round(database.headpos.x*100)/100;
-		if (this.pPos.y!=database.headpos.y) sy=Math.round(database.headpos.y*100)/100;
-		if (this.pPos.z!=database.headpos.z) sz=Math.round(database.headpos.z*100)/100;
-		if (this.pPos.rx!=database.headrot.x) srx=Math.round(database.headrot.x*100)/100;
-		if (this.pPos.ry!=database.headrot.y) sry=Math.round(database.headrot.y*100)/100;
-		if (this.pPos.rz!=database.headrot.z) srz=Math.round(database.headrot.z*100)/100;
-		var msg = (sx)+ ";"+ (sy)+";"+(sz)+'|'+(srx)+ ";"+ (sry)+";"+(srz);
+		//if (this.pPos.x!=database.headpos.x) 
+		sx=Math.round(database.headpos.x*100)/100;
+		//if (this.pPos.y!=database.headpos.y) 
+		sy=Math.round(database.headpos.y*100)/100;
+		//if (this.pPos.z!=database.headpos.z) 
+		sz=Math.round(database.headpos.z*100)/100;
+		//if (this.pPos.rx!=database.headrot.x) 
+		srx=Math.round(database.headrot.x*100)/100;
+		//if (this.pPos.ry!=database.headrot.y) 
+		sry=Math.round(database.headrot.y*100)/100;
+		//if (this.pPos.rz!=database.headrot.z) 
+		srz=Math.round(database.headrot.z*100)/100;
+		var msg = (sy)+ ";"+ (sx)+";"+(sz)+'|'+(srx)+ ";"+ (sry)+";"+(srz);
 			
 		//var msg = (database.headpos.x)+ ";"+ (database.headpos.y)+";"+(database.headpos.z)+'|'+(database.headrot.x)+ ";"+ (database.headrot.y)+";"+(database.headrot.z);
 		this.pPos.x=(database.headpos.x);
@@ -703,6 +719,7 @@ Renderer.prototype.multi = function (database) {
 				if (myJSONUserPosArray2[ns[i]]) {
 					
 					var straw2=myJSONUserPosArray2[ns[i]]+"";
+					$('#tim2').append(straw2+"<br>");
 					var stmid2=straw2.split('|');
 					var st2=stmid2[0].split(';');
 					var strot2=stmid2[1].split(';');
@@ -722,11 +739,13 @@ Renderer.prototype.multi = function (database) {
 					var nlocY=((st2[1]*1) - ndistY);
 					var nlocZ=((st2[2]*1) - ndistZ);
 					
-					this.setposx(database.player,(nlocX));
-					this.setposy(database.player,(nlocY));
-					this.setposz(database.player,(nlocZ+1));	
-					this.setrotz(database.player,((strot[2])-4.8));
-					myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"||"+strot2[0]+";"+strot2[1]+";"+strot2[2]
+					this.setposx(database.opponent,(nlocX));
+					this.setposy(database.opponent,(nlocY));
+					this.setposz(database.opponent,(nlocZ+1));	
+					
+					this.setrotz(database.opponent,((strot[2])));
+					
+					myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"|"+strot2[0]+";"+strot2[1]+";"+strot2[2]
 				}
 			}
 		}
@@ -884,6 +903,7 @@ renderer.doc.onLoad = function() {
 	'head' : 'head',
 	'bullet' : 'Cube',
 	'player' : 'player',
+	'opponent' : 'opponent',
 	'tree' : 'plant_pmat8.001',
 	'bush' : 'Bush 1',
 	'branches' : 'Bush 2',
@@ -896,7 +916,10 @@ renderer.doc.onLoad = function() {
 	utils.setmousewheel();
 	
 	renderer.initennemies(db);
-	
+
+	setInterval( function () {
+					$('#tim2').html('');
+	},5000);
 	setInterval( function () {
 		ai.movecoll(renderer,renderer.ennemyArray,renderer.numEnnemies);
 		renderer.process(window.DB);
