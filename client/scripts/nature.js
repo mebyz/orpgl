@@ -188,9 +188,9 @@ Renderer.prototype.getray = function (database,mousepos) {
 			
 			// initiate bullet movement
 			database.eRay=true;
-			
+			database.accelZ=0;
 			// can't fire faster then 10 bullet per sec
-			setTimeout("window.DB.eRay=false;",1000);
+			setTimeout("window.DB.eRay=false;",3000);
 			setTimeout("$('#tim2').html('');",10000);
 		}
 	}	
@@ -208,7 +208,7 @@ Renderer.prototype.getray = function (database,mousepos) {
 		// 3d intermediate distance
 		var dist3d = Math.sqrt(distX * distX + distY * distY + distZ * distZ);
 		// constant speed
-		var speed= 10;
+		var speed= 3;
 		// intermediate eta 
 		var tps=dist3d/speed;
 		
@@ -222,6 +222,10 @@ Renderer.prototype.getray = function (database,mousepos) {
 			posi[1]	=	database.rayPosStart[1]-((database.rayPosStart[1]-database.rayPosEnd[1])/tps);
 			posi[2]	=	database.rayPosStart[2]-((database.rayPosStart[2]-database.rayPosEnd[2])/tps);
 		}
+		
+		database.accelZ=database.accelZ-(.01);
+		posi[2]	+=database.accelZ;
+		
 		// moves the bullet along its path
 		this.setposx(database.bullet,(posi[0]));
 		this.setposy(database.bullet,(posi[1]));
@@ -698,7 +702,7 @@ Renderer.prototype.setanim = function (db,object,anim) {
 Renderer.prototype.initennemies = function (database) {
 //init ennemies
 	this.ennemyArray = [];
-	this.numEnnemies = 50;
+	this.numEnnemies = 20;
 	for(var i = 0; i < this.numEnnemies; i++) {
 		this.ennemyArray.push(new Vector(window.UTILS.random(300), window.UTILS.random(300),-170));
 		this.ennemyArray[i].velocity=new Vector(0,0,0);
@@ -783,7 +787,9 @@ var DB = function (utils) {
 	
 	this.AnimFramesArray = [0,120,125,135];
 	this.RD		= null; // renderer instance
-	
+
+	this.accelZ = null; // bullet gravity
+		
 	window.DB	= this;
 	window.UTILS= utils;
 	
