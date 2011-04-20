@@ -113,7 +113,10 @@ Renderer.prototype.getheight = function(pos,shift){
 			H=shift;
 		var origin=[pos.x,pos.y,H];
 		var ret=this.gameScene.ray(origin,[0,0,1]);		
-
+		
+		if (ret==null)
+			return false;
+			
 		if (ret['object']['id']=='Plane')
 			return ret['distance'];
 			
@@ -464,9 +467,9 @@ Renderer.prototype.process = function (database){
 		var srz='';
 			
 		//if (this.pPos.x!=database.headpos.x) 
-		sx=Math.round(database.headpos.x*100)/100;
+		sx=Math.round(database.headpos.y*100)/100;
 		//if (this.pPos.y!=database.headpos.y) 
-		sy=Math.round(database.headpos.y*100)/100;
+		sy=Math.round(database.headpos.x*100)/100;
 		//if (this.pPos.z!=database.headpos.z) 
 		sz=Math.round(database.headpos.z*100)/100;
 		//if (this.pPos.rx!=database.headrot.x) 
@@ -747,7 +750,7 @@ Renderer.prototype.multi = function (database) {
 					this.setposy(database.opponent,(nlocY));
 					this.setposz(database.opponent,(nlocZ+1));	
 					
-					this.setrotz(database.opponent,((strot[2])));
+					this.setrotz(database.opponent,strot[2]+3.14);
 					
 					myJSONUserPosArray2[ns[i]]= nlocX+";"+ nlocY+";"+ nlocZ+"|"+strot2[0]+";"+strot2[1]+";"+strot2[2]
 				}
@@ -894,7 +897,8 @@ var renderer=new Renderer(db);
 var ai=new AIMoveable();
 ////////////////////////////////////////////////////////////////////////
 
-renderer.doc.onLoad = function() {
+//renderer.doc.onLoad = function() {
+var testLoad = function() {
 	renderer.setgr('canvas');
 	renderer.setsc("Scene");
 	renderer.setfog(20,2000);
@@ -935,5 +939,7 @@ renderer.doc.onLoad = function() {
 	
 	var inc=2;
 };
+
+setTimeout('testLoad();',30000);
 
 renderer.loadxml("client/meshes/nature.xml");
