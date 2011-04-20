@@ -345,21 +345,20 @@ Renderer.prototype.process = function (database){
 	mousepos.y = mousepos.y	- document.body.offsetTop;			
 	this.getray(database,mousepos);
 	
-	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 200);
-	inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 200;
+	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 400);
+	inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 400;
 	
-	if (inc <=0.1) 
-		inc=0.1;
+	if (inc < 0) 
+		inc=0;
 	
 	var trans=GLGE.mulMat4Vec4(camera.getRotMatrix(),[0,0,-1,1]);
 	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
 	trans[0]=trans[0]/mag;
 	trans[1]=trans[1]/mag;
 	
-	if (inc<1) {
-		this.setrotx(database.player,inc/10000);
-		this.setrotx(database.head,inc/10000);
-	}
+	this.setrotx(database.player,inc/10000);
+	this.setrotx(database.head,inc/10000);
+	
 	
 	this.setrotz(database.player,(-inc2-1.57));
 	this.setrotz(database.head,(-inc2));
@@ -580,7 +579,7 @@ Renderer.prototype.setgr = function (el) {
 	} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
 		this.renderWidth = document.body.clientWidth;
 		this.renderHeight = document.body.clientHeight;
-	}	  
+	}
 }
 
 // create the scene	
@@ -897,8 +896,7 @@ var renderer=new Renderer(db);
 var ai=new AIMoveable();
 ////////////////////////////////////////////////////////////////////////
 
-//renderer.doc.onLoad = function() {
-var testLoad = function() {
+renderer.doc.onLoad = function() {
 	renderer.setgr('canvas');
 	renderer.setsc("Scene");
 	renderer.setfog(20,2000);
@@ -924,22 +922,14 @@ var testLoad = function() {
 	renderer.setposz(db.groundObject,-300);
 	utils.setdom(renderer);
 	utils.setmousewheel();
-	
 	renderer.initennemies(db);
-
-	setInterval( function () {
-					$('#tim2').html('');
-	},5000);
+	
 	setInterval( function () {
 		ai.movecoll(renderer,renderer.ennemyArray,renderer.numEnnemies);
 		renderer.process(window.DB);
 		renderer.multi(window.DB);
 		renderer.render(db,utils);
 	},1);
-	
-	var inc=2;
 };
-
-setTimeout('testLoad();',30000);
 
 renderer.loadxml("client/meshes/nature.xml");
