@@ -523,6 +523,11 @@ Renderer.prototype.addobj = function (o,o2) {
 	o.addObject(o2);
 }
 
+// set an object's material at runtime
+Renderer.prototype.setmat = function (o,mat) {
+	o.setMaterial(mat);
+}
+
 // create a new object
 Renderer.prototype.setobj = function (mesh,name,posrot,mat,pick,bag,counter,type,tvar,scale) {
 	
@@ -898,7 +903,7 @@ var ai=new AIMoveable();
 
 renderer.doc.onLoad = function() {
 	renderer.setgr('canvas');
-	renderer.setsc("Scene");
+	renderer.setsc("mainscene");
 	renderer.setfog(20,2000);
 	renderer.setcam();
 	renderer.getmouse();
@@ -916,10 +921,12 @@ renderer.doc.onLoad = function() {
 	'bush' : 'Bush 1',
 	'branches' : 'Bush 2',
 	'materialBush' : 'Bush Green.001',
-	'materialRobot' : 'Material.003',
 	'materialFlower' : 'fougere',
+	'materialGround' : 'groundmat',
+	'terrain' : 'Plane',
 	'groundObject':'ground'});
 	renderer.setposz(db.groundObject,-300);
+	renderer.setmat(db.terrain,db.materialGround);
 	utils.setdom(renderer);
 	utils.setmousewheel();
 	renderer.initennemies(db);

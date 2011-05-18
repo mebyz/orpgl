@@ -33,6 +33,22 @@
 	</head>
 	<body>
 		<canvas id="canvas" style="z-index:1000;position:absolute;top:0px;left:0px;cursor:none;"></canvas>
+		
+		
+		 
+		<script id="skyglsl" type="text/plain"> 
+		precision highp float;
+		 
+		uniform samplerCube TEXTURE0;
+		varying vec2 texCoord;
+		varying vec3 rayCoord;
+		 
+		void main(void){
+			gl_FragColor = textureCube(TEXTURE0,rayCoord.xyz);
+		}
+		</script> 
+ 
+ 
 		<div>
 			<div style="z-index:1001;position:absolute;top:0px;left:0px;" id="tim"></div>
 			<div style="z-index:1001;position:absolute;top:15px;right:0px;" id="tim1"></div>

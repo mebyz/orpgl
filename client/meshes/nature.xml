@@ -5,10 +5,10 @@
 	<import url="meshes.xml" />
 	<import url="materials.xml" />
 	<import url="cols.xml" />
-	<scene id="Scene" ambient_color="rgb(0,0,0)" fog_type="FOG_NONE" background_color="rgb(209,222,249)">
+	<scene id="mainscene" ambient_color="#6d655f" fog_near="1800" background_color="#000" fog_far="3000" fog_color="#888" fog_type="FOG_SKYLINEAR"  camera="#Camera">
 		<object id="Cube.001" mesh="#CubeMesh"
 			rot_order="ROT_ZYX"
-			scale_x="455.260681" scale_y="455.260681" scale_z="455.260681"
+			scale_x="493.541382" scale_y="493.541382" scale_z="493.541382"
 			material="#Flower Red.001"
 			loc_x="-25.100239" loc_y="-49.651134" loc_z="-17.980581"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
@@ -37,7 +37,7 @@
 		/>
 		<object id="Plane" mesh="#Plane.002Mesh"
 			rot_order="ROT_ZYX"
-			scale_x="203.305176" scale_y="203.305176" scale_z="35.878761"
+			scale_x="203.305176" scale_y="203.305176" scale_z="128.983795"
 			material="#Flower Green"
 			loc_x="13.700546" loc_y="-19.939754" loc_z="-243.848343"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
@@ -60,7 +60,7 @@
 		<camera id="Camera"
 			xtype="C_PERSPECTIVE"
 			rot_order="ROT_XZY"
-			loc_x="5.822488" loc_y="-42.503159" loc_z="8.961102"
+			loc_x="-11.078230" loc_y="-1.431582" loc_z="7.808060"
 			rot_x="1.364610" rot_y="-0.051446" rot_z="0.146897"
 		/>
 		<object id="plant_pmat8.001" mesh="#plant_pmat8.000Mesh"
@@ -80,8 +80,8 @@
 		<object id="Bush 2" mesh="#Plane.007Mesh"
 			rot_order="ROT_ZYX"
 			scale_x="0.425890" scale_y="0.425890" scale_z="0.425890"
-			material="#Bush Green.001"
-			loc_x="-12.673321" loc_y="-8.169106" loc_z="2.325790"
+			material="#Flower Green"
+			loc_x="-12.673321" loc_y="-8.169106" loc_z="2.613645"
 			rot_x="-0.103128" rot_y="-0.142171" rot_z="-2.439326"
 		/>
 		<object id="Bush 1" mesh="#Plane.005Mesh"
@@ -99,5 +99,13 @@
 		<collada document="frankie.dae" id="player" scale="5" />
 		<collada document="frankie.dae" id="opponent" scale="5" />
 		<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
+		<material id="groundmat" specular="0" shininess="250"  color="#888" reflectivity="1">
+		<texture id="tex1" src="sand.jpg" />
+		<material_layer texture="#tex1" mapto="M_COLOR" scale_x="25" scale_y="25" mapinput="UV1" />
+		<texture id="groundnorm" src="normal2.jpg" />
+		<material_layer texture="#groundnorm" mapto="M_NOR" scale_x="70" scale_y="70" mapinput="UV1" />
+		<texture id="groundnorm2" src="normal.jpg" />
+		<material_layer texture="#groundnorm2" mapto="M_NOR" scale_x="7" scale_y="7" mapinput="UV1" alpha="0.5" />
+		</material>
 	</scene>
 </glge>

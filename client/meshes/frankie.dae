@@ -9,46 +9,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Y_UP</up_axis>
   </asset>
-  <library_cameras>
-    <camera id="_-camera" name="Camera.001">
-      <optics>
-        <technique_common>
-          <perspective>
-            <xfov>77.31962</xfov>
-            <aspect_ratio>1.333333</aspect_ratio>
-            <znear>0.099999964237</znear>
-            <zfar>100</zfar>
-          </perspective>
-        </technique_common>
-      </optics>
-    </camera>
-    <camera id="_2-camera" name="Camera">
-      <optics>
-        <technique_common>
-          <perspective>
-            <xfov>77.31962</xfov>
-            <aspect_ratio>1.333333</aspect_ratio>
-            <znear>0.099999964237</znear>
-            <zfar>100</zfar>
-          </perspective>
-        </technique_common>
-      </optics>
-    </camera>
-    <camera id="MainCam-camera" name="Camera.003">
-      <optics>
-        <technique_common>
-          <perspective>
-            <xfov>83.26708</xfov>
-            <aspect_ratio>1.333333</aspect_ratio>
-            <znear>0.099999964237</znear>
-            <zfar>200</zfar>
-          </perspective>
-        </technique_common>
-      </optics>
-    </camera>
-  </library_cameras>
-  <library_lights>
-  </library_lights>
   <library_images>
     <image id="flyingsquirrel_skin_c">
       <init_from>textures/flyingsquirrel_skin_col.jpg</init_from>

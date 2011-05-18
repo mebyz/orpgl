@@ -78,14 +78,7 @@ def writeScene(file, scene):
     else:
         fog = 'FOG_NONE'
     
-    file.write('\n\t<scene id="%s" ambient_color="%s" fog_type="%s" background_color="%s"' 
-               % (
-                  scene.name,
-                  rgbColor(scene.world.ambient_color),
-                  fog,
-                  rgbColor(scene.world.horizon_color)
-                  )
-               )
+    file.write('\n\t<scene id="mainscene" ambient_color="#6d655f" fog_near="1800" background_color="#000" fog_far="3000" fog_color="#888" fog_type="FOG_SKYLINEAR" ')
     if scene.camera:
         file.write(' camera="#%s"' % scene.camera.name)
     file.write('>')
@@ -157,8 +150,15 @@ def writeScene(file, scene):
 #    file.write('<text id="text1" loc_z="-240" text="P1" size="100" font="arial" color="yellow" lookat="#maincamera" /> ')
 #    file.write('<text id="text2" loc_z="-250" text="P2" size="100" font="arial" color="yellow" lookat="#maincamera" /> ')
     file.write('\n\t\t<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />')    
-
-    file.write('\n\t</scene>')    
+    file.write('\n\t\t<material id="groundmat" specular="0" shininess="250"  color="#888" reflectivity="1">')
+    file.write('\n\t\t<texture id="tex1" src="sand.jpg" />')
+    file.write('\n\t\t<material_layer texture="#tex1" mapto="M_COLOR" scale_x="25" scale_y="25" mapinput="UV1" />')
+    file.write('\n\t\t<texture id="groundnorm" src="normal2.jpg" />')
+    file.write('\n\t\t<material_layer texture="#groundnorm" mapto="M_NOR" scale_x="70" scale_y="70" mapinput="UV1" />')
+    file.write('\n\t\t<texture id="groundnorm2" src="normal.jpg" />')
+    file.write('\n\t\t<material_layer texture="#groundnorm2" mapto="M_NOR" scale_x="7" scale_y="7" mapinput="UV1" alpha="0.5" />')
+    file.write('\n\t\t</material>')
+    file.write('\n\t</scene>')  
 
 def writeMaterials(file):
     
