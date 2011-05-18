@@ -663,19 +663,19 @@ Renderer.prototype.setobjectsground = function (database,coll) {
 
 Renderer.prototype.buildnature = function (database) {
 		if (!database.eClusterCrea){
-			database.Forest=new Cluster(this,database);
-			database.Forest.load(database.tree,database.ObjBag,database.materialGrass,0,1);	
-			database.Grass=new Cluster(this,database);
-			database.Grass.load(database.bush,database.ObjBag,database.materialFlower,1,5);	
+	//		database.Forest=new Cluster(this,database);
+	//		database.Forest.load(database.tree,database.ObjBag,database.materialGrass,0,1);	
+	//		database.Grass=new Cluster(this,database);
+	//		database.Grass.load(database.bush,database.ObjBag,database.materialFlower,1,5);	
 			database.Branches=new Cluster(this,database);
 			database.Branches.load(database.branches,database.ObjBag,database.materialBush,2,1);	
 			database.eClusterCrea=true;	
 		}
 		
 		if((database.eClusterCrea)&&(!database.eClusterPos)) { 
-			this.setobjectsground(database,database.Grass);
+		//	this.setobjectsground(database,database.Grass);
 			this.setobjectsground(database,database.Branches);
-			this.setobjectsground(database,database.Forest);
+		//	this.setobjectsground(database,database.Forest);
 			database.eClusterPos=true;
 		}
 }
@@ -708,7 +708,7 @@ Renderer.prototype.initennemies = function (database) {
 	for(var i = 0; i < this.numEnnemies; i++) {
 		this.ennemyArray.push(new Vector(window.UTILS.random(300), window.UTILS.random(300),-170));
 		this.ennemyArray[i].velocity=new Vector(0,0,0);
-		this.setobj( database.robot.getMesh(),"Moveable_",(new PosRot(this.ennemyArray[i].x,this.ennemyArray[i].y,this.ennemyArray[i].z,null,null,null)),database.materialRobot,false,database.ObjBag,database.objectsCounter++,0,this.ennemyArray[i],1);
+		this.setobj( database.robot.getMesh(),"Moveable_",(new PosRot(this.ennemyArray[i].x,this.ennemyArray[i].y,this.ennemyArray[i].z,null,null,null)),database.materialBush,false,database.ObjBag,database.objectsCounter++,0,this.ennemyArray[i],1);
 	}
 }
 

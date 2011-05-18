@@ -6,10 +6,17 @@
 	<import url="materials.xml" />
 	<import url="cols.xml" />
 	<scene id="Scene" ambient_color="rgb(0,0,0)" fog_type="FOG_NONE" background_color="rgb(209,222,249)">
+		<object id="Cube.001" mesh="#CubeMesh"
+			rot_order="ROT_ZYX"
+			scale_x="455.260681" scale_y="455.260681" scale_z="455.260681"
+			material="#Flower Red.001"
+			loc_x="-25.100239" loc_y="-49.651134" loc_z="-17.980581"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
 		<object id="Sphere" mesh="#SphereMesh"
 			rot_order="ROT_ZYX"
 			scale_x="1.000000" scale_y="1.000000" scale_z="1.000000"
-			material="#Material.003"
+			material="#Flower Red.002"
 			loc_x="6.944938" loc_y="-7.523624" loc_z="7.532308"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
@@ -25,21 +32,14 @@
 			rot_order="ROT_ZYX"
 			color="rgb(255,255,255)"
 			type="L_DIR"
-			loc_x="-30.195871" loc_y="26.706169" loc_z="-25.220690"
+			loc_x="46.154716" loc_y="26.706169" loc_z="-197.935730"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<object id="Plane" mesh="#Plane.002Mesh"
 			rot_order="ROT_ZYX"
 			scale_x="203.305176" scale_y="203.305176" scale_z="35.878761"
-			material="#Material"
+			material="#Flower Green"
 			loc_x="13.700546" loc_y="-19.939754" loc_z="-243.848343"
-			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
-		/>
-		<object id="Plane.001" mesh="#Plane.001Mesh"
-			rot_order="ROT_ZYX"
-			scale_x="1343.772949" scale_y="1343.772949" scale_z="8094.309570"
-			material="#Material.002"
-			loc_x="-8.132945" loc_y="22.321857" loc_z="-3722.837402"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<light id="Sun.001"
@@ -67,7 +67,7 @@
 			rot_order="ROT_ZYX"
 			scale_x="0.100000" scale_y="0.100000" scale_z="0.100000"
 			material="#Material.001"
-			loc_x="-3.413240" loc_y="101.188568" loc_z="-132.284958"
+			loc_x="-3.413240" loc_y="-16.872971" loc_z="-0.536069"
 			rot_x="0.000000" rot_y="-0.000000" rot_z="-0.893289"
 		/>
 		<object id="Bush 1f" mesh="#Plane.003Mesh"
@@ -96,7 +96,7 @@
 		</group>
 		<collada document="head.dae" id="head" scale="0" rot_y="0"/>
 		<collada document="head.dae" id="player2" scale="0.98" rot_y="0"/>
-		<collada document="frankie.dae" id="player" scale="5"/>
+		<collada document="frankie.dae" id="player" scale="5" />
 		<collada document="frankie.dae" id="opponent" scale="5" />
 		<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
 	</scene>
