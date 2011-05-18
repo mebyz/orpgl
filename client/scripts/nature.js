@@ -920,7 +920,7 @@ renderer.doc.onLoad = function() {
 	'tree' : 'plant_pmat8.001',
 	'bush' : 'Bush 1',
 	'branches' : 'Bush 2',
-	'materialBush' : 'Bush Green.001',
+	'materialBush' : 'Flower Green',
 	'materialFlower' : 'fougere',
 	'materialGround' : 'groundmat',
 	'terrain' : 'Plane',

@@ -107,5 +107,6 @@
 		<texture id="groundnorm2" src="normal.jpg" />
 		<material_layer texture="#groundnorm2" mapto="M_NOR" scale_x="7" scale_y="7" mapinput="UV1" alpha="0.5" />
 		</material>
+		<texture_cube id="skytex" src_pos_x="negx.jpg" src_neg_x="posx.jpg" src_pos_y="posy.jpg" src_neg_y="negy.jpg" src_pos_z="posz.jpg" src_neg_z="negz.jpg" />
 	</scene>
 </glge>

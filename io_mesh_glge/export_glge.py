@@ -158,6 +158,7 @@ def writeScene(file, scene):
     file.write('\n\t\t<texture id="groundnorm2" src="normal.jpg" />')
     file.write('\n\t\t<material_layer texture="#groundnorm2" mapto="M_NOR" scale_x="7" scale_y="7" mapinput="UV1" alpha="0.5" />')
     file.write('\n\t\t</material>')
+    file.write('\n\t\t<texture_cube id="skytex" src_pos_x="negx.jpg" src_neg_x="posx.jpg" src_pos_y="posy.jpg" src_neg_y="negy.jpg" src_pos_z="posz.jpg" src_neg_z="negz.jpg" />')
     file.write('\n\t</scene>')  
 
 def writeMaterials(file):
