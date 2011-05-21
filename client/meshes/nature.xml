@@ -17,14 +17,14 @@
 			rot_order="ROT_ZYX"
 			scale_x="1.000000" scale_y="1.000000" scale_z="1.000000"
 			material="#Flower Red.002"
-			loc_x="6.944938" loc_y="-7.523624" loc_z="7.532308"
+			loc_x="6.944938" loc_y="-7.523624" loc_z="-1.121875"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<object id="Cube" mesh="#Cube.001Mesh"
 			rot_order="ROT_ZYX"
 			scale_x="0.027270" scale_y="0.027270" scale_z="0.027270"
-			material="#Material"
-			loc_x="-3.137819" loc_y="-6.997164" loc_z="-5.578625"
+			material="#Flower Red.002"
+			loc_x="-3.137819" loc_y="-3.021281" loc_z="4.130110"
 			rot_x="1.561534" rot_y="-0.000000" rot_z="0.000000"
 		/>
 		<light id="Sun.000"
@@ -66,31 +66,16 @@
 		<object id="plant_pmat8.001" mesh="#plant_pmat8.000Mesh"
 			rot_order="ROT_ZYX"
 			scale_x="0.100000" scale_y="0.100000" scale_z="0.100000"
-			material="#Material.001"
-			loc_x="-3.413240" loc_y="-16.872971" loc_z="-0.536069"
-			rot_x="0.000000" rot_y="-0.000000" rot_z="-0.893289"
-		/>
-		<object id="Bush 1f" mesh="#Plane.003Mesh"
-			rot_order="ROT_ZYX"
-			scale_x="0.326500" scale_y="0.326500" scale_z="0.326500"
 			material="#Flower Green"
-			loc_x="-6.745708" loc_y="-6.713222" loc_z="0.103248"
-			rot_x="-0.103128" rot_y="-0.142171" rot_z="-1.734176"
+			loc_x="2.018443" loc_y="-2.779989" loc_z="-0.018273"
+			rot_x="0.000000" rot_y="-0.000000" rot_z="-0.893289"
 		/>
 		<object id="Bush 2" mesh="#Plane.007Mesh"
 			rot_order="ROT_ZYX"
 			scale_x="0.425890" scale_y="0.425890" scale_z="0.425890"
 			material="#Flower Green"
-			loc_x="-12.673321" loc_y="-8.169106" loc_z="2.613645"
+			loc_x="-3.175754" loc_y="-8.169106" loc_z="-0.859072"
 			rot_x="-0.103128" rot_y="-0.142171" rot_z="-2.439326"
-		/>
-		<object id="Bush 1" mesh="#Plane.005Mesh"
-			rot_order="ROT_ZYX"
-			scale_x="26.331409" scale_y="23.907887" scale_z="9.284536"
-			material="#fougere"
-			ztransparent="TRUE"
-			loc_x="-1.107937" loc_y="-1.631102" loc_z="2.497913"
-			rot_x="-0.528614" rot_y="0.012257" rot_z="-1.091431"
 		/>
 		<group id="graph">
 		</group>

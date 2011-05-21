@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glge SYSTEM "glge.dtd">
-<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature4.blend' -->
+<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature5.blend' -->
 <glge>
 	<material id="Boden" color="rgb(204,204,204)" specular="0.000000" shininess="50.000000" emit="0.000000" >
 		<texture id="Texture.003Tex" src="textures/terr_texture.jpg" />
@@ -15,18 +15,5 @@
 	<material id="Flower Red.001" color="rgb(155,169,210)" specular="0.000000" shininess="50.000000" emit="0.490000" >
 	</material>
 	<material id="Flower Red.002" color="rgb(237,80,0)" specular="0.000000" shininess="50.000000" emit="0.000000" >
-	</material>
-	<material id="fougere" color="rgb(56,74,27)" specular="0.000000" shininess="50.000000" emit="0.000000" >
-		<texture id="Tex.017Tex" src="textures/Fern_diff.png" />
-		<material_layer texture="#Tex.017Tex" mapinput="UV1" mapto="M_COLOR" />
-		<material_layer texture="#Tex.017Tex" mapinput="UV1" mapto="M_ALPHA" />
-	</material>
-	<material id="Material" color="rgb(204,204,204)" specular="0.000000" shininess="50.000000" emit="0.000000" >
-		<texture id="TextureTex" src="textures/terr_texture.jpg" />
-		<material_layer texture="#TextureTex" mapinput="UV1" mapto="M_COLOR" />
-	</material>
-	<material id="Material.001" color="rgb(204,204,204)" specular="0.000000" shininess="50.000000" emit="0.000000" >
-		<texture id="Texture.005Tex" src="textures/terr_texture.jpg" />
-		<material_layer texture="#Texture.005Tex" mapinput="UV1" mapto="M_COLOR" />
 	</material>
 </glge>

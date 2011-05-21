@@ -345,7 +345,7 @@ Renderer.prototype.process = function (database){
 	mousepos.y = mousepos.y	- document.body.offsetTop;			
 	this.getray(database,mousepos);
 	
-	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 400);
+	inc = ((mousepos.y - (document.getElementById('canvas').offsetHeight / 2)) / 10000);
 	inc2 = (mousepos.x - (document.getElementById('canvas').offsetWidth / 2)) / 400;
 	
 	if (inc < 0) 
@@ -433,8 +433,8 @@ Renderer.prototype.process = function (database){
 	database.playerrot = this.getrot(database.player);
 	database.headpos = this.getpos(database.head);
 	database.headrot = this.getrot(database.head);
-	this.setposx(camera,(database.playerPos.x-5*inc*Math.cos((database.headrot.z) * 57 *Math.PI / 180)));
-	this.setposy(camera,(database.playerPos.y-5*inc*Math.sin((database.headrot.z) * 57* Math.PI / 180)));
+	this.setposx(camera,(database.playerPos.x-100*inc*Math.cos((database.headrot.z) * 57 *Math.PI / 180)));
+	this.setposy(camera,(database.playerPos.y-100*inc*Math.sin((database.headrot.z) * 57* Math.PI / 180)));
 	
 	this.setposz(database.head,(database.playerPos.z-1.08));
 	this.setposx(database.head,(database.playerPos.x));
@@ -904,7 +904,7 @@ var ai=new AIMoveable();
 renderer.doc.onLoad = function() {
 	renderer.setgr('canvas');
 	renderer.setsc("mainscene");
-	renderer.setfog(20,2000);
+	renderer.setfog(20,20000);
 	renderer.setcam();
 	renderer.getmouse();
 	renderer.getkeyboard();
