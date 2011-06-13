@@ -6,11 +6,34 @@
 	<import url="materials.xml" />
 	<import url="cols.xml" />
 	<scene id="mainscene" ambient_color="#6d655f" fog_near="1800" background_color="#000" fog_far="3000" fog_color="#888" fog_type="FOG_SKYLINEAR"  camera="#Camera">
+		<light id="Sun.002"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-187.819763" loc_y="-76.636108" loc_z="6.738861"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<light id="Sun.001"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-140.392792" loc_y="-74.592735" loc_z="71.809921"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Bush 3" mesh="#Plane.000Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.103577" scale_y="0.103577" scale_z="0.103577"
+			material="#Flower Green"
+			loc_x="2.670558" loc_y="-6.287508" loc_z="-0.500500"
+			rot_x="-0.276614" rot_y="0.334595" rot_z="-2.400298"
+		/>
 		<object id="Cube.001" mesh="#CubeMesh"
 			rot_order="ROT_ZYX"
-			scale_x="493.541382" scale_y="493.541382" scale_z="493.541382"
+			scale_x="446.880096" scale_y="446.880096" scale_z="446.880096"
 			material="#Flower Red.001"
-			loc_x="-25.100239" loc_y="-49.651134" loc_z="-17.980581"
+			loc_x="-25.100239" loc_y="-49.651134" loc_z="-220.955902"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<object id="Sphere" mesh="#SphereMesh"
@@ -32,7 +55,7 @@
 			rot_order="ROT_ZYX"
 			color="rgb(255,255,255)"
 			type="L_DIR"
-			loc_x="46.154716" loc_y="26.706169" loc_z="-197.935730"
+			loc_x="-201.081055" loc_y="26.706169" loc_z="11.487181"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<object id="Plane" mesh="#Plane.002Mesh"
@@ -40,14 +63,6 @@
 			scale_x="203.305176" scale_y="203.305176" scale_z="128.983795"
 			material="#Flower Green"
 			loc_x="13.700546" loc_y="-19.939754" loc_z="-243.848343"
-			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
-		/>
-		<light id="Sun.001"
-			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
-			rot_order="ROT_ZYX"
-			color="rgb(255,255,255)"
-			type="L_DIR"
-			loc_x="-36.281570" loc_y="16.478388" loc_z="-26.529091"
 			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
 		/>
 		<object id="Torus" mesh="#TorusMesh"

@@ -118,6 +118,9 @@ Renderer.prototype.getheight = function(pos,shift){
 			return false;
 			
 		if (ret['object']['id']=='Plane')
+			return ret['distance'];	
+		
+		if (ret['object']['id']=='groundObject')
 			return ret['distance'];
 			
 		return false;
@@ -288,7 +291,7 @@ Renderer.prototype.getray = function (database,mousepos) {
 				var d2Z =  this.ennemyArray[i].z-posmed[2];				
 				var dist2 =  Math.sqrt(d2X * d2X + d2Y * d2Y + d2Z * d2Z);
 
-				if ((dist<=3)||(dist2<=3)) {
+				if ((dist<=2)||(dist2<=2)) {
 					//$("#tim2").append("COLLISION near "+this.ennemyArray[i].x+" "+this.ennemyArray[i].y+" "+this.ennemyArray[i].z+"<br>");
 					this.setposz(this.ennemyArray[i].el,-1000);			
 					this.ennemyArray[i].active=false;
@@ -371,12 +374,8 @@ Renderer.prototype.process = function (database){
 	if (database.playerHeight==null)
 		database.playerHeight=0;
 		
-	if ((!database.eJump))
-		this.setposz(database.player,(-H2)+2);	
-
-//	$("#tim1").html("");
-//	for(prop in db)	
-//			$("#tim1").append(prop+" "+ db[prop]+"<br>");
+	if ((!database.eJump)&&(H2>0))
+		this.setposz(database.player,(-H2)+2);
 
 	if (database.eJumped) {
 		this.setposz(database.player,(database.playerPos.z-.1));	
@@ -412,19 +411,23 @@ Renderer.prototype.process = function (database){
 	if(this.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {mvanim="turnr";incY-=parseFloat(trans[0]);incX+=parseFloat(trans[1]);}
 	
 	
-	if((incY==0)&&(incX==0)){
+	if((incY==0)&&(incX==0)) {
 		if(database.timer==null) 
 			database.timer=setTimeout(function(){database.RD.setanim(database,database.player,"idle");},300);
 	}
-	else{
-		if(database.timer){
+	else {
+		if(database.timer) {
 			clearTimeout(database.timer);
 			database.timer=null;
 		}
 		database.RD.setanim(database,database.player,mvanim);
 	}
-
 	
+	if (database.playerHeight=='')
+		database.playerHeight=-database.playerPos.z;
+		
+		$('#tim2').html(database.playerHeight);
+
 	this.setposy(database.player,(database.playerPos.y+incY*0.5*database.playerHeight/100));
 	this.setposx(database.player,(database.playerPos.x+incX*0.5*database.playerHeight/100));	
 
@@ -433,8 +436,8 @@ Renderer.prototype.process = function (database){
 	database.playerrot = this.getrot(database.player);
 	database.headpos = this.getpos(database.head);
 	database.headrot = this.getrot(database.head);
-	this.setposx(camera,(database.playerPos.x-100*inc*Math.cos((database.headrot.z) * 57 *Math.PI / 180)));
-	this.setposy(camera,(database.playerPos.y-100*inc*Math.sin((database.headrot.z) * 57* Math.PI / 180)));
+	this.setposx(camera,(database.playerPos.x-300*inc*Math.cos((database.headrot.z) * 57 * Math.PI / 180)));
+	this.setposy(camera,(database.playerPos.y-300*inc*Math.sin((database.headrot.z) * 57 * Math.PI / 180)));
 	
 	this.setposz(database.head,(database.playerPos.z-1.08));
 	this.setposx(database.head,(database.playerPos.x));
@@ -444,27 +447,27 @@ Renderer.prototype.process = function (database){
 	
 	database.headpos = this.getpos(database.head);
 	database.headrot = this.getrot(database.head);
-		
-		
+	
+	
 	if ((this.pPos.x-(database.headpos.x)>3)||
-		(this.pPos.x-(database.headpos.x)<-3)||
-		(this.pPos.y-(database.headpos.y)>3)||
-		(this.pPos.y-(database.headpos.y)<-3)||
-		(this.pPos.z-(database.headpos.z)>3)||
-		(this.pPos.z-(database.headpos.z)<-3)||
-		(this.pPos.rx-(database.headrot.x)>1)||
-		(this.pPos.rx-(database.headrot.x)<-1)||
-		(this.pPos.ry-(database.headrot.y)>1)||
-		(this.pPos.ry-(database.headrot.y)<-1)||
-		(this.pPos.rz-(database.headrot.z)>1)||
-		(this.pPos.rz-(database.headrot.z)<-1)) {
+	(this.pPos.x-(database.headpos.x)<-3)||
+	(this.pPos.y-(database.headpos.y)>3)||
+	(this.pPos.y-(database.headpos.y)<-3)||
+	(this.pPos.z-(database.headpos.z)>3)||
+	(this.pPos.z-(database.headpos.z)<-3)||
+	(this.pPos.rx-(database.headrot.x)>1)||
+	(this.pPos.rx-(database.headrot.x)<-1)||
+	(this.pPos.ry-(database.headrot.y)>1)||
+	(this.pPos.ry-(database.headrot.y)<-1)||
+	(this.pPos.rz-(database.headrot.z)>1)||
+	(this.pPos.rz-(database.headrot.z)<-1)) {
 		var sx='';
 		var sy='';
 		var sz='';
 		var srx='';
 		var sry='';
 		var srz='';
-			
+				
 		//if (this.pPos.x!=database.headpos.x) 
 		sx=Math.round(database.headpos.y*100)/100;
 		//if (this.pPos.y!=database.headpos.y) 
@@ -651,7 +654,7 @@ Renderer.prototype.render = function () {
 	this.lasttime = this.now;		
 }
 // set a collection of objects to the ground
-Renderer.prototype.setobjectsground = function (database,coll) {
+Renderer.prototype.setposground = function (database,coll) {
 	for (var i=0;i<coll.count;i++) {
 		cup=database.player.getPosition();
 		cp =coll.cElems[i].getPosition();
@@ -659,9 +662,11 @@ Renderer.prototype.setobjectsground = function (database,coll) {
 		this.setposy(database.player,cp.y);
 		database.playerPos = this.getpos(database.player);
 		H3=this.getheight(database.playerPos,null);
-		this.setposz(coll.cElems[i],-H3+1);
-		this.setposx(database.player,cup.x);
-		this.setposy(database.player,cup.y);
+		if (H3>0) {
+			this.setposz(coll.cElems[i],-H3+1);
+			this.setposx(database.player,cup.x);
+			this.setposy(database.player,cup.y);
+		}
 		database.playerPos = this.getpos(database.player);
 	}
 }
@@ -670,17 +675,17 @@ Renderer.prototype.buildnature = function (database) {
 		if (!database.eClusterCrea){
 	//		database.Forest=new Cluster(this,database);
 	//		database.Forest.load(database.tree,database.ObjBag,database.materialGrass,0,1);	
-	//		database.Grass=new Cluster(this,database);
-	//		database.Grass.load(database.bush,database.ObjBag,database.materialFlower,1,5);	
+			database.Grass=new Cluster(this,database);
+			database.Grass.load(database.bush,database.ObjBag,database.materialBush,1,5);	
 			database.Branches=new Cluster(this,database);
 			database.Branches.load(database.branches,database.ObjBag,database.materialBush,2,1);	
 			database.eClusterCrea=true;	
 		}
 		
 		if((database.eClusterCrea)&&(!database.eClusterPos)) { 
-		//	this.setobjectsground(database,database.Grass);
-			this.setobjectsground(database,database.Branches);
-		//	this.setobjectsground(database,database.Forest);
+			this.setposground(database,database.Grass);
+			this.setposground(database,database.Branches);
+		//	this.setposground(database,database.Forest);
 			database.eClusterPos=true;
 		}
 }
@@ -904,7 +909,7 @@ var ai=new AIMoveable();
 renderer.doc.onLoad = function() {
 	renderer.setgr('canvas');
 	renderer.setsc("mainscene");
-	renderer.setfog(20,20000);
+	renderer.setfog(20,200000);
 	renderer.setcam();
 	renderer.getmouse();
 	renderer.getkeyboard();
@@ -918,14 +923,14 @@ renderer.doc.onLoad = function() {
 	'player' : 'player',
 	'opponent' : 'opponent',
 	'tree' : 'plant_pmat8.001',
-	'bush' : 'Bush 1',
+	'bush' : 'Bush 3',
 	'branches' : 'Bush 2',
 	'materialBush' : 'Flower Green',
 	'materialFlower' : 'fougere',
 	'materialGround' : 'groundmat',
 	'terrain' : 'Plane',
 	'groundObject':'ground'});
-	renderer.setposz(db.groundObject,-300);
+	renderer.setposz(db.groundObject,-215);
 	renderer.setmat(db.terrain,db.materialGround);
 	utils.setdom(renderer);
 	utils.setmousewheel();
