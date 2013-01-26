@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style type="text/css">
+        body{
+            background-color: #fff;
+        }
+        </style>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    </head>
+
+    <body>
+        <script src="../three.js/build/three.js"></script>
+        <script>
+
+
+            var container;
+
+            var camera, scene, renderer, objects;
+            var particleLight, pointLight;
+
+            var clock = new THREE.Clock();
+            var morphs = [];
+
+                init();
+                animate();
+            function init() {
+
+                container = document.createElement( 'div' );
+                document.body.appendChild( container );
+
+                camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+                camera.position.set( 2, 4, 5 );
+
+                scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2( 0x000000, 0.035 );
+
+                // Add Blender exported Collada model
+
+                var loader = new THREE.JSONLoader();
+                loader.load( 'tree.php', function ( geometry, materials ) {
+
+                    // adjust color a bit
+
+                    var material = materials[ 0 ];
+                    material.color.setHex( 0xffffff );
+                    material.ambient.setHex( 0xffffff );
+
+                    var faceMaterial = new THREE.MeshFaceMaterial( materials );
+
+                    for ( var i = 0; i < 50; i ++ ) {
+
+                        // random placement in a grid
+
+                        var x = THREE.Math.randFloatSpread( 30 );
+                        var z = THREE.Math.randFloatSpread( 30 );
+
+                        morph = new THREE.MorphAnimMesh( geometry, faceMaterial );
+
+                        // one second duration
+
+                        morph.duration = 1000;
+
+                        // random animation offset
+
+                        morph.time = 1000 * Math.random();
+
+                        var s = THREE.Math.randFloat( 0.00075, 0.001 );
+                        morph.scale.set( s, s, s );
+
+                        morph.position.set( x, 0, z );
+                        morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+
+                        morph.matrixAutoUpdate = false;
+                        morph.updateMatrix();
+
+                        scene.add( morph );
+
+                        morphs.push( morph );
+
+                    }
+
+                } );
+
+                // Lights
+
+                scene.add( new THREE.AmbientLight( 0xffffff ) );
+
+
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+                container.appendChild( renderer.domElement );
+
+                // Events
+
+                window.addEventListener( 'resize', onWindowResize, false );
+
+            }
+
+            //
+
+            function onWindowResize( event ) {
+
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
+            }
+
+            //
+
+            var t = 0;
+            function animate() {
+
+                requestAnimationFrame( animate );
+
+                if ( t > 30 ) t = 0;
+
+                var delta = clock.getDelta();
+
+                render();
+                
+            }
+
+            function render() {
+
+                var timer = Date.now() * 0.0005;
+
+                camera.position.x = Math.cos( timer ) * 10;
+                camera.position.y = 4;
+                camera.position.z = Math.sin( timer ) * 10;
+
+                camera.lookAt( scene.position );
+
+                renderer.render( scene, camera );
+
+            }
+
+        </script>
+    </body>
+</html>
