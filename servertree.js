@@ -23,6 +23,10 @@ http.createServer(function (request, response) {
       });
       // Send data and end response.
 var seed  = Math.floor((Math.random()*50));
+
+
+
+
 var myTree = new window.Tree({
 "seed": 810+seed,
 "segments":10,
@@ -49,16 +53,6 @@ var myTree = new window.Tree({
 console.log (seed);
 
 
-
-// fixing scienfitic notation
-/*var r = myTree.verts.length;
-for (var i =0 ; i <  r; i++) {
-    for (var j=0 ; j < myTree.verts[i].length ; j++) {
-        myTree.verts[i][j]=myTree.verts[i][j].toFixed(20);
-    }
-}
-*/
-// building three.js face
 var fa=''
 var r = myTree.faces.length;
 for (var i =0 ; i <  r; i++) {
@@ -96,8 +90,45 @@ var jsosTree = {
     "faces":fT
 }
 
-// var json = JSON.parse( JSON.stringify(jsosTree, undefined, 2) );
-//document.getElementById("res").innerHTML= JSON.stringify(jsosTree, undefined, 2);
+/*
+
+var fa2=''
+var r = myTree.facesTwig.length;
+for (var i =0 ; i <  r; i++) {
+    if (i< r -1) {
+
+    fa=fa+'42,'+myTree.facesTwig[i].join(",")+',0,1,3,2,1,3,2,';
+
+   }
+};
+
+fa = fa.substring(0, fa.length - 1);
+var fT = fa.split(',');
+
+// building three.js json model (v3.1)
+var jsosTreeLeafs = {
+    "version" : 2,
+    "materials": [  {
+    "DbgColor" : 0,
+    "DbgIndex" : 0,
+    "DbgName" : "monster",
+    "colorAmbient" : [0,0,0],
+    "colorDiffuse" : [0,0,0],
+    "colorSpecular" : [0,0,0],
+    "mapDiffuse" : "monster.jpg",
+    "mapDiffuseWrap" : ["repeat", "repeat"],
+    "shading" : "Lambert",
+    "specularCoef" : 0,
+    "transparency" : 0,
+    "vertexColors" : false
+    }],
+   "scale":0.001,
+    "vertices":window.Tree.flattenArray(myTree.vertsTwig),
+    "normals":window.Tree.flattenArray(myTree.normalsTwig),
+    "uvs":new Array(window.Tree.flattenArray(myTree.uvsTwig)),
+    "faces":fT
+}
+*/
       response.end(JSON.stringify(jsosTree, undefined, 2));
    });
 }).listen(8081);
