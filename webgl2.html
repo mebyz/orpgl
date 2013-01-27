@@ -85,7 +85,13 @@ var ImprovedNoise = function () {
         }
     }
 }
-
+var heights = new Array();
+function getH(x,y){
+    if (heights[x] != undefined)
+        if (heights[x][y] != undefined)
+            return heights[x][y];
+    return 0;
+}
             var container;
 
             var camera, scene, renderer, objects;
@@ -105,7 +111,8 @@ var ImprovedNoise = function () {
                 camera.position.set( 2, 4, 5 );
 
                 scene = new THREE.Scene();
-                scene.fog = new THREE.FogExp2( 0x000000, 0.035 );
+                scene.fog = new THREE.FogExp2( 0xDDDDFF, 0.0025 );
+ //               scene.fog = new THREE.FogExp2( 0x000000, 0.035 );
 
                 // Add Blender exported Collada model
 
@@ -118,8 +125,8 @@ var ImprovedNoise = function () {
 
                         // random placement in a grid
 
-                        posX[i] = THREE.Math.randFloatSpread( 30 );
-                        posY[i] = THREE.Math.randFloatSpread( 30 );
+                        posX[i] = THREE.Math.randFloatSpread( 1000 );
+                        posY[i] = THREE.Math.randFloatSpread( 1000 );
                     }
 
 
@@ -134,20 +141,24 @@ var ImprovedNoise = function () {
 
                     geometry.vertices[ i ].x =geometry.vertices[ i ].x-200;
                     geometry.vertices[ i ].z =geometry.vertices[ i ].z-200;
-                    geometry.vertices[ i ].y = data[ i ] * 10-1000;
-
+                    geometry.vertices[ i ].y = data[ i ] * 5-300;
+                    if (heights[Math.floor(geometry.vertices[ i ].x)] == undefined)
+                    heights[Math.floor(geometry.vertices[ i ].x*100)] = new Array();
+                    heights[Math.floor(geometry.vertices[ i ].x*100)][Math.floor(geometry.vertices[ i ].z*100)]=geometry.vertices[ i ].y;
+//console.log("xa:"+Math.floor(geometry.vertices[ i ].x*100)/100+" za:"+Math.floor(geometry.vertices[ i ].z*100)/100+" h="+geometry.vertices[ i ].y);
+                       
                 }
-//    var floorTexture = new THREE.ImageUtils.loadTexture( 'http://localhost:81/orpgl/monster.jpg' );
-//    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-//    floorTexture.repeat.set( 10, 10 );
+    var floorTexture = new THREE.ImageUtils.loadTexture( 'monster.jpg' );
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+    floorTexture.repeat.set( 10, 10 );
 
 
                 texture = new THREE.Texture( generateTexture( data, worldWidth, worldDepth ), new THREE.UVMapping(), THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping );
                 texture.needsUpdate = true;
 
-                mesh = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial(
+                mesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
     {
-      color: 0xCC0000
+    "map": floorTexture
     }));
                 scene.add( mesh );
 
@@ -182,7 +193,7 @@ var ImprovedNoise = function () {
                         var s = THREE.Math.randFloat( 0.00075, 0.001 );
                         morph.scale.set( s, s, s );
 
-                        morph.position.set( x, 0, z );
+                        morph.position.set( x, getH(x,z), z );
                         morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
                         morph.matrixAutoUpdate = false;
@@ -225,8 +236,8 @@ var ImprovedNoise = function () {
 
                         var s = THREE.Math.randFloat( 0.00075, 0.001 );
                         morph2.scale.set( s, s, s );
-
-                        morph2.position.set( x, 0, z );
+                       console.log("x:"+Math.floor(x)+" z:"+Math.floor(z)+" h="+getH(Math.floor(x),Math.floor(z)));
+                        morph2.position.set( x, getH(x,z), z );
                         morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
                         morph2.matrixAutoUpdate = false;
@@ -242,7 +253,9 @@ var ImprovedNoise = function () {
                 // Lights
 
                 scene.add( new THREE.AmbientLight( 0xffffff ) );
-
+ var directionalLight = new THREE.DirectionalLight(0xffffff);
+        directionalLight.position.set(1, 1, 1).normalize();
+        scene.add(directionalLight);
 
                 renderer = new THREE.WebGLRenderer();
                 renderer.setSize( window.innerWidth, window.innerHeight );
