@@ -39,6 +39,17 @@
                 // Add Blender exported Collada model
 
                 var loader = new THREE.JSONLoader();
+
+                var posX= new Array();
+                var posY= new Array();
+
+                    for ( var i = 0; i < 50; i ++ ) {
+
+                        // random placement in a grid
+
+                        posX[i] = THREE.Math.randFloatSpread( 30 );
+                        posY[i] = THREE.Math.randFloatSpread( 30 );
+                    }
                 loader.load( 'tree.php', function ( geometry, materials ) {
 
                     // adjust color a bit
@@ -46,6 +57,7 @@
                     var material = materials[ 0 ];
                     material.color.setHex( 0xffffff );
                     material.ambient.setHex( 0xffffff );
+                    //material.alphaTest = 0.5;
 
                     var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
@@ -53,8 +65,8 @@
 
                         // random placement in a grid
 
-                        var x = THREE.Math.randFloatSpread( 30 );
-                        var z = THREE.Math.randFloatSpread( 30 );
+                        var x = posX[i];
+                        var z = posY[i];
 
                         morph = new THREE.MorphAnimMesh( geometry, faceMaterial );
 
@@ -82,7 +94,50 @@
                     }
 
                 } );
+                loader.load( 'tree.php?leaves=1', function ( geometry, materials ) {
 
+                    // adjust color a bit
+
+                    var material = materials[ 0 ];
+                    material.color.setHex( 0xffffff );
+                    material.ambient.setHex( 0xffffff );
+                    material.alphaTest = 0.5;
+
+                    var faceMaterial = new THREE.MeshFaceMaterial( materials );
+
+                    for ( var i = 0; i < 50; i ++ ) {
+
+                        // random placement in a grid
+
+                        var x = posX[i];
+                        var z = posY[i];
+
+                        morph2 = new THREE.MorphAnimMesh( geometry, faceMaterial );
+
+                        // one second duration
+
+                        morph2.duration = 1000;
+
+                        // random animation offset
+
+                        morph2.time = 1000 * Math.random();
+
+                        var s = THREE.Math.randFloat( 0.00075, 0.001 );
+                        morph2.scale.set( s, s, s );
+
+                        morph2.position.set( x, 0, z );
+                        morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+
+                        morph2.matrixAutoUpdate = false;
+                        morph2.updateMatrix();
+
+                        scene.add( morph2 );
+
+                        morphs.push( morph2 );
+
+                    }
+
+                } );
                 // Lights
 
                 scene.add( new THREE.AmbientLight( 0xffffff ) );
@@ -127,7 +182,7 @@
 
             function render() {
 
-                var timer = Date.now() * 0.0005;
+                var timer = Date.now() * 0.00005;
 
                 camera.position.x = Math.cos( timer ) * 10;
                 camera.position.y = 4;
