@@ -93,7 +93,7 @@ function getH(x,y){
     return 0;
 }
             var container;
-
+            var ground;
             var camera, scene, renderer, objects;
             var particleLight, pointLight;
 
@@ -156,11 +156,11 @@ function getH(x,y){
                 texture = new THREE.Texture( generateTexture( data, worldWidth, worldDepth ), new THREE.UVMapping(), THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping );
                 texture.needsUpdate = true;
 
-                mesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
+                ground = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial(
     {
     "map": floorTexture
     }));
-                scene.add( mesh );
+                scene.add( ground );
 
                 loader.load( 'tree.php', function ( geometry, materials ) {
 
@@ -180,7 +180,7 @@ function getH(x,y){
                         var x = posX[i];
                         var z = posY[i];
 
-                        morph = new THREE.MorphAnimMesh( geometry, faceMaterial );
+                        morph = new THREE.Mesh( geometry, faceMaterial );
 
                         // one second duration
 
@@ -192,12 +192,9 @@ function getH(x,y){
 
                         var s = THREE.Math.randFloat( 0.00075, 0.001 );
                         morph.scale.set( s, s, s );
-
+                        morph.name="tree"
                         morph.position.set( x, getH(x,z), z );
                         morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
-
-                        morph.matrixAutoUpdate = false;
-                        morph.updateMatrix();
 
                         scene.add( morph );
 
@@ -224,7 +221,7 @@ function getH(x,y){
                         var x = posX[i];
                         var z = posY[i];
 
-                        morph2 = new THREE.MorphAnimMesh( geometry, faceMaterial );
+                        morph2 = new THREE.Mesh( geometry, faceMaterial );
 
                         // one second duration
 
@@ -236,12 +233,12 @@ function getH(x,y){
 
                         var s = THREE.Math.randFloat( 0.00075, 0.001 );
                         morph2.scale.set( s, s, s );
+                      morph2.name="tree"
+                        
                        console.log("x:"+Math.floor(x)+" z:"+Math.floor(z)+" h="+getH(Math.floor(x),Math.floor(z)));
                         morph2.position.set( x, getH(x,z), z );
                         morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
-                        morph2.matrixAutoUpdate = false;
-                        morph2.updateMatrix();
 
                         scene.add( morph2 );
 
@@ -354,12 +351,27 @@ function generateHeight( width, height ) {
 
                 var delta = clock.getDelta();
 
+if (don==false && morphs.length>0) dod();
                 render();
                 
             }
+function dod(){
 
+    for (var i = 0 ; i<scene.children.length;i++){
+if(scene.children[i].name=="tree") {
+      var raycaster = new THREE.Raycaster(scene.children[i].position,new THREE.Vector3( 0, -100000, 0 ));
+        var intersects = raycaster.intersectObjects(scene.children);
+//        console.log(intersects[0].distance)
+        if (intersects.length>0)
+        scene.children[i].position.y= -intersects[0].distance;
+}
+    }
+
+
+        don=true;
+}
+var don=false;
             function render() {
-
                 var timer = Date.now() * 0.00005;
 
                 camera.position.x = Math.cos( timer ) * 10;
