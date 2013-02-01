@@ -150,7 +150,25 @@ document.addEventListener( 'keydown', onKeyDown , false );
         };
 
     };
-
+var attributesS6 = {
+                displacement: {
+                    type: 'f', // a float
+                    value: [] // an empty array
+                }
+            };
+            
+        // now populate the array of attributes
+        var valuesS6 = attributesS6.displacement.value;
+        for(var v = 0; v < 128; v++) {
+            valuesS6.push(Math.random() * 30);
+        }
+        
+        var uniformsS6 = {
+            amplitude: {
+                type: 'f', // a float
+                value: 0
+            }
+        };
 var heights = {};
 function getH(x,y){
     x=Math.floor(x);
@@ -203,10 +221,11 @@ function getH(x,y){
                         posY[i] = THREE.Math.randFloatSpread( 512 );
                     }
 
-
+ var waterWidth = 1024, waterDepth = 1024;
+           
             var worldWidth = 512, worldDepth = 512,
-            worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
                 data = generateHeight( worldWidth, worldDepth );
+                data2 = generateHeight( waterWidth, waterDepth );
 
                 var geometry = new THREE.PlaneGeometry( 512, 512, worldWidth - 1, worldDepth - 1 );
                 geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
@@ -297,7 +316,39 @@ function getH(x,y){
                         var x = posX[i];
                         var z = posY[i];
 
-                        morph2 = new THREE.Mesh( geometry, faceMaterial );
+Shaders = {
+    LitAttributeAnimated: {
+        'vertex': ["uniform float amplitude;",
+                   "attribute float displacement;", 
+                   "varying vec3 vNormal;",
+                    "void main() {",
+                    "vNormal = normal;",
+                    "vec3 newPosition = position + normal * vec3(displacement * amplitude);",
+                    "gl_Position = projectionMatrix *",
+                                  "modelViewMatrix *",
+                                  "vec4(newPosition,1.0);",
+                   "}"].join("\n"),
+                   
+        'fragment': ["varying vec3 vNormal;",
+                     "void main() {",
+                     "vec3 light = vec3(0.5,0.2,1.0);",
+                     "light = normalize(light);",
+                     "float dProd = max(0.0, dot(vNormal, light));",
+                     "gl_FragColor = vec4(dProd, dProd, dProd, 1.0);",
+                   "}"].join("\n")
+    }
+};
+
+
+        var shaderMaterial = new THREE.ShaderMaterial({
+            attributes:     attributesS6,
+            uniforms:       uniformsS6,
+            vertexShader:   Shaders.LitAttributeAnimated.vertex,
+            fragmentShader: Shaders.LitAttributeAnimated.fragment
+        });
+        
+
+                        morph2 = new THREE.Mesh( geometry, shaderMaterial );
 
                         // one second duration
 
@@ -448,7 +499,12 @@ if(scene.children[i].name=="tree") {
 }
 var don=false;
 var movementSpeed = 1.0;
+var frame=0;
             function render() {
+
+            uniformsS6.amplitude.value = Math.sin(frame);
+            frame += 0.1;
+    
                 var timer = Date.now() * 0.00005;
     
         var actualMoveSpeed =  movementSpeed;
