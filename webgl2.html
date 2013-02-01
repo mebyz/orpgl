@@ -11,6 +11,7 @@
     </head>
 
     <body>
+	<div style="position:absolute;top:0px;left:0px;" id="debug">debug</>
         <script src="../three.js/build/three.js"></script>
         <script>
 
@@ -85,8 +86,75 @@ var ImprovedNoise = function () {
         }
     }
 }
-var heights = new Array();
+
+var moveForward,moveLeft,moveBackward,moveRight,moveUp,moveDown = false;
+
+
+    var onKeyDown = function ( event ) {
+
+        //event.preventDefault();
+        switch ( event.keyCode ) {
+
+            case 38: /*up*/
+            case 87: /*W*/ moveForward = true; break;
+
+            case 37: /*left*/
+            case 65: /*A*/ moveLeft = true; break;
+
+            case 40: /*down*/
+            case 83: /*S*/ moveBackward = true; break;
+
+            case 39: /*right*/
+            case 68: /*D*/ moveRight = true; break;
+
+            case 82: /*R*/ this.moveUp = true; break;
+            case 70: /*F*/ this.moveDown = true; break;
+
+            case 81: /*Q*/ freeze = !this.freeze; break;
+
+        }
+
+    };
+
+    var onKeyUp = function ( event ) {
+
+        switch( event.keyCode ) {
+
+            case 38: /*up*/
+            case 87: /*W*/ moveForward = false; break;
+
+            case 37: /*left*/
+            case 65: /*A*/ moveLeft = false; break;
+
+            case 40: /*down*/
+            case 83: /*S*/ moveBackward = false; break;
+
+            case 39: /*right*/
+            case 68: /*D*/ moveRight = false; break;
+
+            case 82: /*R*/ moveUp = false; break;
+            case 70: /*F*/ moveDown = false; break;
+
+        }
+
+    };
+document.addEventListener( 'keydown', onKeyDown , false );
+    document.addEventListener( 'keyup', onKeyUp , false );
+
+    function bind( scope, fn ) {
+
+        return function () {
+
+            fn.apply( scope, arguments );
+
+        };
+
+    };
+
+var heights = {};
 function getH(x,y){
+    x=Math.floor(x);
+    y=Math.floor(y);
     if (heights[x] != undefined)
         if (heights[x][y] != undefined)
             return heights[x][y];
@@ -110,6 +178,12 @@ function getH(x,y){
                 camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
                 camera.position.set( 2, 4, 5 );
 
+              /*  controls = new THREE.FirstPersonControls( camera );
+                controls.movementSpeed = 70;
+                controls.noFly = true;
+                controls.lookVertical = false;
+                controls.lookSpeed = 0.05;
+*/
                 scene = new THREE.Scene();
                 scene.fog = new THREE.FogExp2( 0xDDDDFF, 0.0025 );
  //               scene.fog = new THREE.FogExp2( 0x000000, 0.035 );
@@ -121,34 +195,36 @@ function getH(x,y){
                 var posX= new Array();
                 var posY= new Array();
 
-                    for ( var i = 0; i < 50; i ++ ) {
+                    for ( var i = 0; i <500; i ++ ) {
 
                         // random placement in a grid
 
-                        posX[i] = THREE.Math.randFloatSpread( 1000 );
-                        posY[i] = THREE.Math.randFloatSpread( 1000 );
+                        posX[i] = THREE.Math.randFloatSpread( 512 );
+                        posY[i] = THREE.Math.randFloatSpread( 512 );
                     }
 
 
-            var worldWidth = 256, worldDepth = 256,
+            var worldWidth = 512, worldDepth = 512,
             worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
                 data = generateHeight( worldWidth, worldDepth );
 
-                var geometry = new THREE.PlaneGeometry( 7500, 7500, worldWidth - 1, worldDepth - 1 );
+                var geometry = new THREE.PlaneGeometry( 512, 512, worldWidth - 1, worldDepth - 1 );
                 geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-
+//NOOOO
+//                    geometry.vertices.sort();
                 for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
 
-                    geometry.vertices[ i ].x =geometry.vertices[ i ].x-200;
-                    geometry.vertices[ i ].z =geometry.vertices[ i ].z-200;
-                    geometry.vertices[ i ].y = data[ i ] * 5-300;
+                    geometry.vertices[ i ].x =geometry.vertices[ i ].x;
+                    geometry.vertices[ i ].z =geometry.vertices[ i ].z;
+                    geometry.vertices[ i ].y = data[ i ]/10-10;
+                    
                     if (heights[Math.floor(geometry.vertices[ i ].x)] == undefined)
-                    heights[Math.floor(geometry.vertices[ i ].x*100)] = new Array();
-                    heights[Math.floor(geometry.vertices[ i ].x*100)][Math.floor(geometry.vertices[ i ].z*100)]=geometry.vertices[ i ].y;
+                    heights[""+Math.floor(geometry.vertices[ i ].x)] = {};
+                    heights[""+Math.floor(geometry.vertices[ i ].x)][""+Math.floor(geometry.vertices[ i ].z)]=geometry.vertices[ i ].y;
 //console.log("xa:"+Math.floor(geometry.vertices[ i ].x*100)/100+" za:"+Math.floor(geometry.vertices[ i ].z*100)/100+" h="+geometry.vertices[ i ].y);
                        
                 }
-    var floorTexture = new THREE.ImageUtils.loadTexture( 'monster.jpg' );
+    var floorTexture = new THREE.ImageUtils.loadTexture( 'texture.jpg' );
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
     floorTexture.repeat.set( 10, 10 );
 
@@ -173,7 +249,7 @@ function getH(x,y){
 
                     var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                    for ( var i = 0; i < 50; i ++ ) {
+                    for ( var i = 0; i < 500; i ++ ) {
 
                         // random placement in a grid
 
@@ -193,7 +269,7 @@ function getH(x,y){
                         var s = THREE.Math.randFloat( 0.00075, 0.001 );
                         morph.scale.set( s, s, s );
                         morph.name="tree"
-                        morph.position.set( x, getH(x,z), z );
+                        morph.position.set( x, getH(x,z)-0.5, z );
                         morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
                         scene.add( morph );
@@ -214,7 +290,7 @@ function getH(x,y){
 
                     var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                    for ( var i = 0; i < 50; i ++ ) {
+                    for ( var i = 0; i < 500; i ++ ) {
 
                         // random placement in a grid
 
@@ -235,8 +311,7 @@ function getH(x,y){
                         morph2.scale.set( s, s, s );
                       morph2.name="tree"
                         
-                       console.log("x:"+Math.floor(x)+" z:"+Math.floor(z)+" h="+getH(Math.floor(x),Math.floor(z)));
-                        morph2.position.set( x, getH(x,z), z );
+                        morph2.position.set( x, getH(x,z)-0.5, z );
                         morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
 
 
@@ -356,7 +431,8 @@ if (don==false && morphs.length>0) dod();
                 
             }
 function dod(){
-
+//    RAYCASTS
+/*
     for (var i = 0 ; i<scene.children.length;i++){
 if(scene.children[i].name=="tree") {
       var raycaster = new THREE.Raycaster(scene.children[i].position,new THREE.Vector3( 0, -100000, 0 ));
@@ -366,20 +442,34 @@ if(scene.children[i].name=="tree") {
         scene.children[i].position.y= -intersects[0].distance;
 }
     }
-
+*/
 
         don=true;
 }
 var don=false;
+var movementSpeed = 1.0;
             function render() {
                 var timer = Date.now() * 0.00005;
+    
+        var actualMoveSpeed =  movementSpeed;
+       // console.log(actualMoveSpeed)
 
-                camera.position.x = Math.cos( timer ) * 10;
-                camera.position.y = 4;
-                camera.position.z = Math.sin( timer ) * 10;
+        if (moveForward ) camera.translateZ( - ( actualMoveSpeed ) );
+        if ( moveBackward ) camera.translateZ( actualMoveSpeed );
 
+        if ( moveLeft ) camera.translateX( - actualMoveSpeed );
+        if ( moveRight ) camera.translateX( actualMoveSpeed );
+
+        if ( moveUp ) camera.translateY( actualMoveSpeed );
+        if ( moveDown ) camera.translateY( - actualMoveSpeed );
+
+                camera.position.y = getH(camera.position.x ,camera.position.z)+3;
+
+//                camera.position.x = Math.cos( timer ) * 10;
+                //  camera.position.z = Math.sin( timer ) * 10;
+//controls.update();
                 camera.lookAt( scene.position );
-
+//console.log(camera.position)
                 renderer.render( scene, camera );
 
             }
