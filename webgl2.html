@@ -179,17 +179,26 @@
 
         init();
         animate();
+        var sprite1,uniforms1=null;
         function init() {
 
-            var sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
+            sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
+           
             container = document.createElement( 'div' );
             document.body.appendChild( container );
 
             camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
             camera.position.set( 2, 4, 5 );
-          
+          camera.uniforms1=  {
+                        sprite1: { type: "t", value: sprite1 },
+                        previousRender: { type: "t", value: null },
+                        amplitude: {
+                            type: 'f', // a float
+                            value: 0
+                        }
+                    };
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2( 0x9999AA, 0.0085 );
+            scene.fog = new THREE.FogExp2( 0x9999AA, 0.0025 );
 
             var loader = new THREE.JSONLoader();
             var posX= new Array();
@@ -198,8 +207,8 @@
 
                 // random placement in a grid
 
-                posX[i] = THREE.Math.randFloatSpread( 512 );
-                posY[i] = THREE.Math.randFloatSpread( 512 );
+                posX[i] = THREE.Math.randFloatSpread( 256 );
+                posY[i] = THREE.Math.randFloatSpread( 256 );
             }
 
             var waterWidth = 1024, waterDepth = 1024;
@@ -324,14 +333,11 @@
                                        "}"].join("\n")
                         }
                     };
-                    var uniforms1 = {
-                        sprite1: { type: "t", value: sprite1 },
-                        previousRender: { type: "t", value: null }
-                    };
+           
 
                     var shaderMaterial = new THREE.ShaderMaterial({
                         attributes:     attributesS6,
-                                uniforms: uniforms1,
+                                uniforms: camera.uniforms1,
                         vertexShader:   Shaders.LitAttributeAnimated.vertex,
                         fragmentShader: Shaders.LitAttributeAnimated.fragment
                     });
@@ -487,8 +493,8 @@
         var movementSpeed = 1.0;
         var frame=0;
         function render() {
-            uniformsS6.amplitude.value = Math.sin(frame)*5;
-            frame += 0.1;
+            camera.uniforms1.amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
+            frame += 0.04;
             var timer = Date.now() * 0.00005;
             var actualMoveSpeed =  movementSpeed;
 
