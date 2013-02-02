@@ -203,7 +203,7 @@
             var loader = new THREE.JSONLoader();
             var posX= new Array();
             var posY= new Array();
-            for ( var i = 0; i <1500; i ++ ) {
+            for ( var i = 0; i <500; i ++ ) {
 
                 // random placement in a grid
 
@@ -254,7 +254,7 @@
 
                 var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                for ( var i = 0; i < 1500; i ++ ) {
+                for ( var i = 0; i < 500; i ++ ) {
 
                     var x = posX[i];
                     var z = posY[i];
@@ -288,7 +288,7 @@
 
                 var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                for ( var i = 0; i < 1500; i ++ ) {
+                for ( var i = 0; i < 500; i ++ ) {
 
                     var x = posX[i];
                     var z = posY[i];
@@ -324,11 +324,11 @@
                                "    gl_FragColor.rgb = color;",
                                "    gl_FragColor.a = 1.0;",
 
-                                "if (gl_FragColor.r < 0.15)",
+                                "if (gl_FragColor.r < 0.1)",
                                "    discard;",
-                                "if (gl_FragColor.g < 0.15)",
+                                "if (gl_FragColor.g < 0.1)",
                                "    discard;",
-                                "if (gl_FragColor.b < 0.15)",
+                                "if (gl_FragColor.b < 0.1)",
                                "   discard;",
                                        "}"].join("\n")
                         }
@@ -490,7 +490,7 @@
                 don=true;
         }
         var don=false;
-        var movementSpeed = 1.0;
+        var movementSpeed = 0.3;
         var frame=0;
         function render() {
             camera.uniforms1.amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
