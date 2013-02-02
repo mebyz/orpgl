@@ -16,8 +16,30 @@ http.createServer(function (request, response) {
         response.writeHead(200, {
             'Content-Type': 'text/plain'
         });
+var seed=519;
+var segments=6;
+var levels=5;
+var vMultiplier=1.01;
+var twigScale=0.52;
+var initalBranchLength=0.65;
+var lengthFalloffFactor=0.73;
+var lengthFalloffPower=0.76;
+var clumpMax=0.53;
+var clumpMin=0.419;
+var branchFactor=3.4;
+var dropAmount=-0.16;
+var growAmount=0.128;
+var sweepAmount=0.01;
+var maxRadius=0.168;
+var climbRate=0.472;
+var trunkKink=0.06;
+var treeSteps=5;
+var taperRate=0.835;
+var radiusFalloffRate=0.73;
+var twistRate=1.29;
+var trunkLength=2.2;
 
-        var seed=810;
+/*        var seed=810;
         var segments =10;
         var vMultiplier=0.66;
         var twigScale=0.47;
@@ -37,7 +59,8 @@ http.createServer(function (request, response) {
         var taperRate=0.876;
         var radiusFalloffRate=0.66;
         var twistRate=2.7;
-        var trunkLength=1.55;
+        var trunkLength=1.55;*/
+
         var leaves=0;
 
 
