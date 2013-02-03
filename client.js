@@ -302,7 +302,7 @@ $("#canvas").css({"height":"300px","width":"600px"})
     return;
   }
   
-    var str='<script type="text/javascript" src="client/scripts/nature.js"></script>';
+    var str='<script type="text/javascript" src="client/webgl2.js"></script>';
     $("#app").append(str);
 
   CONFIG.nick = session.nick;
@@ -329,12 +329,13 @@ $("#canvas").css({"height":"300px","width":"600px"})
     ns = String(data.nicks);
     ns=ns.split(',');
   }, "json");
-
+  $("#page").hide();
+/*
   jQuery.get("/getnature", {}, function (data, status) {
     if (status != "success") return;
     Nature=data.nature;
   }, "json");
-
+*/
  
 }
 
