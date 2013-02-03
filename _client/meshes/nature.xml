@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glge SYSTEM "glge.dtd">
+<!-- Created by Blender 2.55 (sub 0) - www.blender.org, source file: 'nature4.blend' -->
+<glge>
+	<import url="meshes.xml" />
+	<import url="materials.xml" />
+	<import url="cols.xml" />
+	<scene id="mainscene" ambient_color="#6d655f" fog_near="1800" background_color="#000" fog_far="3000" fog_color="#888" fog_type="FOG_SKYLINEAR"  camera="#Camera">
+		<light id="Sun.002"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-187.819763" loc_y="-76.636108" loc_z="6.738861"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<light id="Sun.001"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-140.392792" loc_y="-74.592735" loc_z="71.809921"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Bush 3" mesh="#Plane.000Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.103577" scale_y="0.103577" scale_z="0.103577"
+			material="#Flower Green"
+			loc_x="2.670558" loc_y="-6.287508" loc_z="-0.500500"
+			rot_x="-0.276614" rot_y="0.334595" rot_z="-2.400298"
+		/>
+		<object id="Cube.001" mesh="#CubeMesh"
+			rot_order="ROT_ZYX"
+			scale_x="446.880096" scale_y="446.880096" scale_z="446.880096"
+			material="#Flower Red.001"
+			loc_x="-25.100239" loc_y="-49.651134" loc_z="-220.955902"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Sphere" mesh="#SphereMesh"
+			rot_order="ROT_ZYX"
+			scale_x="1.000000" scale_y="1.000000" scale_z="1.000000"
+			material="#Flower Red.002"
+			loc_x="6.944938" loc_y="-7.523624" loc_z="-1.121875"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Cube" mesh="#Cube.001Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.027270" scale_y="0.027270" scale_z="0.027270"
+			material="#Flower Red.002"
+			loc_x="-3.137819" loc_y="-3.021281" loc_z="4.130110"
+			rot_x="1.561534" rot_y="-0.000000" rot_z="0.000000"
+		/>
+		<light id="Sun.000"
+			attenuation_constant="0.500000" attenuation_linear="0.000001" attenuation_quadratic="0.000100"
+			rot_order="ROT_ZYX"
+			color="rgb(255,255,255)"
+			type="L_DIR"
+			loc_x="-201.081055" loc_y="26.706169" loc_z="11.487181"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Plane" mesh="#Plane.002Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="203.305176" scale_y="203.305176" scale_z="128.983795"
+			material="#Flower Green"
+			loc_x="13.700546" loc_y="-19.939754" loc_z="-243.848343"
+			rot_x="0.000000" rot_y="0.000000" rot_z="0.000000"
+		/>
+		<object id="Torus" mesh="#TorusMesh"
+			rot_order="ROT_ZYX"
+			scale_x="103.315445" scale_y="103.315445" scale_z="46.953388"
+			material="#Boden"
+			loc_x="0.000000" loc_y="0.000000" loc_z="-4.930620"
+			rot_x="0.000000" rot_y="-0.000000" rot_z="0.000000"
+		/>
+		<camera id="Camera"
+			xtype="C_PERSPECTIVE"
+			rot_order="ROT_XZY"
+			loc_x="-11.078230" loc_y="-1.431582" loc_z="7.808060"
+			rot_x="1.364610" rot_y="-0.051446" rot_z="0.146897"
+		/>
+		<object id="plant_pmat8.001" mesh="#plant_pmat8.000Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.100000" scale_y="0.100000" scale_z="0.100000"
+			material="#Flower Green"
+			loc_x="2.018443" loc_y="-2.779989" loc_z="-0.018273"
+			rot_x="0.000000" rot_y="-0.000000" rot_z="-0.893289"
+		/>
+		<object id="Bush 2" mesh="#Plane.007Mesh"
+			rot_order="ROT_ZYX"
+			scale_x="0.425890" scale_y="0.425890" scale_z="0.425890"
+			material="#Flower Green"
+			loc_x="-3.175754" loc_y="-8.169106" loc_z="-0.859072"
+			rot_x="-0.103128" rot_y="-0.142171" rot_z="-2.439326"
+		/>
+		<group id="graph">
+		</group>
+		<collada document="head.dae" id="head" scale="0" rot_y="0"/>
+		<collada document="head.dae" id="player2" scale="0.98" rot_y="0"/>
+		<collada document="frankie.dae" id="player" scale="5" />
+		<collada document="frankie.dae" id="opponent" scale="5" />
+		<object id="ground" mesh="#groundMesh" material="#water" rot_x="0" loc_z="-40" scale="2" />
+		<material id="groundmat" specular="0" shininess="250"  color="#888" reflectivity="1">
+		<texture id="tex1" src="sand.jpg" />
+		<material_layer texture="#tex1" mapto="M_COLOR" scale_x="25" scale_y="25" mapinput="UV1" />
+		<texture id="groundnorm" src="normal2.jpg" />
+		<material_layer texture="#groundnorm" mapto="M_NOR" scale_x="70" scale_y="70" mapinput="UV1" />
+		<texture id="groundnorm2" src="normal.jpg" />
+		<material_layer texture="#groundnorm2" mapto="M_NOR" scale_x="7" scale_y="7" mapinput="UV1" alpha="0.5" />
+		</material>
+		<texture_cube id="skytex" src_pos_x="negx.jpg" src_neg_x="posx.jpg" src_pos_y="posy.jpg" src_neg_y="negy.jpg" src_pos_z="posz.jpg" src_neg_z="negz.jpg" />
+	</scene>
+</glge>
