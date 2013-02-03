@@ -162,9 +162,10 @@
         var clock = new THREE.Clock();
         var morphs = [];
 
+        var sprite1,uniforms1=null;
+        var myPos = { 'x':2,'y':4,'z':5};
         init();
         animate();
-        var sprite1,uniforms1=null;
         function init() {
 
             sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
@@ -173,7 +174,8 @@
             document.body.appendChild( container );
 
             camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
-            camera.position.set( 2, 4, 5 );
+
+            camera.position.set( myPos.x,myPos.y,myPos.z);
           camera.uniforms1=  {
                         sprite1: { type: "t", value: sprite1 },
                         previousRender: { type: "t", value: null },
@@ -509,6 +511,34 @@ scene.add(sphere);
         var don=false;
         var movementSpeed = 0.3;
         var frame=0;
+function replacer(key, value) {
+    if (typeof value === 'number' && !isFinite(value)) {
+        return String(value);
+    }
+    return value;
+}
+
+
+function checkPos(){
+    var willsend=false;
+    if ((Math.floor(camera.position.x)<myPos.x) || (Math.floor(camera.position.x)>myPos.x)){
+        myPos.x=Math.floor(camera.position.x);
+        willsend=true;
+}
+    if ((Math.floor(camera.position.y)<myPos.y) || (Math.floor(camera.position.y)>myPos.y)){
+        myPos.y=Math.floor(camera.position.y);
+        willsend=true;
+}
+    if ((Math.floor(camera.position.z)<myPos.z) || (Math.floor(camera.position.z)>myPos.z)){
+        myPos.z=Math.floor(camera.position.z);
+        willsend=true;
+}
+//var js = JSON.parse(myPos);
+if (willsend == true)
+    //alert(JSON.stringify(myPos))
+    send(JSON.stringify(myPos,replacer));
+}
+
         function render() {
             camera.uniforms1.amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
             frame += 0.04;
@@ -527,7 +557,7 @@ scene.add(sphere);
             camera.position.y = getH(camera.position.x ,camera.position.z)+3;
 
             camera.lookAt( scene.position );
-
+checkPos();
             renderer.render( scene, camera );
 
         }
