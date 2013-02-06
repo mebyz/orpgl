@@ -1417,8 +1417,17 @@ THREE.extend( THREE.Vector3.prototype, {
 
 		return this;
 
-	},
-
+	}
+,addSelf: function(b) {
+        this.x += b.x;
+        this.y += b.y;
+        return this
+    }
+    ,subSelf: function(b) {
+ this.x -= b.x;
+        this.y -= b.y;
+        return this
+    },     
 	addScalar: function ( s ) {
 
 		this.x += s;

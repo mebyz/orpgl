@@ -1,5 +1,325 @@
 
-        var ImprovedNoise = function () {
+ var Bird = function () {
+
+    var scope = this;
+
+    THREE.Geometry.call( this );
+
+    v(   0.5,   0.0,   0.0 );
+    v( - 0.5, - 0.2,   0.1 );
+    v( - 0.5,   0.0,   0.0 );
+    v( - 0.5, - 0.2, - 0.1 );
+
+    v(   0.0,   0.2, - 0.6 );
+    v(   0.0,   0.2,   0.6 );
+    v(   0.2,   0.0,   0.0 );
+    v( - 0.3,   0.0,   0.0 );
+
+    f3( 0, 2, 1 );
+    // f3( 0, 3, 2 );
+
+    f3( 4, 7, 6 );
+    f3( 5, 6, 7 );
+
+    this.computeCentroids();
+    this.computeFaceNormals();
+
+    function v( x, y, z ) {
+
+        scope.vertices.push( new THREE.Vertex( new THREE.Vector3( x, y, z ) ) );
+
+    }
+
+    function f3( a, b, c ) {
+
+        scope.faces.push( new THREE.Face3( a, b, c ) );
+
+    }
+
+}
+
+Bird.prototype = new THREE.Geometry();
+Bird.prototype.constructor = Bird;
+
+var Boid = function() {
+
+                var vector = new THREE.Vector3(),
+                _acceleration, _width = 500, _height = 500, _depth = 200, _goal, _neighborhoodRadius = 100,
+                _maxSpeed = 4, _maxSteerForce = 0.1, _avoidWalls = false;
+
+                this.position = new THREE.Vector3();
+                this.velocity = new THREE.Vector3();
+                _acceleration = new THREE.Vector3();
+
+                this.setGoal = function ( target ) {
+
+                    _goal = target;
+
+                }
+
+                this.setAvoidWalls = function ( value ) {
+
+                    _avoidWalls = value;
+
+                }
+
+                this.setWorldSize = function ( width, height, depth ) {
+
+                    _width = width;
+                    _height = height;
+                    _depth = depth;
+
+                }
+
+                this.run = function ( boids ) {
+
+                    if ( _avoidWalls ) {
+
+                        vector.set( - _width, this.position.y, this.position.z );
+                        vector = this.avoid( vector );
+                        vector.multiplyScalar( 5 );
+                        _acceleration.addSelf( vector );
+
+                        vector.set( _width, this.position.y, this.position.z );
+                        vector = this.avoid( vector );
+                        vector.multiplyScalar( 5 );
+                        _acceleration.addSelf( vector );
+
+                        vector.set( this.position.x, - _height, this.position.z );
+                        vector = this.avoid( vector );
+                        vector.multiplyScalar( 5 );
+                        _acceleration.addSelf( vector );
+
+                        vector.set( this.position.x, _height, this.position.z );
+                        vector = this.avoid( vector );
+                        vector.multiplyScalar( 5 );
+                        _acceleration.addSelf( vector );
+
+                        vector.set( this.position.x, this.position.y, - _depth );
+                        vector = this.avoid( vector );
+                        vector.multiplyScalar( 5 );
+                        _acceleration.addSelf( vector );
+
+                        vector.set( this.position.x, this.position.y, _depth );
+                        vector = this.avoid( vector );
+                        vector.multiplyScalar( 5 );
+                        _acceleration.addSelf( vector );
+
+                    }/* else {
+
+                        this.checkBounds();
+
+                    }
+                    */
+
+                    if ( Math.random() > 0.5 ) {
+
+                        this.flock( boids );
+
+                    }
+
+                    this.move();
+
+                }
+
+                this.flock = function ( boids ) {
+
+                    if ( _goal ) {
+
+                        _acceleration.addSelf( this.reach( _goal, 0.005 ) );
+
+                    }
+
+                    _acceleration.addSelf( this.alignment( boids ) );
+                    _acceleration.addSelf( this.cohesion( boids ) );
+                    _acceleration.addSelf( this.separation( boids ) );
+
+                }
+
+                this.move = function () {
+
+                    this.velocity.addSelf( _acceleration );
+
+                    var l = this.velocity.length();
+
+                    if ( l > _maxSpeed ) {
+
+                        this.velocity.divideScalar( l / _maxSpeed );
+
+                    }
+
+                    this.position.addSelf( this.velocity );
+                    _acceleration.set( 0, 0, 0 );
+
+                }
+
+                this.checkBounds = function () {
+
+                    if ( this.position.x >   _width ) this.position.x = - _width;
+                    if ( this.position.x < - _width ) this.position.x =   _width;
+                    if ( this.position.y >   _height ) this.position.y = - _height;
+                    if ( this.position.y < - _height ) this.position.y =  _height;
+                    if ( this.position.z >  _depth ) this.position.z = - _depth;
+                    if ( this.position.z < - _depth ) this.position.z =  _depth;
+
+                }
+
+                //
+
+                this.avoid = function ( target ) {
+
+                    var steer = new THREE.Vector3();
+
+                    steer.copy( this.position );
+                    steer.sub( this.position, target );
+
+                    steer.multiplyScalar( 1 / this.position.distanceToSquared( target ) );
+
+                    return steer;
+
+                }
+
+                this.repulse = function ( target ) {
+
+                    var distance = this.position.distanceTo( target );
+
+                    if ( distance < 150 ) {
+
+                        var steer = new THREE.Vector3();
+
+                        steer.sub( this.position, target );
+                        steer.multiplyScalar( 0.5 / distance );
+
+                        _acceleration.addSelf( steer );
+
+                    }
+
+                }
+
+                this.reach = function ( target, amount ) {
+
+                    var steer = new THREE.Vector3();
+
+                    steer.sub( target, this.position );
+                    steer.multiplyScalar( amount );
+
+                    return steer;
+
+                }
+
+                this.alignment = function ( boids ) {
+
+                    var boid, velSum = new THREE.Vector3(),
+                    count = 0;
+
+                    for ( var i = 0, il = boids.length; i < il; i++ ) {
+
+                        if ( Math.random() > 0.6 ) continue;
+
+                        boid = boids[ i ];
+
+                        distance = boid.position.distanceTo( this.position );
+
+                        if ( distance > 0 && distance <= _neighborhoodRadius ) {
+
+                            velSum.add( this.position,boid.velocity );
+                            count++;
+
+                        }
+
+                    }
+
+                    if ( count > 0 ) {
+
+                        velSum.divideScalar( count );
+
+                        var l = velSum.length();
+
+                        if ( l > _maxSteerForce ) {
+
+                            velSum.divideScalar( l / _maxSteerForce );
+
+                        }
+
+                    }
+
+                    return velSum;
+
+                }
+
+                this.cohesion = function ( boids ) {
+
+                    var boid, distance,
+                    posSum = new THREE.Vector3(),
+                    steer = new THREE.Vector3(),
+                    count = 0;
+
+                    for ( var i = 0, il = boids.length; i < il; i ++ ) {
+
+                        if ( Math.random() > 0.6 ) continue;
+
+                        boid = boids[ i ];
+                        distance = boid.position.distanceTo( this.position );
+
+                        if ( distance > 0 && distance <= _neighborhoodRadius ) {
+
+                            posSum.addSelf( boid.position );
+                            count++;
+
+                        }
+
+                    }
+
+                    if ( count > 0 ) {
+
+                        posSum.divideScalar( count );
+
+                    }
+
+                    steer.sub( posSum, this.position );
+
+                    var l = steer.length();
+
+                    if ( l > _maxSteerForce ) {
+
+                        steer.divideScalar( l / _maxSteerForce );
+
+                    }
+
+                    return steer;
+
+                }
+
+                this.separation = function ( boids ) {
+
+                    var boid, distance,
+                    posSum = new THREE.Vector3(),
+                    repulse = new THREE.Vector3();
+
+                    for ( var i = 0, il = boids.length; i < il; i ++ ) {
+
+                        if ( Math.random() > 0.6 ) continue;
+
+                        boid = boids[ i ];
+                        distance = boid.position.distanceTo( this.position );
+
+                        if ( distance > 0 && distance <= _neighborhoodRadius ) {
+
+                            repulse.sub( this.position, boid.position );
+                            repulse.normalize();
+                            repulse.divideScalar( distance );
+                            posSum.addSelf( repulse );
+
+                        }
+
+                    }
+
+                    return posSum;
+
+                }
+
+            }
+                   var ImprovedNoise = function () {
 
             var p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,
                  23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,
@@ -157,7 +477,10 @@
         var container;
         var ground;
         var camera, scene, renderer, objects;
-        var particleLight, pointLight;
+        var particleLight, pointLight,birds, bird;
+
+            var boid, boids;
+
 
         var clock = new THREE.Clock();
         var morphs = [];
@@ -185,9 +508,33 @@
                         }
                     };
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2( 0x9999AA, 0.0025 );
+            scene.fog = new THREE.FogExp2( 0xB4E4F4, 0.0025 );
 
 
+                birds = [];
+                boids = [];
+
+                for ( var i = 0; i < 50; i ++ ) {
+
+                    boid = boids[ i ] = new Boid();
+                    boid.position.x = Math.random() * 400 - 200;
+                    boid.position.y = 0;
+                    boid.position.z = Math.random() * 400 - 200;
+                    boid.velocity.x = Math.random() * 2 - 1;
+                    boid.velocity.y = Math.random() * 2 - 1;
+                    boid.velocity.z = Math.random() * 2 - 1;
+                    boid.setAvoidWalls( true );
+                    boid.setWorldSize( 30, 30, 30 );
+
+                    bird = birds[ i ] = new THREE.Mesh( new Bird(), new THREE.MeshBasicMaterial( { color:Math.random() * 0xffffff } ) );
+                    bird.phase = Math.floor( Math.random() * 62.83 );
+                    bird.position = boids[ i ].position;
+                    bird.doubleSided = true;
+                    // bird.scale.x = bird.scale.y = bird.scale.z = 10;
+                    scene.add( bird );
+
+
+                }
 // set up the sphere vars
 var radius = 5,
     segments = 16,
@@ -349,6 +696,14 @@ scene.add(sphere);
                                "    discard;",
                                 "if (gl_FragColor.b < 0.1)",
                                "   discard;",
+                               
+                                "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
+                               "    gl_FragColor.a = 0.5;",
+                                "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
+                               "    gl_FragColor.a = 0.5;",
+                                "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
+                               "    gl_FragColor.a = 0.5;",
+
                                        "}"].join("\n")
                         }
                     };
@@ -393,7 +748,7 @@ scene.add(sphere);
 
             renderer = new THREE.WebGLRenderer();
             renderer.setSize( window.innerWidth, window.innerHeight );
-            renderer.setClearColor(new THREE.Color(0x9999AA));
+            renderer.setClearColor(new THREE.Color(0xB4E4F4));
             container.appendChild( renderer.domElement );
 
             window.addEventListener( 'resize', onWindowResize, false );
@@ -540,6 +895,25 @@ if (willsend == true)
 }
 
         function render() {
+
+            for ( var i = 0, il = birds.length; i < il; i++ ) {
+
+                    boid = boids[ i ];
+                    boid.run( boids );
+
+                    bird = birds[ i ];
+
+                    color = bird.material.color;
+                    color.r = color.g = color.b = ( 500 - bird.position.z ) / 1000;
+
+                    bird.rotation.y = Math.atan2( - boid.velocity.z, boid.velocity.x );
+                    bird.rotation.z = Math.asin( boid.velocity.y / boid.velocity.length() );
+
+                    bird.phase = ( bird.phase + ( Math.max( 0, bird.rotation.z ) + 0.1 )  ) % 62.83;
+                    bird.geometry.vertices[ 5 ].x = bird.geometry.vertices[ 4 ].x = Math.sin( bird.phase ) * 5;
+
+                }
+
             camera.uniforms1.amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
             frame += 0.04;
             var timer = Date.now() * 0.00005;
