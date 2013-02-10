@@ -26,7 +26,7 @@
 
     function v( x, y, z ) {
 
-        scope.vertices.push( new THREE.Vertex( new THREE.Vector3( x, y, z ) ) );
+        scope.vertices.push( new THREE.Vector3( x, y, z ) );
 
     }
 
@@ -171,7 +171,7 @@ var Boid = function() {
                     var steer = new THREE.Vector3();
 
                     steer.copy( this.position );
-                    steer.sub( this.position, target );
+                    steer.subVectors( this.position, target );
 
                     steer.multiplyScalar( 1 / this.position.distanceToSquared( target ) );
 
@@ -187,7 +187,7 @@ var Boid = function() {
 
                         var steer = new THREE.Vector3();
 
-                        steer.sub( this.position, target );
+                        steer.subVectors( this.position, target );
                         steer.multiplyScalar( 0.5 / distance );
 
                         _acceleration.addSelf( steer );
@@ -200,7 +200,7 @@ var Boid = function() {
 
                     var steer = new THREE.Vector3();
 
-                    steer.sub( target, this.position );
+                    steer.subVectors( target, this.position );
                     steer.multiplyScalar( amount );
 
                     return steer;
@@ -276,7 +276,7 @@ var Boid = function() {
 
                     }
 
-                    steer.sub( posSum, this.position );
+                    steer.subVectors( posSum, this.position );
 
                     var l = steer.length();
 
@@ -305,7 +305,7 @@ var Boid = function() {
 
                         if ( distance > 0 && distance <= _neighborhoodRadius ) {
 
-                            repulse.sub( this.position, boid.position );
+                            repulse.subVectors( this.position, boid.position );
                             repulse.normalize();
                             repulse.divideScalar( distance );
                             posSum.addSelf( repulse );
@@ -508,7 +508,8 @@ var Boid = function() {
 
 var posX= new Array();
 var posY= new Array();
-            
+        var sphere = null;
+    
         init();
         animate();
 
@@ -652,6 +653,7 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
 
             } );
 }
+
         function init() {
 
             sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
@@ -687,7 +689,7 @@ url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale
                 birds = [];
                 boids = [];
 
-                for ( var i = 0; i < 5; i ++ ) {
+                for ( var i = 0; i < 1; i ++ ) {
 
                     boid = boids[ i ] = new Boid();
                     boid.position.x = Math.random() * 400 - 200;
@@ -729,7 +731,7 @@ var sphereMaterial =
 // create a new mesh with
 // sphere geometry - we will cover
 // the sphereMaterial next!
-var sphere = new THREE.Mesh(
+sphere = new THREE.Mesh(
 
   sungeo,
 
@@ -1069,9 +1071,29 @@ if (willsend == true)
     //alert(JSON.stringify(myPos))
     send(JSON.stringify(myPos,replacer));
 }
-
+var lastpos=null
         function render() {
+var xc,yc,zc=0;
+for (var prop in myJSONUserPosArray2) {
+        var tt = JSON.parse(myJSONUserPosArray2[prop])
+if ((    lastpos!=myJSONUserPosArray2[prop]) && (prop !=CONFIG.nick))
+    {
+for (var prop2 in tt) {
+if (prop2='x')
+    xc=tt[prop2];
+if (prop2='y')
+    yc=tt[prop2];
+if (prop2='z')
+    zc=tt[prop2];
+}
+sphere.position.x=xc;
+sphere.position.y=yc;
+sphere.position.z=zc;
+ console.log   (sphere.geometry.x);
+ }
+       lastpos=myJSONUserPosArray2[prop]
 
+}
             for ( var i = 0, il = birds.length; i < il; i++ ) {
 
                     boid = boids[ i ];
