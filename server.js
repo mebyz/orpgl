@@ -194,6 +194,7 @@ fu.get("/client.js", fu.staticHandler("client.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
 fu.get("/three.js", fu.staticHandler("three.js"));
 fu.get("/branch1.png", fu.staticHandler("branch1.png"));
+fu.get("/branch2.png", fu.staticHandler("branch2.png"));
 fu.get("/monster.jpg", fu.staticHandler("monster.jpg"));
 fu.get("/texture.jpg", fu.staticHandler("texture.jpg"));
 //fu.get("/tree.php", fu.staticHandler("tree.php"));

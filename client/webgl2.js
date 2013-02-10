@@ -449,16 +449,33 @@ var Boid = function() {
                 value: [] // an empty array
             }
         };
+        var attributesS7 = {
+            displacement2: {
+                type: 'f', // a float
+                value: [] // an empty array
+            }
+        };
             
         // now populate the array of attributes
         var valuesS6 = attributesS6.displacement.value;
+        // now populate the array of attributes
+        var valuesS7 = attributesS7.displacement2.value;
         
         for(var v = 0; v < 128; v++) {
             valuesS6.push(Math.random() * 30);
         }
+        for(var v = 0; v < 128; v++) {
+            valuesS7.push(Math.random() * 30);
+        }
         
         var uniformsS6 = {
             amplitude: {
+                type: 'f', // a float
+                value: 0
+            }
+        };
+        var uniformsS7 = {
+            amplitude2: {
                 type: 'f', // a float
                 value: 0
             }
@@ -485,13 +502,160 @@ var Boid = function() {
         var clock = new THREE.Clock();
         var morphs = [];
 
-        var sprite1,uniforms1=null;
+        var sprite1,uniforms=null;
+        var sprite2=null;
         var myPos = { 'x':2,'y':4,'z':5};
+
+var posX= new Array();
+var posY= new Array();
+            
         init();
         animate();
+
+function loadtrees(loader,branchfactor,levels,leafsprite,iduni,idxstart,idxend,amplitude,previousRender,attributes,displacement,seed,segments,vMultiplier,twigScale,initalBranchLength,lengthFalloffFactor,lengthFalloffPower,clumpMax,clumpMin){
+url = 'http://localhost:8080/tree?leaves=0&levels='+levels+'&branchfactor='+branchfactor
+if (seed != undefined)
+url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+//+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+
+loader.load( url, function ( geometry, materials ) {
+
+
+                var material = materials[ 0 ];
+                material.color.setHex( 0xffffff );
+                material.ambient.setHex( 0xffffff );
+
+                var faceMaterial = new THREE.MeshFaceMaterial( materials );
+
+                for ( var i = idxstart; i < idxend; i ++ ) {
+
+                    var x = posX[i];
+                    var z = posY[i];
+
+                    morph = new THREE.Mesh( geometry, faceMaterial );
+
+                    morph.duration = 1000;
+
+                    morph.time = 1000 * Math.random();
+
+                    var s = THREE.Math.randFloat( 0.00075, 0.001 );
+                    morph.scale.set( s, s, s );
+                    morph.name="tree"
+                    morph.position.set( x, getH(x,z)-0.5, z );
+                    morph.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+
+                    scene.add( morph );
+
+                    morphs.push( morph );
+
+                }
+
+            });
+url = 'http://localhost:8080/tree?leaves=1&levels='+levels+'&branchfactor='+branchfactor
+if (seed != undefined)
+url+='&seed='+seed+'&segments='+segments+'&vMultiplier='+vMultiplier+'&twigScale='+twigScale
+//+'&initalBranchLength='+initalBranchLength+'&lengthFalloffFactor='+lengthFalloffFactor+'&lengthFalloffPower='+lengthFalloffPower+'&clumpMax='+clumpMax+'&clumpMin='+clumpMin
+
+            loader.load( url, function ( geometry, materials ) {
+
+
+                var material = materials[ 0 ];
+                material.color.setHex( 0xffffff );
+                material.ambient.setHex( 0xffffff );
+                material.alphaTest = 0.5;
+
+                var faceMaterial = new THREE.MeshFaceMaterial( materials );
+
+                for ( var i = idxstart; i < idxend; i ++ ) {
+
+                    var x = posX[i];
+                    var z = posY[i];
+
+                    Shaders = {
+                        LitAttributeAnimated: {
+                            'vertex': ["varying vec2 glTexCoord;",
+                    "uniform float "+amplitude+";",
+                                       "attribute float "+displacement+";", 
+                                       "varying vec3 vNormal;",
+                                "void main() {",
+                                 "  glTexCoord = uv;",
+                                        "vNormal = normal;",
+                                        "vec3 newPosition = position + normal * vec3( "+amplitude+" );",
+                                  "  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+                                "}"
+
+
+
+                                ].join("\n"),
+                                       
+                            'fragment': [           "varying vec2 glTexCoord;",
+
+                               "uniform sampler2D "+leafsprite+";",
+                               "uniform sampler2D "+previousRender+";",
+
+                               "void main() {",
+
+                               "    vec3 color = texture2D( "+previousRender+", glTexCoord ).rgb;",
+
+                               "    color += texture2D( "+leafsprite+", glTexCoord ).rgb;",
+
+                               "    gl_FragColor.rgb = color;",
+                               "    gl_FragColor.a = 1.0;",
+
+                                "if (gl_FragColor.r < 0.05)",
+                               "    discard;",
+                                "if (gl_FragColor.g < 0.05)",
+                               "    discard;",
+                                "if (gl_FragColor.b < 0.05)",
+                               "   discard;",
+                               
+                                "if ((gl_FragColor.r < 0.12)&&(gl_FragColor.r >= 0.1))",
+                               "    gl_FragColor.a = 0.5;",
+                                "if ((gl_FragColor.g < 0.12)&&(gl_FragColor.g >= 0.1))",
+                               "    gl_FragColor.a = 0.5;",
+                                "if ((gl_FragColor.b < 0.12)&&(gl_FragColor.b >= 0.1))",
+                               "    gl_FragColor.a = 0.5;",
+
+                                       "}"].join("\n")
+                        }
+                    };
+
+                    var shaderMaterial = new THREE.ShaderMaterial({
+                        attributes:     attributes,
+                                uniforms: camera.uniforms[iduni],
+                        vertexShader:   Shaders.LitAttributeAnimated.vertex,
+                        fragmentShader: Shaders.LitAttributeAnimated.fragment
+                    });
+                    
+
+                    morph2 = new THREE.Mesh( geometry, shaderMaterial );
+
+
+
+                    morph2.duration = 1000;
+
+                    morph2.time = 1000 * Math.random();
+
+                    var s = THREE.Math.randFloat( 0.00075, 0.001 );
+                    morph2.scale.set( s, s, s );
+                    morph2.name="tree"
+                    
+                    morph2.position.set( x, getH(x,z)-0.5, z );
+                    morph2.rotation.y = THREE.Math.randFloat( -0.25, 0.25 );
+
+
+                    scene.add( morph2 );
+
+                    morphs.push( morph2 );
+
+                }
+
+            } );
+}
         function init() {
 
             sprite1 = THREE.ImageUtils.loadTexture( "branch1.png", null );
+            sprite2 = THREE.ImageUtils.loadTexture( "branch2.png", null );
            
             container = document.createElement( 'div' );
             document.body.appendChild( container );
@@ -499,10 +663,19 @@ var Boid = function() {
             camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
 
             camera.position.set( myPos.x,myPos.y,myPos.z);
-          camera.uniforms1=  {
+            camera.uniforms=new Array();
+          camera.uniforms[1]=  {
                         sprite1: { type: "t", value: sprite1 },
                         previousRender: { type: "t", value: null },
                         amplitude: {
+                            type: 'f', // a float
+                            value: 0
+                        }
+                    };
+          camera.uniforms[2]=  {
+                        sprite2: { type: "t", value: sprite2 },
+                        previousRender2: { type: "t", value: null },
+                        amplitude2: {
                             type: 'f', // a float
                             value: 0
                         }
@@ -514,7 +687,7 @@ var Boid = function() {
                 birds = [];
                 boids = [];
 
-                for ( var i = 0; i < 50; i ++ ) {
+                for ( var i = 0; i < 5; i ++ ) {
 
                     boid = boids[ i ] = new Boid();
                     boid.position.x = Math.random() * 400 - 200;
@@ -567,8 +740,6 @@ scene.add(sphere);
 
 
             var loader = new THREE.JSONLoader();
-            var posX= new Array();
-            var posY= new Array();
             for ( var i = 0; i <500; i ++ ) {
 
                 // random placement in a grid
@@ -610,7 +781,12 @@ scene.add(sphere);
                                                                             "map": floorTexture
                                                                             }));
             scene.add( ground );
-
+            loadtrees(loader,3.4,5,'sprite1',1,0,49,"amplitude","previousRender",attributesS6,"displacement"   );
+            loadtrees(loader,6,20,'sprite2',2,50,99,"amplitude2","previousRender2",attributesS7,"displacement2");
+            loadtrees(loader,7,10,'sprite2',2,100,199,"amplitude2","previousRender2",attributesS7,"displacement2",267,8,0.6,0.7,0.26,0.94,0.7,0.556,0.404);
+            loadtrees(loader,5,30,'sprite2',2,200,399,"amplitude2","previousRender2",attributesS7,"displacement2",300,4,0.3,0.7,0.26,0.9,0.3,0.15,0.404);
+            loadtrees(loader,8,60,'sprite2',2,400,500,"amplitude2","previousRender2",attributesS7,"displacement2",540,10,0.9,0.7,0.2,0.4,0.7,0.556,0.404);
+/*
             loader.load( 'http://localhost:8080/tree?leaves=0', function ( geometry, materials ) {
 
 
@@ -620,7 +796,7 @@ scene.add(sphere);
 
                 var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                for ( var i = 0; i < 500; i ++ ) {
+                for ( var i = 0; i < 50; i ++ ) {
 
                     var x = posX[i];
                     var z = posY[i];
@@ -654,7 +830,7 @@ scene.add(sphere);
 
                 var faceMaterial = new THREE.MeshFaceMaterial( materials );
 
-                for ( var i = 0; i < 500; i ++ ) {
+                for ( var i = 0; i < 50; i ++ ) {
 
                     var x = posX[i];
                     var z = posY[i];
@@ -740,7 +916,7 @@ scene.add(sphere);
                 }
 
             } );
-
+*/
             scene.add( new THREE.AmbientLight( 0xffffff ) );
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(1, 1, 1).normalize();
@@ -914,7 +1090,8 @@ if (willsend == true)
 
                 }
 
-            camera.uniforms1.amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
+            camera.uniforms[1].amplitude.value = 3*Math.sin(frame)+Math.cos(frame);
+            camera.uniforms[2].amplitude2.value = 3*Math.sin(frame)+Math.cos(frame);
             frame += 0.04;
             var timer = Date.now() * 0.00005;
             var actualMoveSpeed =  movementSpeed;
