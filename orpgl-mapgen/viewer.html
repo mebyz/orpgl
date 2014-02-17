@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body  width="100%" height="100%">
+<script src="js/Three.js"></script>
+<script src="js/OrbitControls.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+<canvas id="myCanvas" width="512" height="512" style="visibility:hidden;z-index:0;"></canvas>
+<script id="vertexShader" type="x-shader/x-vertex">
+uniform sampler2D heightMap;
+uniform float heightScale;
+
+varying float vAmount;
+varying vec2 vUV;
+
+
+void main() 
+{ 
+	vUV = uv;
+    vec4 tx = texture2D( heightMap, vUV);   
+	vAmount = tx.g;
+    vec3 newPosition = position + normal  * vAmount * heightScale;
+	
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+}
+</script>
+<script id="fragmentShader" type="x-shader/x-vertex"> 
+uniform sampler2D oceanTexture;
+uniform sampler2D sandyTexture;
+uniform sampler2D grassTexture;
+uniform sampler2D rockyTexture;
+uniform sampler2D snowyTexture;
+uniform sampler2D heightMap;
+
+varying vec2 vUV;
+
+varying float vAmount;
+
+void main() 
+{
+	vec4 water = (smoothstep(0.01, 0.25, vAmount) - smoothstep(0.24, 0.26, vAmount)) * texture2D( oceanTexture, vUV * 10.0 );
+	vec4 sandy = (smoothstep(0.24, 0.27, vAmount) - smoothstep(0.28, 0.31, vAmount)) * texture2D( sandyTexture, vUV * 10.0 );
+	vec4 grass = (smoothstep(0.28, 0.32, vAmount) - smoothstep(0.35, 0.40, vAmount)) * texture2D( grassTexture, vUV * 20.0 );
+	vec4 rocky = (smoothstep(0.30, 0.50, vAmount) - smoothstep(0.40, 0.70, vAmount)) * texture2D( rockyTexture, vUV * 20.0 );
+	vec4 snowy = (smoothstep(0.50, 0.65, vAmount))                                   * texture2D( snowyTexture, vUV * 10.0 );
+	vec4 tx = texture2D( heightMap, vUV);  
+	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0) + water + sandy + grass + rocky + snowy; //, 1.0);
+}  
+</script>
+<div id="webgl" style="position: absolute; left:0px; top:0px;width:100%;height:100%;"></div>
+<script>
+var container, scene, camera, renderer, controls, imgTilePaths,currentTile;
+
+init();
+animate();
+	
+function init() {
+	scene = new THREE.Scene();
+	// CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0,100,400);
+	camera.lookAt(scene.position);	
+	// RENDERER
+	renderer = new THREE.WebGLRenderer( {antialias:true} );
+
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	container = document.getElementById( 'webgl' );
+	container.appendChild( renderer.domElement );
+
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+	var heightScale   = 500.0;
+	currentTile = -1;
+	imgTilePaths= new Array();
+
+	var oceanTexture = new THREE.ImageUtils.loadTexture( 'images/dirt-512.jpg' );
+	oceanTexture.wrapS = oceanTexture.wrapT = THREE.RepeatWrapping; 
+	
+	var sandyTexture = new THREE.ImageUtils.loadTexture( 'images/sand-512.jpg' );
+	sandyTexture.wrapS = sandyTexture.wrapT = THREE.RepeatWrapping; 
+	
+	var grassTexture = new THREE.ImageUtils.loadTexture( 'images/grass-512.jpg' );
+	grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping; 
+	
+	var rockyTexture = new THREE.ImageUtils.loadTexture( 'images/rock-512.jpg' );
+	rockyTexture.wrapS = rockyTexture.wrapT = THREE.RepeatWrapping; 
+	
+	var snowyTexture = new THREE.ImageUtils.loadTexture( 'images/snow-512.jpg' );
+	snowyTexture.wrapS = snowyTexture.wrapT = THREE.RepeatWrapping; 
+
+		
+	var planeGeo = new THREE.PlaneGeometry( 1024, 1024, 64,64 );
+
+
+
+	var i =0;
+	for (var i=0;i<10;i++) {
+		for (var j=0;j<10;j++){
+
+var imgPath = 'http://localhost:81/orpgl/orpgl-mapgen/images/tile_'+j+'_'+i+'.bmp' ;
+
+imgTilePaths[i*j] = imgPath;
+		
+			var texture = new THREE.ImageUtils.loadTexture(imgPath);
+			texture.magFilter = texture.minFilter = THREE.NearestFilter;
+
+	 		var uniforms = {
+			heightMap:	{ type: "t", value: texture },
+			heightScale:	    { type: "f", value: heightScale },
+			oceanTexture:	{ type: "t", value: oceanTexture },
+			sandyTexture:	{ type: "t", value: sandyTexture },
+			grassTexture:	{ type: "t", value: grassTexture },
+			rockyTexture:	{ type: "t", value: rockyTexture },
+			snowyTexture:	{ type: "t", value: snowyTexture },
+			};
+
+			var material = new THREE.ShaderMaterial( 
+			{
+			    uniforms: uniforms,
+				vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+				fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+				// side: THREE.DoubleSide
+			}   );
+
+			var plane = new THREE.Mesh(	planeGeo, material );
+			plane.rotation.x = -Math.PI / 2;
+			plane.position.y = -100;
+			plane.position.z = 1007*j;
+			plane.position.x = 1007*i;
+
+			scene.add( plane );
+			
+		}
+	}
+}
+
+function animate() 
+{
+    requestAnimationFrame( animate );
+	render();		
+	update();
+}
+
+function update()
+{	
+	controls.update();
+	getHeight(camera);
+}
+
+function render() 
+{
+	renderer.render( scene, camera );
+}
+
+function getHeight(object){
+
+	if (currentTile == -1) {
+		var ctx = document.getElementById('myCanvas').getContext('2d');
+	  	var img = new Image();
+	  	img.src = imgTilePaths[0];
+	  	img.onload = function(){
+	    	ctx.drawImage(img,0,0,512,512);
+		}
+		currentTile = 0;
+	}
+	var ctx =document.getElementById('myCanvas').getContext('2d');
+	var imageData = ctx.getImageData(0, 0, 512,512);
+	var x = Math.floor(object.position.x/2+256);
+	var z = Math.floor(object.position.z/2+256);
+	var index = 4 * (z * 512 + x);
+	var height = imageData.data[index];	
+	 if (x>0 && x<=512 && z>0 && z<=512) 
+	 	return height;
+}
+
+
+</script>
+
+</body></html>

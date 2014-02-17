@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+	<title>HTML5-WebGL-NodeJS Multiplayer Game Experiment by E.BOTROS</title>
+	<link rel="stylesheet" type="text/css" href="css/styles.css" />  
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jqueryui.min.js"></script>
+	<script type="text/javascript" src="client.js"></script>
+    <script type="text/javascript" src="nature.js"></script>
+    <script type="text/javascript" src="js/three.js"></script>   
+    <script type="text/javascript" src="js/Core.js"></script>
+	<script type="text/javascript" src="js/loaders/OBJLoader.js"></script>
+    <script type="text/javascript" src="js/loaders/ColladaLoader.js"></script>
+    <script type="text/javascript" src="js/loaders/MD2Character.js"></script>
+    <script type="text/javascript" src="js/shaders/ShaderWater.js"></script>
+    <script type="text/javascript" src="js/shaders/ShaderGrass.js"></script>
+    <script type="text/javascript" src="js/shaders/ShaderTiling.js"></script>
+    <script type="text/javascript" src="js/shaders/ShaderSky.js"></script>
+    <script type="text/javascript" src="js/physi.js"></script>
+	<script type="text/javascript" src="js/gui/dat.gui.min.js"></script>
+    <script type="text/javascript" src="js/gui/threex.rendererstats.js"></script>
+    <script type="text/javascript" src="js/tools/ShaderParticles.js"></script>
+    <script type="text/javascript" src="js/audio/jasmid/stream.js"></script>
+    <script type="text/javascript" src="js/audio/jasmid/midifile.js"></script>
+    <script type="text/javascript" src="js/audio/jasmid/replayer.js"></script>
+    <script type="text/javascript" src="js/audio/jasmid/synth.js"></script>
+    <script type="text/javascript" src="js/audio/jasmid/audio.js"></script>
+    <script type="text/javascript" src="js/audio/Sound.js"></script>
+    <script type="text/javascript" src="js/controls/Controls.js"></script>
+    <script type="text/javascript" src="js/Game.js"></script>
+	</head>
+	<body>
+        <div id="wait" class="wait">Please wait for the engine to initialize ..</div>
+
+        <div id="app">
+              <div id="log"></div>
+        </div>
+                
+        <div id="authOps" style="z-index:100000;position:absolute;top:0px;right:0px;">
+            <button id="disconnect" >Disconnect your Google account from this app</button>
+        </div>
+
+        <button class="g-signin"
+            data-scope="https://www.googleapis.com/auth/plus.login"
+            data-requestvisibleactions="http://schemas.google.com/AddActivity"
+            data-clientId="83039654513-9bl9qcht7tl7sbom35srumc6dvb4tvbd.apps.googleusercontent.com"
+            data-callback="onSignInCallback"
+            data-theme="dark"
+            data-cookiepolicy="single_host_origin">
+        </button>              
+
+        <div id='painDiv' style='position:absolute;top:0px;left:0px;width:100%;height:100%;background: url("textures/blood.png") repeat scroll 0 0 transparent; opacity:0.2; visibility:hidden;'></div>
+        <div id='underwaterDiv' style='position:absolute;top:0px;left:0px;width:100%;height:100%;background: url("textures/underwater.png") repeat scroll 0 0 transparent; opacity:0.8; visibility:hidden;'></div>
+
+        <div class="droppable myBox" style='position:absolute;bottom:10px;left:10px;'><center><br/>USE</center></div>
+
+         <div class="draggable" id='I_Scroll02' style='position:absolute;top:50px;left:5px;background: #eeeeee url("textures/items/I_Scroll02.png");visibility:hidden;'></div>
+         <div class="draggable" id='I_Antidote' style='position:absolute;top:90px;left:5px;background: #eeeeee url("textures/items/I_Antidote.png");visibility:hidden;'></div>
+         <div class="draggable" id='P_Medicine06' style='position:absolute;top:130px;left:5px;background: #eeeeee url("textures/items/P_Medicine06.png");visibility:hidden;'></div>
+         <div class="draggable" id='S_Holy06' style='position:absolute;top:170px;left:5px;background: #eeeeee url("textures/items/S_Holy06.png");visibility:hidden;'></div>
+
+
+    <canvas id="tile_0_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_0_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_1_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_1_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_2_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_2_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_3_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_3_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_4_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_4_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_5_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_5_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_6_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_6_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_7_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_7_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_8_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_8_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+    <canvas id="tile_9_0" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_1" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_2" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_3" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_4" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_5" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_6" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_7" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_8" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+    <canvas id="tile_9_9" width="512" height="512" style="visibility:hidden;z-index:0;position:absolute;"></canvas>
+
+
+		<div id="mapDiv" style="visibility:hidden;z-index:1000;position:absolute;top:3px;right:3px;width : 128px;height : 128px;background-size: 100%;">
+		</div>
+		<div id="posDiv" style="visibility:hidden;z-index:1000;background-image : url(textures/location.png);position:absolute;top:52px;right:56px;width : 16px;height : 16px;background-size: 100%;">
+		</div>
+		<div id="pos2Div" style="visibility:hidden;display:none;z-index:1000;background-image : url(textures/location2.png);position:absolute;top:52px;right:56px;width : 16px;height : 16px;background-size: 100%;">
+		</div>
+		<div id="winPosDiv" style="visibility:hidden;z-index:1000;background-image : url(textures/flag.png);position:absolute;top:52px;right:56px;width : 16px;height : 16px;background-size: 100%;">
+		</div>
+    <div style="text-align: center;width:100%;position:absolute;bottom:20px;">
+		<iframe id="chatframe" src="http://lecontrepoids.fr/orpgl-chat/?nickName=New Player" frameborder="0"width="520" height="90" style="" />
+		</div>
+	</body>
+</html>
