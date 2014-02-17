@@ -1,6 +1,6 @@
 // IMAGE
 var loadImage = function(url) {
-    return THREE.ImageUtils.loadTexture(url,null,function(){lt++;});
+    return THREE.ImageUtils.loadTexture(url,null,function(){app.Config.lazyloaded++;});
 }
 
 // GET HEIGHT
@@ -52,21 +52,21 @@ function getHeight(x,z,cam){
 
 
 // LENS FLARE
-function addLight(h, s, l, x, y, z,texture,scene) {
+function addLight(h, s, l, x, y, z,texture,application) {
 
-    Sunlight = new THREE.PointLight(0xffffff, 1.5, 4500);
-    Sunlight.color.setHSL(h, s, l);
-    Sunlight.position.set(x, y, z);
-    scene.add(Sunlight);
+    application.Config.Sunlight = new THREE.PointLight(0xffffff, 1.5, 4500);
+    application.Config.Sunlight.color.setHSL(h, s, l);
+    application.Config.Sunlight.position.set(x, y, z);
+    application.Config.scene.add(application.Config.Sunlight);
 
     var flareColor = new THREE.Color(0xffffff);
     flareColor.setHSL(h, s, l + 0.5);
 
-    lensFlare = new THREE.LensFlare(texture, 700, 0.0, THREE.AdditiveBlending, flareColor);
-    lensFlare.customUpdateCallback = lensFlareUpdateCallback;
-    lensFlare.position = Sunlight.position;
+    application.Config.lensFlare = new THREE.LensFlare(texture, 700, 0.0, THREE.AdditiveBlending, flareColor);
+    application.Config.lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+    application.Config.lensFlare.position = application.Config.Sunlight.position;
 
-    scene.add(lensFlare);
+    application.Config.scene.add(application.Config.lensFlare);
 
 }
 

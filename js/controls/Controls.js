@@ -1,15 +1,15 @@
-THREE.PointerLockControls = function(camera) {
+THREE.PointerLockControls = function(application) {
 
     var scope = this;
-    camera.rotation.set(0, 0, 0);
+    application.Config.camera.rotation.set(0, 0, 0);
 
-    pitchObject = new THREE.Object3D();
-    pitchObject.add(camera);
+    application.Config.pitchObject = new THREE.Object3D();
+    application.Config.pitchObject.add(application.Config.camera);
 
-    yawObject = new THREE.Object3D();
-    yawObject.position.y = 0;
-    yawObject.add(pitchObject);
-
+    application.Config.yawObject = new THREE.Object3D();
+    application.Config.yawObject.position.y = 0;
+    application.Config.yawObject.add(application.Config.pitchObject);
+    var direct;
     var moveUpward = false;
     var moveForward = false;
     var moveBackward = false;
@@ -44,10 +44,10 @@ THREE.PointerLockControls = function(camera) {
         var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-        yawObject.rotation.y -= movementX * 0.004;
-        pitchObject.rotation.x -= movementY * 0.004;
+        app.Config.yawObject.rotation.y -= movementX * 0.004;
+        app.Config.pitchObject.rotation.x -= movementY * 0.004;
 
-        pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+        app.Config.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, app.Config.pitchObject.rotation.x));
 }
     };
     var onMouseDown = function(event) {
@@ -55,7 +55,7 @@ THREE.PointerLockControls = function(camera) {
     if (!dragging)
         mousemov=true;
 
-        var raycaster = projector.pickingRay( mouseVector.clone(), camera );
+        var raycaster = projector.pickingRay( mouseVector.clone(), app.Config.camera );
         var     intersects = raycaster.intersectObjects( app.Config.scene.children );
                         
                 for( var i = 0; i < intersects.length; i++ ) {
@@ -97,10 +97,10 @@ mousemov=false
                 break;
 
             case 32: // space
-attack = true;
-setTimeout("attack=false;","500")
-                sound1.position.copy( yawObject.position );
-                sound1.play();
+                app.Config.attack = true;
+                setTimeout("app.Config.attack=false;","500")
+                app.Config.sound1.position.copy( app.Config.yawObject.position );
+                app.Config.sound1.play();
 
 
 
@@ -112,7 +112,7 @@ setTimeout("attack=false;","500")
                 var direction = new THREE.Vector3(0, 0, -1);
                 var rotation = new THREE.Euler(0, 0, 0, "YXZ");
 
-                rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
+                rotation.set(app.Config.pitchObject.rotation.x, app.Config.yawObject.rotation.y, 0);
 
                 direct = direction.applyEuler(rotation);
                 direct = direct.multiplyScalar(5);
@@ -166,7 +166,7 @@ setTimeout("attack=false;","500")
 
     this.getObject = function() {
 
-        return yawObject;
+        return application.Config.yawObject;
 
     };
 
@@ -186,7 +186,7 @@ setTimeout("attack=false;","500")
 
         return function(v) {
 
-            rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
+            rotation.set(app.Config.pitchObject.rotation.x, app.Config.yawObject.rotation.y, 0);
 
             v.copy(direction).applyEuler(rotation);
 
@@ -199,7 +199,7 @@ setTimeout("attack=false;","500")
     this.update = function(delta) {
 
 
-        if(scope.enabled === false || die) {
+        if(scope.enabled === false || app.Config.die) {
             return;
         }
 
@@ -227,31 +227,26 @@ setTimeout("attack=false;","500")
             velocity.x += 0.7 * delta;
         }
 
-        yawObject.translateX(velocity.x);
-        yawObject.translateZ(velocity.z);
+        app.Config.yawObject.translateX(velocity.x);
+        app.Config.yawObject.translateZ(velocity.z);
 
-        var height = getHeight(yawObject.position.x,yawObject.position.z,true)+1;
-            yawObject.position.y =height+5;
-        if (height<=-64 && yawObject.position.x != 0 && yawObject.position.z!=0) {
-            if(!underwaterInterval)
-                underwaterInterval = setInterval(function () {$('#painDiv').css("visibility","").effect( "pulsate", {times:1,mode:'hide'}, 350 );ctext.health-=10;},3000);
+        var height = getHeight(app.Config.yawObject.position.x,app.Config.yawObject.position.z,true)+1;
+            app.Config.yawObject.position.y =height+5;
+        if (height<=-64 && app.Config.yawObject.position.x != 0 && app.Config.yawObject.position.z!=0) {
+            if(!app.Config.underwaterInterval)
+                app.Config.underwaterInterval = setInterval(function () {$('#painDiv').css("visibility","").effect( "pulsate", {times:1,mode:'hide'}, 350 );app.Config.ctext.health-=10;},3000);
                 $('#underwaterDiv').css("visibility","");
         }
         else{
-            clearInterval(underwaterInterval)
+            clearInterval(app.Config.underwaterInterval)
                 $('#underwaterDiv').css("visibility","hidden");
-                underwaterInterval = false;
+                app.Config.underwaterInterval = false;
         }
 
-//        if (height<=-64) {
-//            yawObject.position.y =-94;
-//        }
-//        if (Math.abs(lastheight-height)>=35) 
-//            yawObject.position.y = lastheight
 
-        lastheight=yawObject.position.y;
+        app.Config.lastheight=app.Config.yawObject.position.y;
         
-        checkPos(yawObject);
+        checkPos(app.Config.yawObject);
 
 
     };

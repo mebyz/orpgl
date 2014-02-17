@@ -185,8 +185,8 @@ THREE.MD2Character = function () {
 			this.setAnimation('run');
 			if (this.attackInterval){
 				clearInterval(this.attackInterval)
-				soundattack1.stop();					
-				soundattack1 = null
+				app.Config.soundattack1.stop();					
+				app.Config.soundattack1 = null
 				this.attackInterval = false
 			}
 			
@@ -194,7 +194,7 @@ THREE.MD2Character = function () {
 	}
 
 	this.update = function ( delta,onlyanim ) {
-		var dist = Math.sqrt(Math.pow((yawObject.position.x-this.root.position.x),2)+Math.pow((yawObject.position.z-this.root.position.z),2));
+		var dist = Math.sqrt(Math.pow((app.Config.yawObject.position.x-this.root.position.x),2)+Math.pow((app.Config.yawObject.position.z-this.root.position.z),2));
 
 
 		if ( this.meshBody ) {
@@ -209,7 +209,7 @@ THREE.MD2Character = function () {
 
 		}
 
-		this.root.lookAt(yawObject.position);
+		this.root.lookAt(app.Config.yawObject.position);
 				
 		if (!onlyanim) {
 
@@ -222,8 +222,8 @@ THREE.MD2Character = function () {
 				this.setAnimation('stand');
 				if (this.attackInterval) {
 					clearInterval(this.attackInterval)
-					soundattack1.stop();
-					soundattack1 = null
+					app.Config.soundattack1.stop();
+					app.Config.soundattack1 = null
 					this.attackInterval = false
 				}
 			}
@@ -233,11 +233,11 @@ THREE.MD2Character = function () {
 		{
 
 			if (!interval){
-    		interval = setInterval(function(){ character.goto(yawObject.position.x,yawObject.position.z);},2000)
-        	if (soundattack1 == null)
-			soundattack1 = new Sound( [ 'sounds/attack1.mp3'], 275, 1);
-	        soundattack1.position.copy( this.root.position );
-        	soundattack1.play(2000);
+    		interval = setInterval(function(){ app.Config.character.goto(app.Config.yawObject.position.x,app.Config.yawObject.position.z);},2000)
+        	if (app.Config.soundattack1 == null)
+			app.Config.soundattack1 = new Sound( [ 'sounds/attack1.mp3'], 275, 1);
+	        app.Config.soundattack1.position.copy( this.root.position );
+        	app.Config.soundattack1.play(2000);
 
 			}
 		}
@@ -252,16 +252,16 @@ THREE.MD2Character = function () {
 
 				if (!this.attackInterval){
 					$('#painDiv').css("visibility","").effect( "pulsate", {times:1,mode:'hide'}, 350 );
-					if (soundattack1 !=null) 
+					if (app.Config.soundattack1 !=null) 
 					{
 						console.log("PALY"+dist);
-	                	soundattack1.position.copy( this.root.position );
-	                	soundattack1.playloop(2000);
+	                	app.Config.soundattack1.position.copy( this.root.position );
+	                	app.Config.soundattack1.playloop(2000);
 					}
 
 					
 
-					this.attackInterval = setInterval(function(){$('#painDiv').css("visibility","").effect( "pulsate", {times:1,mode:'hide'}, 350 );ctext.health-=10;},1900);
+					this.attackInterval = setInterval(function(){$('#painDiv').css("visibility","").effect( "pulsate", {times:1,mode:'hide'}, 350 );app.Config.ctext.health-=10;},1900);
 				}
 				this.norun = true;
 				this.stand = false;
