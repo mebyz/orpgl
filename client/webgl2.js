@@ -45,7 +45,7 @@ var Config = {
     sound1          : null,
     soundattack1    : null
 }
-
+var interval;
 function Application(conf){
     this.Config = conf;         // load configuration
     this.run = this.Config.run; // app method routing

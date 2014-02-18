@@ -163,6 +163,7 @@ var initGrass = function() {
             var c = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), new THREE.MeshBasicMaterial({ map: THREE.ImageUtils.loadTexture( '/textures/items/I_Scroll02.png' ),transparent: true, 
              alphaTest: 0.5,side: 
              THREE.DoubleSide}));
+            c.name ='scroll'
             c.overdraw = true;
             c.position.x = posArray[i].x;
             c.position.z = posArray[i].z;
@@ -469,8 +470,18 @@ function checkPos(camera) {
 
     time = Date.now();
 };
+var runner;
+    function answer(answerIdx){
+        runner.answer(answerIdx);
+        runner.dialogTree().node() && $( "#dialog" ).dialog( "open" ).html(runner.displayNode());
+    }
 
 var initScene = function() {
+
+
+    var url     = 'js/dialog/datadialog.json';
+    runner  = new DialogTreeRunnerConsole().loadSync(url);
+    $( "#dialog" ).dialog({ autoOpen: false });
 
     this.Config.sound1 = new Sound( [ 'sounds/sword.mp3'], 275, 1 );
 

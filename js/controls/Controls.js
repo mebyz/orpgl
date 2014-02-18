@@ -61,9 +61,10 @@ THREE.PointerLockControls = function(application) {
                 for( var i = 0; i < intersects.length; i++ ) {
                         var intersection = intersects[ i ],
                                 obj = intersection.object;
-if (obj.material.color) {
-    console.log(obj.id)
-                        obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
+if (obj.material.color){//&& obj.position.distanceTo( app.Config.yawObject.position ) < 50) {
+    if (obj.id == 'clickme')
+        $( "#dialog" ).dialog( "open" ).html(runner.displayNode());
+//                        obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
                         }
                 }
          event.preventDefault();
