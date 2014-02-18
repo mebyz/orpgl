@@ -1,13 +1,18 @@
 HTML5 WEBGL NODEJS Multiplayer Game Experiment  
-Copyrights E. BOTROS (c) 2013/2014 - emmanuel.botros@gmail.com, Creative Commons BY 3.0 License Terms
+Copyright E.BOTROS 2014 - 2015 - emmanuel.botros@gmail.com, Creative Commons (Attribution) 3.0 License
+
+---
+get the code:
 
 git clone git@github.com:mebyz/orpgl.git && cd orpgl/
-
-THEN :
+---
+deploy locally:
 
 npm install
+npm update
 npm start
 
-OR if you have a nodejitsu account : 
+---
+deploy in the cloud:
 
 jitsu deploy
