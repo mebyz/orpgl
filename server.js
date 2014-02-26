@@ -284,6 +284,7 @@ function createnature() {
     s= "var naturePos="+JSON.stringify(Array(nature['posX'],nature['posY']), undefined, 2)+';'
     s+= "var groundGeometry="+JSON.stringify(dataground)+';';
     s+= "var wa="+JSON.stringify(winArea)+';';
+   
 
     fs.writeFile("nature.js", s); 
 }
@@ -305,6 +306,7 @@ function loaddir(path, callback, set) {
 }
 
     var realfiles = {};
+    var itemsfiles = {};
     var vf=0;
 function loadmodelsset(path, callback) {
   fs.readdir(path, function (err, filenames) {
@@ -342,6 +344,24 @@ function loadmodelsset(path, callback) {
   return realfiles;
 }
 
+function loaditemsset(path, callback) {
+  fs.readdir(path, function (err, filenames) {
+    if (err) { return; }
+    var count = filenames.length;
+    var ii = 0;
+    filenames.forEach(function (filename) {
+      var ppath = path+'/'+filename;
+      var ppath2 = filename;
+      if (ppath2.indexOf(".png")!=-1)
+      itemsfiles[ii++]=ppath2;
+
+  });
+
+  });
+
+  return itemsfiles;
+}
+
 var jslibs = 'js';
 console.log("loading scripts "+jslibs);
 loaddir(jslibs);
@@ -372,6 +392,9 @@ loaddir('orpgl-mapgen');
 
 console.log("loading textures");
 loaddir('textures');
+
+console.log("loading items folder");
+var it =loaditemsset('textures/items');
 
 
 fu.get("/", fu.staticHandler("index.html"));
@@ -712,7 +735,9 @@ fin.push(realfiles[index])
 }
 console.log(fin);
 
-      fs.writeFile("nature.js", "var nature_ = "+JSON.stringify(fin)); 
+      fs.writeFile("nature.js", "var nature_ = "+JSON.stringify(fin)+";"+
+        "var items_ = "+JSON.stringify(it)+";"
+        ); 
 
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 

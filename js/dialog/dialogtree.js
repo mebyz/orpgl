@@ -106,6 +106,7 @@ DialogTree.prototype.nodeId = function(value) {
  */
 DialogTree.prototype.answer = function(answerIdx){
 	// sanity check
+	if (this.node() == null){$(".ui-dialog").hide(); return null;}
 	console.assert(answerIdx < this.node().answers.length, "answerIdx too high");
 	// update this._nodeId according to answerIdx
 	var node	= this.node();

@@ -188,7 +188,7 @@ var initGrass = function() {
         }
 
         var matrix = new THREE.Matrix4();
-        var material = new THREE.MeshBasicMaterial( {map: THREE.ImageUtils.loadTexture( 'textures/items/sword.png' ), alphaTest: 0.5, side:THREE.DoubleSide } );
+        var material = new THREE.MeshBasicMaterial( {map: THREE.ImageUtils.loadTexture( 'textures/sword.png' ), alphaTest: 0.5, side:THREE.DoubleSide } );
         material.transparent = true;
         var geo = new THREE.PlaneGeometry(10,10); 
         geo.applyMatrix( matrix.makeRotationX( -Math.PI / 4 ) );

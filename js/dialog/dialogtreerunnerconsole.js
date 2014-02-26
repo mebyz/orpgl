@@ -35,6 +35,7 @@ DialogTreeRunnerConsole.prototype.dialogTree = function() {
 DialogTreeRunnerConsole.prototype.displayNode = function() {
 	var node	= this._dialogTree.node();
 	var res = '';
+	if (node == null){$(".ui-dialog").hide(); return null;}
 	res += '</b>"' + node.botText +'"</b><br/><br/>';
 	node.answers.forEach(function(answer, answerIdx){
 		res += '<u><a href="#" onclick="answer('+answerIdx+')" >- '+ answer.playerText +'</a></u><br/>';

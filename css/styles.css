@@ -628,7 +628,7 @@ button.ui-button::-moz-focus-inner {
 }
 .ui-dialog .ui-dialog-titlebar {
 	padding: .4em 1em;
-	position: relative;
+	position: relative;	
 }
 .ui-dialog .ui-dialog-title {
 	float: left;
@@ -636,6 +636,7 @@ button.ui-button::-moz-focus-inner {
 	white-space: nowrap;
 	width: 90%;
 	overflow: hidden;
+	opacity: 1.0;
 	text-overflow: ellipsis;
 }
 .ui-dialog .ui-dialog-titlebar-close {
@@ -1027,15 +1028,16 @@ body .ui-tooltip {
 }
 .ui-widget-content {
 	border: 1px solid #aaaaaa;
-	background: #ffffff url(images/ui-bg_flat_75_ffffff_40x100.png) 50% 50% repeat-x;
+	background: #ffffff url(../textures/paper_background.png) 50% 50% repeat-x;
 	color: #222222;
 }
 .ui-widget-content a {
 	color: #222222;
 }
 .ui-widget-header {
-	border: 1px solid #aaaaaa;
-	background: #cccccc url(images/ui-bg_highlight-soft_75_cccccc_1x100.png) 50% 50% repeat-x;
+	border: 2px solid #999999;
+	background: #eeeeee;
+	opacity: 0.7;
 	color: #222222;
 	font-weight: bold;
 }
