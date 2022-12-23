@@ -22,11 +22,11 @@ var MESSAGE_BACKLOG = 1,
 
 var mongodb = require('mongodb')
   , MongoClient = mongodb.MongoClient
-var _users;
+var _users = {};
 
-MongoClient.connect('mongodb://nodejitsu:72c7d98c69b4019a72b6e3dfdae485bb@alex.mongohq.com:10089/nodejitsudb5993184105', function(err, db) {
-_users = db.collection('users')
-});
+//MongoClient.connect('mongodb://nodejitsu:72c7d98c69b4019a72b6e3dfdae485bb@alex.mongohq.com:10089/nodejitsudb5993184105', function(err, db) {
+//_users = db.collection('users')
+//});
 // Global Server timer
 GTime=0;
 
@@ -39,14 +39,14 @@ var vm    = require("vm"),          // vm lib (see includeInThisContext)
     qs    = require("querystring"), // query string lib
     fu    = require("./fu")         // nodechat fu lib;
 
-/*
+
 // additionnal JS libs
 var includeInThisContext = function(path) {
     var code = fs.readFileSync(path);
     vm.runInThisContext(code, path);
 }.bind(this);
 includeInThisContext("proctree/proctree.js");
-*/
+
 // Folder where reside client files
 var appfolder='client';
 
@@ -605,7 +605,7 @@ fu.get("/tree", function (req, res) {
         trunkLength = val
   }
 
-  var myTree = new window.Tree({
+  var myTree = new this.Tree({
       "seed": seed,
       "segments":segments,
       "vMultiplier":vMultiplier,
@@ -651,12 +651,12 @@ fu.get("/tree", function (req, res) {
   fa2 = fa2.substring(0, fa2.length - 1);
   var fT2 = fa2.split(',');
 
-  var _verts1 = window.Tree.flattenArray(myTree.verts);
-  var _verts2 = window.Tree.flattenArray(myTree.vertsTwig);
-  var _norms1 = window.Tree.flattenArray(myTree.normals);
-  var _norms2 = window.Tree.flattenArray(myTree.normalsTwig);
-  var _uvs1 = window.Tree.flattenArray(myTree.UV);
-  var _uvs2 = window.Tree.flattenArray(myTree.uvsTwig);
+  var _verts1 = this.Tree.flattenArray(myTree.verts);
+  var _verts2 = this.Tree.flattenArray(myTree.vertsTwig);
+  var _norms1 = this.Tree.flattenArray(myTree.normals);
+  var _norms2 = this.Tree.flattenArray(myTree.normalsTwig);
+  var _uvs1 = this.Tree.flattenArray(myTree.UV);
+  var _uvs2 = this.Tree.flattenArray(myTree.uvsTwig);
   var _faces1 = fT;
   var _faces2 = fT2;
 
