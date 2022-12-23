@@ -20,7 +20,7 @@ var initGrass = function() {
             }               
         });
     });
-
+/*
 
     loader.load( 'models/buildings/grassfield4.obj', function ( object) {
         object.traverse( function ( child ) {
@@ -95,7 +95,7 @@ var initGrass = function() {
         }               
         });
     });
-
+*/
 /*
 
 
@@ -212,7 +212,7 @@ var initGrass = function() {
         app.Config.sounds[3].position.set(10000,10,10000);
         app.Config.sounds[3].playsea();
 
-        setTimeout("initNoiseShader();initGrass();app.Config.character.setAnimation('stand');",500);
+        setTimeout("initNoiseShader();initGrass();app.Config.character.setAnimation('stand');",15000);
 
         var config = {
 
