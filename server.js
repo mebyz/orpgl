@@ -76,10 +76,10 @@ var server = new function () {
       case "msg":
         break;
       case "join":
-        sys.puts(nick + " join");
+        console.log(nick + " join");
         break;
       case "part":
-        sys.puts(nick + " part");
+        console.log(nick + " part");
         break;
     }
 
@@ -286,7 +286,7 @@ function createnature() {
     s+= "var wa="+JSON.stringify(winArea)+';';
    
 
-    fs.writeFile("nature.js", s); 
+//    fs.writeFileSync("nature.js", s); 
 }
 
 function loaddir(path, callback, set) {
@@ -735,9 +735,9 @@ fin.push(realfiles[index])
 }
 console.log(fin);
 
-      fs.writeFile("nature.js", "var nature_ = "+JSON.stringify(fin)+";"+
-        "var items_ = "+JSON.stringify(it)+";"
-        ); 
+      //fs.writeFileSync("nature.js", "var nature_ = "+JSON.stringify(fin)+";"+
+      //  "var items_ = "+JSON.stringify(it)+";");
+        
 
 fu.get("/nature.js", fu.staticHandler("nature.js"));
 
